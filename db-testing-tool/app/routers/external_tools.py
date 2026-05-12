@@ -267,34 +267,12 @@ async def get_tool_config():
 
 @router.post("/config/save")
 async def save_tool_config(body: SaveToolConfigBody):
-    odi_path = (body.odi_path or "").strip()
-    sqldeveloper_path = (body.sqldeveloper_path or "").strip()
-    odi_stream_url = _validate_stream_url(body.odi_stream_url or "")
-    sqldeveloper_stream_url = _validate_stream_url(body.sqldeveloper_stream_url or "")
-
-    _runtime_config_paths["odi"] = odi_path
-    _runtime_config_paths["sqldeveloper"] = sqldeveloper_path
-    _runtime_stream_urls["odi"] = odi_stream_url
-    _runtime_stream_urls["sqldeveloper"] = sqldeveloper_stream_url
-
-    try:
-        _write_env_updates({
-            "ODI_STUDIO_PATH": odi_path,
-            "SQLDEVELOPER_PATH": sqldeveloper_path,
-            "ODI_STREAM_URL": odi_stream_url,
-            "SQLDEVELOPER_STREAM_URL": sqldeveloper_stream_url,
-        })
-    except Exception as exc:
-        raise HTTPException(500, f"Failed to update .env: {exc}")
-
-    return {
-        "saved": True,
-        "odi_path": odi_path,
-        "sqldeveloper_path": sqldeveloper_path,
-        "odi_stream_url": odi_stream_url,
-        "sqldeveloper_stream_url": sqldeveloper_stream_url,
-        "env_file": str(_env_file_path()),
-    }
+    """REMOVED for security: This endpoint allowed modifying what executables get launched.
+    
+    Host configuration endpoints have been disabled. Local tool launching must be
+    configured securely through environment variables by system administrators only.
+    """
+    raise HTTPException(status_code=410, detail="This endpoint has been removed for security reasons. Host tool configuration cannot be modified via HTTP.")
 
 
 @router.get("/stream/check")
@@ -435,65 +413,18 @@ async def live_mjpeg(tool: str = ""):
 
 @router.post("/launch")
 async def launch_tool(body: LaunchToolBody):
-    tool = _validate_tool(body.tool)
-
-    if _is_running(_launched_processes.get(tool)):
-        proc = _launched_processes.get(tool)
-        return {
-            "launched": True,
-            "already_running": True,
-            "tool": tool,
-            "pid": proc.pid if proc else None,
-        }
-
-    raw_path = (body.path or "").strip() or _default_path_for_tool(tool)
-    if not raw_path:
-        env_name = "ODI_STUDIO_PATH" if tool == "odi" else "SQLDEVELOPER_PATH"
-        raise HTTPException(400, f"No executable path set. Provide path in request or configure {env_name} in .env")
-
-    exe_path = _normalize_path(raw_path)
-    _validate_executable(exe_path)
-    cmd = _build_launch_command(exe_path, body.args or "")
-
-    creationflags = 0
-    if os.name == "nt":
-        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS
-
-    try:
-        proc = subprocess.Popen(
-            cmd,
-            cwd=str(exe_path.parent),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            stdin=subprocess.DEVNULL,
-            creationflags=creationflags,
-            close_fds=True,
-        )
-    except Exception as exc:
-        raise HTTPException(500, f"Failed to launch {_tool_label(tool)}: {exc}")
-
-    _launched_processes[tool] = proc
-    return {
-        "launched": True,
-        "tool": tool,
-        "label": _tool_label(tool),
-        "pid": proc.pid,
-        "path": str(exe_path),
-    }
+    """REMOVED for security: This endpoint allowed launching arbitrary executables.
+    
+    Host process launching has been disabled via HTTP API. Local tools must be
+    started manually or through secure administrative channels only.
+    """
+    raise HTTPException(status_code=410, detail="This endpoint has been removed for security reasons. Process launching is not available via HTTP.")
 
 
 @router.post("/stop")
 async def stop_tool(body: StopToolBody):
-    tool = _validate_tool(body.tool)
-    proc = _launched_processes.get(tool)
-
-    if not _is_running(proc):
-        _launched_processes.pop(tool, None)
-        return {"stopped": True, "tool": tool, "was_running": False}
-
-    try:
-        proc.terminate()
-    except Exception as exc:
-        raise HTTPException(500, f"Failed to stop {_tool_label(tool)}: {exc}")
-
-    return {"stopped": True, "tool": tool, "was_running": True}
+    """REMOVED for security: This endpoint allowed terminating processes.
+    
+    Process control has been disabled via HTTP API.
+    """
+    raise HTTPException(status_code=410, detail="This endpoint has been removed for security reasons. Process control is not available via HTTP.")

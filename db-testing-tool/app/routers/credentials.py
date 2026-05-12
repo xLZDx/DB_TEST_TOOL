@@ -104,19 +104,12 @@ async def get_profile(profile_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.get("/{profile_id}/inject")
 async def inject_profile(profile_id: int, db: AsyncSession = Depends(get_db)):
-    """Returns decrypted credentials for use in a pre-fill operation (UI only, no logging)."""
-    profile = await credential_service.get_credential_profile(db, profile_id)
-    if not profile:
-        raise HTTPException(status_code=404, detail="Credential profile not found")
-    decrypted = credential_service.decrypt_value(profile.password_enc or "")
-    return {
-        "id": profile.id,
-        "name": profile.name,
-        "db_type": profile.db_type or "any",
-        "username": profile.username,
-        "password": decrypted,
-        "host_hint": profile.host_hint,
-    }
+    """Returns decrypted credentials for use in a pre-fill operation (UI only, no logging).
+    
+    REMOVED for security: This endpoint previously returned plaintext passwords.
+    Client-side encryption/secure storage should be used instead.
+    """
+    raise HTTPException(status_code=410, detail="This endpoint has been removed for security reasons. Plaintext passwords cannot be returned via HTTP.")
 
 
 @router.put("/{profile_id}")

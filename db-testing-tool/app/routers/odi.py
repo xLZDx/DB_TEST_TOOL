@@ -677,20 +677,21 @@ async def run_odi_package(body: OdiRunRequest):
             "note": "Provide command_template or ODI_RUNNER_CMD_TEMPLATE for real execution",
         }
 
-    if command_template:
-        variable_items = sorted(variables.items(), key=lambda x: x[0].upper())
-        variables_cli = " ".join([f'\"{k}={v}\"' for k, v in variable_items])
-        command = command_template.format(
-            package=package_name,
-            context=session["context"],
-            execution_agent=session["execution_agent"],
-            logical_agent=session["logical_agent"],
-            login_name=session["login_name"],
-            variables_cli=variables_cli,
-            variables_json=json.dumps(variables),
-        )
-        asyncio.create_task(_run_command_session(session_id, command))
-    else:
+    # SECURITY FIX: Real ODI execution via shell command is disabled pending refactoring
+    # The original implementation used create_subprocess_shell with user-supplied variables,
+    # which is vulnerable to shell injection. Need to refactor to use create_subprocess_exec
+    # with safe argument arrays.
+    if command_template or body.require_real_run:
+        _append_error(session_id, "Real ODI execution is temporarily disabled for security refactoring")
+        session["status"] = "error"
+        session["ended_at"] = time.time()
+        return {
+            "session": _session_summary(session),
+            "note": "Real ODI command execution is disabled pending security refactoring (shell injection risk). Use simulation mode only.",
+        }
+
+    # Only allow simulated sessions
+    if True:  # Always simulate for now
         asyncio.create_task(_simulate_odi_session(session_id))
 
     return {"session": _session_summary(session), "note": "Use /api/odi/sessions/{session_id} for live progress"}

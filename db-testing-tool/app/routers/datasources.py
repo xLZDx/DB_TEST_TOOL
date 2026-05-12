@@ -431,7 +431,8 @@ async def get_datasource(ds_id: int, db: AsyncSession = Depends(get_db)):
         "port": ds.port,
         "database_name": ds.database_name,
         "username": ds.username,
-        "password": ds.password,
+        # SECURITY: Do not return plaintext password
+        # "password": ds.password,
         "extra_params": ds.extra_params,
         "status": ds.status,
         "is_active": ds.is_active,
@@ -441,29 +442,12 @@ async def get_datasource(ds_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.get("/export-env")
 async def export_datasources_env(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(DataSource).order_by(DataSource.id))
-    items = result.scalars().all()
-
-    payload = []
-    for ds in items:
-        payload.append({
-            "name": ds.name,
-            "db_type": ds.db_type,
-            "host": ds.host,
-            "port": ds.port,
-            "database_name": ds.database_name,
-            "username": ds.username,
-            "password": ds.password,
-            "extra_params": ds.extra_params,
-            "is_active": bool(ds.is_active),
-        })
-
-    return {
-        "count": len(payload),
-        "datasources": payload,
-        "datasources_json": json.dumps(payload, separators=(",", ":")),
-        "env_line": f"DATASOURCES_JSON={json.dumps(payload, separators=(',', ':'))}",
-    }
+    """REMOVED for security: This endpoint previously exported plaintext datasource passwords.
+    
+    Datasource credentials cannot be exported via HTTP endpoints.
+    Use secure credential management patterns instead.
+    """
+    raise HTTPException(status_code=410, detail="This endpoint has been removed for security reasons. Plaintext datasource credentials cannot be exported.")
 
 
 @router.post("")

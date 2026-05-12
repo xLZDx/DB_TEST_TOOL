@@ -110,7 +110,7 @@ async def create_work_item(db: AsyncSession, title: str, description: str,
 
             url = _api_url("wit/workitems/$Bug?api-version=7.1", project=project or None)
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, headers=_headers(), json=body, ssl=False) as resp:
+                async with session.post(url, headers=_headers(), json=body) as resp:
                     if resp.status in (200, 201):
                         data = await resp.json()
                         wi.tfs_id = data.get("id")
@@ -151,7 +151,7 @@ async def sync_work_item(db: AsyncSession, local_id: int) -> TfsWorkItem:
             "Content-Type": "application/json",
         }
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, ssl=False) as resp:
+            async with session.get(url, headers=headers) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     fields = data.get("fields", {})
@@ -250,7 +250,7 @@ async def update_work_item(db: AsyncSession, local_id: int,
             if patches:
                 url = _api_url(f"wit/workitems/{wi.tfs_id}?api-version=7.1", project=wi.project or None)
                 async with aiohttp.ClientSession() as session:
-                    async with session.patch(url, headers=_headers(), json=patches, ssl=False) as resp:
+                    async with session.patch(url, headers=_headers(), json=patches) as resp:
                         if resp.status == 200:
                             data = await resp.json()
                             fields = data.get("fields", {})
@@ -285,7 +285,7 @@ async def run_wiql_query(project: str, wiql: str) -> list:
         url = _api_url("wit/wiql?api-version=7.1", project=project)
         async with aiohttp.ClientSession() as session:
             async with session.post(url, headers=headers,
-                                     json={"query": wiql}, ssl=False) as resp:
+                                     json={"query": wiql}) as resp:
                 if resp.status != 200:
                     text = await resp.text()
                     logger.error(f"WIQL query failed ({resp.status}): {text}")
@@ -303,7 +303,7 @@ async def run_wiql_query(project: str, wiql: str) -> list:
         detail_url = _api_url(f"wit/workitems?ids={ids_param}&fields={fields}&api-version=7.1", project=project)
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(detail_url, headers=headers, ssl=False) as resp:
+            async with session.get(detail_url, headers=headers) as resp:
                 if resp.status != 200:
                     text = await resp.text()
                     return [{"error": f"TFS detail fetch failed ({resp.status}): {text}"}]
@@ -357,7 +357,7 @@ async def get_saved_queries(project: str, folder_path: str = "", depth: int = 2)
         )
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, ssl=False) as resp:
+            async with session.get(url, headers=headers) as resp:
                 if resp.status != 200:
                     text = await resp.text()
                     logger.error(f"TFS queries fetch failed ({resp.status}): {text}")
@@ -418,7 +418,7 @@ async def _enrich_saved_queries_metadata(project: str, queries: list) -> None:
         url = _api_url(f"wit/queries/{query_id}?$expand=all&api-version=7.1", project=project)
         try:
             async with semaphore:
-                async with session.get(url, headers=_headers(), ssl=False, timeout=timeout) as resp:
+                async with session.get(url, headers=_headers(), timeout=timeout) as resp:
                     if resp.status != 200:
                         return
                     details = await resp.json()
@@ -451,7 +451,7 @@ async def run_saved_query(project: str, query_id: str) -> dict:
         # Step 1: Run the saved query
         url = _api_url(f"wit/wiql/{query_id}?api-version=7.1", project=project)
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, ssl=False) as resp:
+            async with session.get(url, headers=headers) as resp:
                 if resp.status != 200:
                     text = await resp.text()
                     return {"error": f"TFS returned {resp.status}: {text}", "items": []}
@@ -476,7 +476,7 @@ async def run_saved_query(project: str, query_id: str) -> dict:
         )
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(detail_url, headers=headers, ssl=False) as resp:
+            async with session.get(detail_url, headers=headers) as resp:
                 if resp.status != 200:
                     text = await resp.text()
                     return {"error": f"TFS detail fetch failed ({resp.status}): {text}", "items": []}
@@ -703,7 +703,7 @@ async def fetch_work_item_context(item_id: int, project: str = "") -> dict:
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers, ssl=False) as resp:
+        async with session.get(url, headers=headers) as resp:
             if resp.status == 404:
                 raise ValueError(f"Work item {item_id} not found in project '{proj}'")
             if not resp.ok:
@@ -788,7 +788,7 @@ async def download_tfs_attachment(attachment_url: str) -> bytes:
         "Authorization": _headers()["Authorization"],
     }
     async with aiohttp.ClientSession() as session:
-        async with session.get(attachment_url, headers=headers, ssl=False) as resp:
+        async with session.get(attachment_url, headers=headers) as resp:
             if not resp.ok:
                 raise ValueError(f"Failed to download attachment: HTTP {resp.status}")
             return await resp.read()
@@ -900,15 +900,24 @@ async def fetch_work_item_full_context(item_id: int, project: str = "") -> dict:
             # Fallback: Use SharePoint Bearer token if configured
             elif getattr(settings, "SHAREPOINT_BEARER_TOKEN", "") and msal_needed:
                 headers_for_link["Authorization"] = f"Bearer {settings.SHAREPOINT_BEARER_TOKEN}"
-            # Otherwise, re-use TFS PAT for TFS/Azure DevOps links
+            # SECURITY FIX: Do NOT forward TFS PAT tokens to external/untrusted URLs
+            # This was vulnerable to SSRF attacks where an attacker could supply a URL
+            # that looks like it's from TFS but redirects to attacker-controlled servers,
+            # causing the PAT to be leaked.
+            # Only fetch links from a whitelist of known-safe TFS URLs.
             elif settings.TFS_BASE_URL and settings.TFS_PAT:
                 tfs_host = urlparse(settings.TFS_BASE_URL).netloc
-                if tfs_host and tfs_host.lower() in link_host:
+                # Only forward credentials if the link is EXACTLY from our TFS domain
+                if tfs_host and tfs_host.lower() == link_host.lower():
                     headers_for_link = _headers()
+                else:
+                    # For untrusted links, do not include TFS credentials
+                    link["content_text"] = f"[Link to external domain {link_host} - credentials not forwarded]"
+                    continue
             try:
                 timeout_cfg = aiohttp.ClientTimeout(total=30)
                 async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
-                    async with session.get(url, headers=headers_for_link, ssl=False) as resp:
+                    async with session.get(url, headers=headers_for_link) as resp:
                         if resp.status == 200:
                             link["content_text"] = await resp.text()
                         else:
