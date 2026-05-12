@@ -24,6 +24,21 @@
     <div id="copilot-login-instructions" style="display:none;margin-top:12px;padding:12px;background:var(--bg-dark);border-radius:6px;border:1px solid var(--border);font-size:13px;line-height:1.9"></div>
 </div>
 
+<div class="card" style="margin-bottom:16px;padding:12px 16px">
+    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <div style="min-width:280px;flex:1">
+            <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Agent Picker (optional)</label>
+            <select id="ai-agent-select" class="form-control" multiple size="5" style="min-height:120px"></select>
+            <div class="text-muted" style="font-size:12px;margin-top:6px">Hold Ctrl (or Cmd) to select multiple local agents.</div>
+        </div>
+        <div style="min-width:280px;flex:1">
+            <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Task Hint (optional)</label>
+            <textarea id="ai-task-hint" class="form-control" rows="5" placeholder="Example: Focus on join correctness and null-handling edge cases."></textarea>
+            <div class="text-muted" style="font-size:12px;margin-top:6px">Used as guidance for SQL analysis, rule extraction, and chat actions.</div>
+        </div>
+    </div>
+</div>
+
 <div class="grid grid-2">
     <div class="card">
         <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
