@@ -67,9 +67,8 @@ app.include_router(credentials.router)
 @app.on_event("startup")
 async def startup():
     await init_db()
-    ensure_schema_task_workers()
-    async with async_session() as db:
-        await sync_datasources_from_env(db)
+    await ensure_schema_task_workers()
+    await sync_datasources_from_env()
     await restore_training_automation_loop()
     await start_session_watchdog()
     # Build missing hint indices in background (non-blocking)
