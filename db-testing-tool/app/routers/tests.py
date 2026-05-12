@@ -2268,6 +2268,23 @@ async def list_tests(db: AsyncSession = Depends(get_db)):
 
 @router.post("")
 async def create_test(body: TestCreate, db: AsyncSession = Depends(get_db)):
+    # CORRECTNESS FIX: Validate that referenced datasources exist
+    if body.source_datasource_id:
+        src_ds = await db.get(DataSource, body.source_datasource_id)
+        if not src_ds:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Source datasource {body.source_datasource_id} does not exist"
+            )
+    
+    if body.target_datasource_id:
+        tgt_ds = await db.get(DataSource, body.target_datasource_id)
+        if not tgt_ds:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Target datasource {body.target_datasource_id} does not exist"
+            )
+    
     tc = TestCase(**body.model_dump())
     db.add(tc)
     await db.flush()

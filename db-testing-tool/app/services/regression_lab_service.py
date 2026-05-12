@@ -1361,6 +1361,24 @@ async def promote_regression_items_to_local_tests(
             folder_names.add(folder.name)
         for index, sql in enumerate(sql_candidates, start=1):
             test_name = item.title if len(sql_candidates) == 1 else f"{item.title} [SQL {index}]"
+            
+            # CORRECTNESS FIX: Ensure expected_result is properly formatted JSON
+            # The test executor expects expected_result to be valid JSON (int, float, or dict)
+            expected_result = None
+            if item.expected_results_text:
+                try:
+                    # Try to parse - if it's already JSON, this will work
+                    parsed = json.loads(item.expected_results_text)
+                    expected_result = item.expected_results_text
+                except (json.JSONDecodeError, TypeError):
+                    # If it's not JSON, try to convert it to a number
+                    try:
+                        val = float(item.expected_results_text) if item.expected_results_text else None
+                        expected_result = str(val) if val is not None else None
+                    except (ValueError, TypeError):
+                        # Can't convert - leave as None, test will execute without assertion
+                        expected_result = None
+            
             local_test = TestCase(
                 name=test_name,
                 test_type="custom_sql",
@@ -1368,7 +1386,7 @@ async def promote_regression_items_to_local_tests(
                 target_datasource_id=target_datasource_id,
                 source_query=sql,
                 target_query=None,
-                expected_result=item.expected_results_text or None,
+                expected_result=expected_result,
                 severity="medium",
                 description=_build_regression_local_test_description(item, sql),
                 is_active=True,

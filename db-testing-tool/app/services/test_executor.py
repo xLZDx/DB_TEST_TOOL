@@ -110,7 +110,9 @@ def _compare_results(test: TestCase, src_res: dict, tgt_res: dict) -> tuple:
                 passed = diff <= (test.tolerance or 0)
                 return passed, diff, f"Expected={exp_val}, Actual={actual_val}"
 
-    return True, 0, "Executed (no specific assertion)"
+    # CORRECTNESS FIX: Unknown test types should fail, not pass
+    # Previously this was returning True (pass) which masked invalid test type configurations
+    return False, 0, f"Unknown or unhandled test type: {test.test_type}"
 
 
 async def run_test(db: AsyncSession, test_id: int, batch_id: Optional[str] = None) -> TestRun:
