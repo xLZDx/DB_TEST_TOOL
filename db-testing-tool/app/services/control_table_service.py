@@ -272,15 +272,17 @@ def _load_table_def_from_live_db(datasource_id: int, schema: str, table: str) ->
             return None
 
         from app.connectors.factory import get_connector
-        connector = get_connector(
+        from types import SimpleNamespace
+        ds_obj = SimpleNamespace(
             db_type=row["db_type"],
             host=row["host"],
             port=int(row["port"]),
-            database=row["database_name"],
+            database_name=row["database_name"],
             username=row["username"],
             password=row["password"] or "",
             extra_params=row["extra_params"],
         )
+        connector = get_connector(ds_obj)
 
         col_rows = connector.execute_query(
             "SELECT COLUMN_NAME, DATA_TYPE, NULLABLE, COLUMN_ID "
