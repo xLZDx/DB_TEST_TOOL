@@ -466,17 +466,10 @@ async def test_connection(ds_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(404, "DataSource not found")
     try:
         if (ds.db_type or "").lower().strip() == "redshift":
-            conn = await asyncio.to_thread(
-                get_connector,
-                ds.db_type, ds.host, ds.port, ds.database_name,
-                ds.username, ds.password, ds.extra_params,
-            )
+            conn = await asyncio.to_thread(get_connector, ds)
             result = await asyncio.to_thread(conn.test_connection)
         else:
-            conn = get_connector(
-                ds.db_type, ds.host, ds.port, ds.database_name,
-                ds.username, ds.password, ds.extra_params,
-            )
+            conn = get_connector(ds)
             result = conn.test_connection()
         ds.status = "ok" if result.success else "error"
         ds.last_tested_at = datetime.now(timezone.utc)
@@ -543,10 +536,7 @@ async def query_datasource(ds_id: int, body: QueryInput, db: AsyncSession = Depe
             if db_kind == "redshift":
                 conn, from_cache = await _get_or_create_cached_connector(ds)
             else:
-                conn = get_connector(
-                    ds.db_type, ds.host, ds.port, ds.database_name,
-                    ds.username, ds.password, ds.extra_params,
-                )
+                conn = get_connector(ds)
 
             executions: list[dict[str, Any]] = []
             final_rows: list[dict[str, Any]] = []

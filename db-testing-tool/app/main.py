@@ -18,9 +18,8 @@ import app.models
 # Import routers
 from app.routers import (
     datasources, credentials, schemas, tests, tfs, agents, ai,
-    chat_assistant, external_tools, odi, regression_lab, system_watchdog,
+    chat_assistant, external_tools, odi, regression_lab, system_watchdog, mappings,
 )
-# Note: mappings.py router does not exist yet — excluded intentionally
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -62,6 +61,7 @@ app.include_router(odi.router)
 app.include_router(chat_assistant.router)
 app.include_router(regression_lab.router)
 app.include_router(system_watchdog.router)
+app.include_router(mappings.router)
 
 
 @app.on_event("startup")

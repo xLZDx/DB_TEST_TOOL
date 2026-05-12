@@ -93,3 +93,18 @@ Prefer delegating focused work to specialized custom agents instead of solving e
 - **Functional tests prove behavior:** Tests must verify actual behavior, not just string matches.
 - **Regression test maintenance:** Every change must include or update a regression test.
 - **Git lifecycle:** Commit before each major phase; commit and push after completion. Include the todo list in the commit body.
+- **Full E2E functional validation required after every implementation (ALL projects):** pytest alone is NOT sufficient. After every implementation you MUST:
+	1. Restart the service/app and confirm healthy startup (exit 0, root/health endpoint returns 200).
+	2. Click every UI control: all tabs, cards, buttons, forms — confirm each works as designed.
+	3. Run a complete end-to-end flow for every feature changed, including bot flows, agent orchestration flows, and training pipeline flows where applicable.
+	4. Run a small training pipeline to validate training services if the change touches training or ML components.
+	5. Test full functionality of all bots, agents, and orchestration layers affected by the change.
+	6. Check error logs (last 50 lines) for every relevant service before claiming success.
+	7. Only commit after all E2E validations pass. Do NOT claim success based on import-only or unit tests alone.
+- **Mandatory post-implementation test discipline (ALL projects):** After every code change:
+	1. Restart the relevant service using the project's restart script (e.g. `Restart-DB-Testing-Tool.ps1`) → wait for exit 0.
+	2. GET the root or health endpoint → must return 200.
+	3. Hit the changed endpoint/feature and assert the actual response body (not just HTTP status).
+	4. Check the project's error log (last 50 lines) — resolve any errors before proceeding.
+	5. Run full E2E validation (see rule above).
+	6. Only then commit. Import-only tests are NOT sufficient.
