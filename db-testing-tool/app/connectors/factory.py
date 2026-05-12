@@ -3,23 +3,77 @@ from typing import Optional
 from app.connectors.base import BaseConnector
 
 
-def get_connector(datasource_model: any) -> Optional[BaseConnector]:
+def get_connector(datasource_model) -> Optional[BaseConnector]:
     """Get a database connector instance from a datasource model.
-    
+
     Args:
-        datasource_model: SQLAlchemy model or configuration object
-        
+        datasource_model: SQLAlchemy DataSource model or SimpleNamespace with
+            .db_type, .host, .port, .database_name, .username, .password,
+            .extra_params attributes.
+
     Returns:
-        Connector instance or None if datasource type is not supported
+        Connector instance, or None if the datasource type is not supported.
     """
-    # TODO: implement connector factory
-    # This is a stub implementation that returns None
-    # Actual implementation would instantiate the correct connector based on
-    # datasource_model.connector_type or datasource_model.db_type
+    db_type = (getattr(datasource_model, "db_type", None) or "").lower().strip()
+    host = getattr(datasource_model, "host", "") or ""
+    port_raw = getattr(datasource_model, "port", None)
+    # Support both .database_name (SQLAlchemy model) and .database (SimpleNamespace legacy)
+    database = (
+        getattr(datasource_model, "database_name", None)
+        or getattr(datasource_model, "database", None)
+        or ""
+    )
+    username = getattr(datasource_model, "username", "") or ""
+    password = getattr(datasource_model, "password", "") or ""
+    extra_params = getattr(datasource_model, "extra_params", None) or {}
+    if isinstance(extra_params, str):
+        import json
+        try:
+            extra_params = json.loads(extra_params)
+        except Exception:
+            extra_params = {}
+
+    if db_type == "oracle":
+        from app.connectors.oracle_connector import OracleConnector
+        port = int(port_raw) if port_raw else 1521
+        return OracleConnector(
+            host=host,
+            port=port,
+            database=database,
+            username=username,
+            password=password,
+            extra_params=extra_params,
+        )
+
+    if db_type in ("redshift",):
+        from app.connectors.redshift_connector import RedshiftConnector
+        port = int(port_raw) if port_raw else 5439
+        return RedshiftConnector(
+            host=host,
+            port=port,
+            database=database,
+            username=username,
+            password=password,
+            extra_params=extra_params,
+        )
+
+    if db_type in ("sqlserver", "mssql", "sql server"):
+        from app.connectors.sqlserver_connector import SqlServerConnector
+        port = int(port_raw) if port_raw else 1433
+        return SqlServerConnector(
+            host=host,
+            port=port,
+            database=database,
+            username=username,
+            password=password,
+            extra_params=extra_params,
+        )
+
+    # Unsupported type — caller must handle None
     return None
 
 
-def get_connector_from_model(datasource_model: any) -> Optional[BaseConnector]:
+def get_connector_from_model(datasource_model) -> Optional[BaseConnector]:
     """Alias for get_connector."""
     return get_connector(datasource_model)
 

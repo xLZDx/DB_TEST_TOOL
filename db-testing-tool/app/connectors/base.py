@@ -26,12 +26,22 @@ class ConnectionResult:
     message: str
     error: Optional[str] = None
     connection_id: Optional[str] = None
+    server_version: Optional[str] = None
 
 
 class BaseConnector:
     """Base class for all database connectors."""
-    
-    async def test_connection(self) -> ConnectionResult:
+
+    def __init__(self, host: str, port: int, database: str,
+                 username: str, password: str, extra_params: Optional[Dict] = None):
+        self.host = host
+        self.port = port
+        self.database = database
+        self.username = username
+        self.password = password
+        self.extra_params = extra_params or {}
+
+    def test_connection(self) -> ConnectionResult:
         """Test the connection."""
         raise NotImplementedError
     

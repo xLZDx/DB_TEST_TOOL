@@ -1088,16 +1088,19 @@ function refreshSqlDatasourceSelect(items) {
     const select = document.getElementById('sql-ds-select');
     if (!select) return;
     const current = select.value;
-    const connected = (items || []).filter(x => x.status === 'ok');
-    select.innerHTML = connected.map(x => `<option value="${x.id}">${escapeHtml(x.name)} (${x.db_type})</option>`).join('');
-    if (!connected.length) {
-        select.innerHTML = '<option value="">No connected data sources</option>';
+    const all = items || [];
+    if (!all.length) {
+        select.innerHTML = '<option value="">No data sources configured</option>';
         return;
     }
+    select.innerHTML = all.map(x => {
+        const statusMark = x.status === 'ok' ? '' : ' ⚠';
+        return `<option value="${x.id}">${escapeHtml(x.name)}${statusMark} (${x.db_type})</option>`;
+    }).join('');
     const ws = activeSqlWorksheet();
     const preferred = ws?.datasourceId || current;
-    const found = connected.find(x => String(x.id) === String(preferred));
-    select.value = found ? String(preferred) : String(connected[0].id);
+    const found = all.find(x => String(x.id) === String(preferred));
+    select.value = found ? String(preferred) : String(all[0].id);
     if (ws) ws.datasourceId = select.value;
 }
 
