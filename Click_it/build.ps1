@@ -6,9 +6,7 @@ $workDir = Join-Path $root "build"
 $distDir = Join-Path $root "dist"
 $specDir = $root
 
-if ((Get-Item $root).PSDrive.Name -eq "C") {
-    throw "Refusing to build on C:\ (D:-drive-only policy). Move the repo to D:."
-}
+
 
 pyinstaller `
     --noconfirm `

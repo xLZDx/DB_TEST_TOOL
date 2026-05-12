@@ -1,0 +1,44 @@
+"""Base connector interface for database connections."""
+from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass
+
+
+@dataclass
+class ColumnInfo:
+    """Column metadata."""
+    name: str
+    type: str
+    nullable: bool = True
+
+
+@dataclass
+class TableInfo:
+    """Table metadata."""
+    name: str
+    columns: List[ColumnInfo]
+    row_count: int = 0
+
+
+@dataclass
+class ConnectionResult:
+    """Result of a connection attempt."""
+    success: bool
+    message: str
+    error: Optional[str] = None
+    connection_id: Optional[str] = None
+
+
+class BaseConnector:
+    """Base class for all database connectors."""
+    
+    async def test_connection(self) -> ConnectionResult:
+        """Test the connection."""
+        raise NotImplementedError
+    
+    async def execute_query(self, query: str) -> Tuple[bool, List[Dict[str, Any]], Optional[str]]:
+        """Execute a query."""
+        raise NotImplementedError
+    
+    async def get_tables(self) -> Tuple[bool, List[TableInfo], Optional[str]]:
+        """Get list of tables."""
+        raise NotImplementedError

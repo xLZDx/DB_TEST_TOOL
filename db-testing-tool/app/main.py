@@ -7,8 +7,9 @@ from pathlib import Path
 from app.database import init_db
 from app.database import async_session
 from app.config import settings
-from app.services.datasource_bootstrap import sync_datasources_from_env
-from app.services.schema_task_queue import ensure_schema_task_workers
+# TODO: restore datasource_bootstrap and schema_task_queue imports when services are available
+# from app.services.datasource_bootstrap import sync_datasources_from_env
+# from app.services.schema_task_queue import ensure_schema_task_workers
 from app.services.training_automation_service import restore_training_automation_loop
 from app.services.session_watchdog import start_session_watchdog, stop_session_watchdog
 

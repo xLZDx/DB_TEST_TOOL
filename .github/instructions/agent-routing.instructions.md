@@ -46,11 +46,13 @@ Prefer delegating focused work to specialized custom agents instead of solving e
 - Documentation and changelog updates: `doc-updater`
 - SEO-focused content refinements: `seo-specialist`
 
+
 ## Operational Rules
 
 - For multi-step feature work, invoke `planner` or `architect` first.
 - Before editing unfamiliar areas, use `code-explorer` to gather context.
-- After meaningful implementation, run `code-reviewer` and add `security-reviewer` for APIs, auth, data access, secrets, or external input.
+- After meaningful implementation, run `code-reviewer` and add `security-reviewer` for APIs, auth, data access, secrets, external input, or **any build script or executable change** (including automation/macro tools like pynput, pyautogui, etc.).
+- For any build script or executable change, also run an environment-check agent to detect likely antivirus/endpoint security interference. Proactively warn users and reference the AV-exe checklist in repo memory.
 - For Python/FastAPI/SQL changes, always include the corresponding domain reviewer.
 - For performance-sensitive paths, include `performance-optimizer` before finalizing.
 - For flaky tests, swallowed exceptions, or brittle fallbacks, include `silent-failure-hunter`.
@@ -62,3 +64,32 @@ Prefer delegating focused work to specialized custom agents instead of solving e
 - Keep delegation narrow. Use the smallest specialist set needed for the current task.
 - Avoid circular handoffs.
 - Prefer one lead specialist plus one verifier over broad parallel delegation.
+
+
+## Additional Global Rules
+
+
+
+- **Grid-based plan/report template required:** All planning, analysis, and reporting must use the following combined, grid-based template, presented in chat and in the repository:
+	- Overview: summary of the plan/report and its scope.
+	- Requirements: explicit goals and constraints.
+	- Architecture/Change Table: grid with columns for Change, Priority, File/Area, Rationale, Risks, Benefits, Reviewer/Approver, Pros/Cons Summary.
+	- Implementation Steps Table: grid grouped by phase and step, with columns for Phase, Phase Priority, Step, Task Priority, Change/Action, Files/Area, Action/What, Why (Rationale), Dependencies, Risk, Reviewer, Approver, Pros/Cons Summary.
+	- Agent Pros/Cons Summaries: bullet points for each agent.
+	- Testing Strategy: unit, integration, regression, and doc review.
+	- Risks & Mitigations: explicit risk/mitigation pairs.
+	- Success Criteria: checklist of outcomes.
+	- Reviewer/Approver Table: grid of workstreams and responsible agents.
+	- The template must be shown in chat for review and approval before any code is written or merged, and must be referenced in the PR/commit.
+- **Approval workflow required:** The work must move through explicit stage gates in chat:
+	- Review approval needed before the plan is finalized.
+	- Plan approval needed before implementation starts.
+	- Implementation approval needed before merge, release, or close-out.
+	- Do not advance to the next stage without explicit user approval.
+- **Approval gate:** Every implementation requires a written plan and a double-ask confirmation before code is written.
+- **No guessing:** All answers and code must cite their source inline (file:line, command output).
+- **Agent review mandatory:** A specialist reviewer must review the plan before writing code and again after completion. Reviewer/approver agent name must be recorded in the plan.
+- **Validate logs before claiming success:** Always check and reference the last 50 lines of every relevant log before reporting success.
+- **Functional tests prove behavior:** Tests must verify actual behavior, not just string matches.
+- **Regression test maintenance:** Every change must include or update a regression test.
+- **Git lifecycle:** Commit before each major phase; commit and push after completion. Include the todo list in the commit body.
