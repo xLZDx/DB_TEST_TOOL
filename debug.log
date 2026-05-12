@@ -1,0 +1,4 @@
+[0410/111747.072:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: The system cannot find the file specified. (0x2)
+[0410/111747.396:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: The system cannot find the file specified. (0x2)
+[0504/093941.075:ERROR:third_party\crashpad\crashpad\client\crashpad_client_win.cc:869] not connected
+[0504/094011.931:ERROR:third_party\crashpad\crashpad\client\crashpad_client_win.cc:869] not connected
