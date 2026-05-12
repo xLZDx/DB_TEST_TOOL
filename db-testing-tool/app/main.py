@@ -16,9 +16,11 @@ from app.services.session_watchdog import start_session_watchdog, stop_session_w
 import app.models
 
 # Import routers
-from app.routers import datasources, credentials
-# TODO: restore remaining routers when missing services are available
-# from app.routers import schemas, mappings, tests, ai, tfs, agents, external_tools, odi, chat_assistant, regression_lab, system_watchdog
+from app.routers import (
+    datasources, credentials, schemas, tests, tfs, agents, ai,
+    chat_assistant, external_tools, odi, regression_lab, system_watchdog,
+)
+# Note: mappings.py router does not exist yet — excluded intentionally
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -49,19 +51,17 @@ templates.env.globals["STATIC_VERSION"] = _build_static_version()
 
 # Include API routers
 app.include_router(datasources.router)
-# TODO: restore router includes when services are available
-# app.include_router(schemas.router)
-# app.include_router(mappings.router)
-# app.include_router(tests.router)
-# app.include_router(ai.router)
-# app.include_router(tfs.router)
-# app.include_router(agents.router)
+app.include_router(schemas.router)
+app.include_router(tests.router)
+app.include_router(ai.router)
+app.include_router(tfs.router)
+app.include_router(agents.router)
 app.include_router(credentials.router)
-# app.include_router(external_tools.router)
-# app.include_router(odi.router)
-# app.include_router(chat_assistant.router)
-# app.include_router(regression_lab.router)
-# app.include_router(system_watchdog.router)
+app.include_router(external_tools.router)
+app.include_router(odi.router)
+app.include_router(chat_assistant.router)
+app.include_router(regression_lab.router)
+app.include_router(system_watchdog.router)
 
 
 @app.on_event("startup")
