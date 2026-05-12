@@ -742,7 +742,7 @@ async def create_run(body: CreateTestRunRequest, background_tasks: BackgroundTas
                                        body.run_name, body.test_point_ids)
 
         if run_id <= 0:
-            raise HTTPException(500, "Failed to create test run in TFS")
+            raise HTTPException(400, "Failed to create test run in TFS — verify plan ID and test point IDs exist in the selected project")
         
         # Fetch result IDs from TFS so the frontend can update individual results
         result_id_map = await get_result_ids_for_run(body.project, run_id)

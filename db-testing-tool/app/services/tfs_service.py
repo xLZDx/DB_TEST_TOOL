@@ -705,7 +705,7 @@ async def fetch_work_item_context(item_id: int, project: str = "") -> dict:
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as resp:
             if resp.status == 404:
-                raise ValueError(f"Work item {item_id} not found in project '{proj}'")
+                raise ValueError(f"Work item {item_id} not found in project '{project}'")
             if not resp.ok:
                 body = await resp.text()
                 raise ValueError(f"TFS returned HTTP {resp.status}: {body[:200]}")
