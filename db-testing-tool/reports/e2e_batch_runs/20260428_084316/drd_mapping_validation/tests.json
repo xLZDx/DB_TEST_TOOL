@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Generated Test",
+    "test_type": "value_match",
+    "severity": "medium",
+    "description": "",
+    "db_dialect": "oracle",
+    "source_query": "",
+    "target_query": "",
+    "expected_result": "0"
+  },
+  {
+    "name": "Generated Test",
+    "test_type": "value_match",
+    "severity": "medium",
+    "description": "",
+    "db_dialect": "oracle",
+    "source_query": "",
+    "target_query": "",
+    "expected_result": "0"
+  },
+  {
+    "name": "Generated Test",
+    "test_type": "value_match",
+    "severity": "medium",
+    "description": "",
+    "db_dialect": "oracle",
+    "source_query": "",
+    "target_query": "",
+    "expected_result": "0"
+  },
+  {
+    "name": "Generated Test",
+    "test_type": "value_match",
+    "severity": "medium",
+    "description": "",
+    "db_dialect": "oracle",
+    "source_query": "",
+    "target_query": "",
+    "expected_result": "0"
+  },
+  {
+    "name": "Generated Test",
+    "test_type": "value_match",
+    "severity": "medium",
+    "description": "",
+    "db_dialect": "oracle",
+    "source_query": "",
+    "target_query": "",
+    "expected_result": "0"
+  }
+]

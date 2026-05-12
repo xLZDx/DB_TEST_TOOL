@@ -1,0 +1,47 @@
+-- Test 1: Generated Test
+-- Source Query
+SELECT APA_ID, APA_SRC_KEY, APA_TP_ID FROM CCAL_OWNER.CCAL_APA_SRC_STG_TBL
+
+-- Target Query
+SELECT APA_ID, APA_SRC_KEY, APA_TP_ID FROM CCAL_OWNER.APA
+
+
+-- Test 2: Generated Test
+-- Source Query
+SELECT FIP_SRC_KEY FROM CCAL_OWNER.CCAL_FIP_SRC_STG_TBL
+
+-- Target Query
+SELECT FIP_SRC_KEY FROM CCAL_OWNER.FIP
+
+
+-- Test 3: Generated Test
+-- Source Query
+SELECT COUNT(*) AS row_count FROM CIRD_OWNER.RULE
+
+-- Target Query
+SELECT COUNT(*) AS row_count FROM CCAL_OWNER.TXN
+
+
+-- Test 4: Generated Test
+-- Source Query
+SELECT COUNT(*) AS row_count FROM CCAL_OWNER.CCAL_APA_SRC_STG_TBL
+
+-- Target Query
+SELECT COUNT(*) AS row_count FROM CCAL_OWNER.APA
+
+
+-- Test 5: Generated Test
+-- Source Query
+SELECT COUNT(*) AS row_count FROM CCAL_OWNER.CCAL_FIP_SRC_STG_TBL
+
+-- Target Query
+SELECT COUNT(*) AS row_count FROM CCAL_OWNER.FIP
+
+
+-- Test 6: Generated Test
+-- Source Query
+SELECT RULE_ID, RULE_CODE, EFF_FM_DT, EFF_TO_DT FROM CIRD_OWNER.RULE WHERE EFF_FM_DT IS NOT NULL AND EFF_TO_DT IS NOT NULL
+
+-- Target Query
+SELECT TXN_ID, TXN_SRC_KEY, EXEC_DTM FROM CCAL_OWNER.TXN WHERE EXEC_DTM IS NOT NULL
+

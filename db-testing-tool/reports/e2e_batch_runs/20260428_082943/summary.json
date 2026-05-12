@@ -1,0 +1,9 @@
+[
+  {
+    "scenario": "drd_mapping_validation",
+    "tfs_item_id": null,
+    "status": "ok",
+    "test_count": 0,
+    "output_folder": "C:\\GIT_Repo\\db-testing-tool\\reports\\e2e_batch_runs\\20260428_082943\\drd_mapping_validation"
+  }
+]

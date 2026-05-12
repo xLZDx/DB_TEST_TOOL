@@ -1,0 +1,18 @@
+{
+  "scenario": {
+    "name": "ct_control_table_validation",
+    "tfs_item_id": null,
+    "prompt": "Generate Oracle SQL validation tests for control-table behavior (CT): task/session tracking, error threshold handling, and partition/thread isolation behavior in ETL flow. Use provided artifacts to derive control table dependencies and validation assertions.",
+    "artifact_paths": [
+      "C:\\Users\\ikorostelev\\Downloads\\SCEN_CCAL_PKG_LOAD_TX_STCCCALQ_STG_Version_001.xml",
+      "C:\\GIT_Repo\\db-testing-tool\\control-table-fix.patch"
+    ]
+  },
+  "result": {
+    "scenario": "ct_control_table_validation",
+    "tfs_item_id": null,
+    "status": "ok",
+    "test_count": 10,
+    "output_folder": "C:\\GIT_Repo\\db-testing-tool\\reports\\e2e_batch_runs\\20260428_081309\\ct_control_table_validation"
+  }
+}
