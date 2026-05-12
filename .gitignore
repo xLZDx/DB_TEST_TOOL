@@ -34,3 +34,9 @@ db-testing-tool/portable/dist/
 db-testing-tool/training_packs/
 db-testing-tool/certs/
 db-testing-tool/redshift-jdbc42-2.1.0.32/
+
+# Large local artifact collections
+Aira/
+PP_BOT/docs/
+Presentation/Presentation materials/
+Presentation/output/*.pptx
