@@ -1,17 +1,14 @@
 """AI service – uses OpenAI GPT to assist with rule extraction, test generation, and triage."""
 from typing import Any, Dict, List, Optional, Tuple
 from app.config import settings
-# TODO: restore copilot_auth_service when available
-# from app.services.copilot_auth_service import get_runtime_copilot_token
+from app.services.copilot_auth_service import get_runtime_copilot_token
 from app.services.schema_kb_service import load_schema_kb_payload
 from app.models.agent_contracts import TfsContext, EtlMappingSpec, TestCaseDesign, AgentPhaseReport
 from app.models.db_dialects import get_dialect_prompt
-# TODO: restore sql_pattern_validation when available
-# from app.services.sql_pattern_validation import validate_test_definition_sql
+from app.services.sql_pattern_validation import validate_test_definition_sql
 from app.services.tfs_service import fetch_work_item_full_context
 from app.database import async_session
-# TODO: restore datasource model when available
-# from app.models.datasource import DataSource
+from app.models.datasource import DataSource
 from app.connectors.factory import get_connector_from_model
 from sqlalchemy import select, func
 import asyncio

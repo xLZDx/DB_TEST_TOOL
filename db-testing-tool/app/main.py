@@ -7,9 +7,8 @@ from pathlib import Path
 from app.database import init_db
 from app.database import async_session
 from app.config import settings
-# TODO: restore datasource_bootstrap and schema_task_queue imports when services are available
-# from app.services.datasource_bootstrap import sync_datasources_from_env
-# from app.services.schema_task_queue import ensure_schema_task_workers
+from app.services.datasource_bootstrap import sync_datasources_from_env
+from app.services.schema_task_queue import ensure_schema_task_workers
 from app.services.training_automation_service import restore_training_automation_loop
 from app.services.session_watchdog import start_session_watchdog, stop_session_watchdog
 
@@ -17,7 +16,9 @@ from app.services.session_watchdog import start_session_watchdog, stop_session_w
 import app.models
 
 # Import routers
-from app.routers import datasources, schemas, mappings, tests, ai, tfs, agents, credentials, external_tools, odi, chat_assistant, regression_lab, system_watchdog
+from app.routers import datasources, credentials
+# TODO: restore remaining routers when missing services are available
+# from app.routers import schemas, mappings, tests, ai, tfs, agents, external_tools, odi, chat_assistant, regression_lab, system_watchdog
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -48,18 +49,19 @@ templates.env.globals["STATIC_VERSION"] = _build_static_version()
 
 # Include API routers
 app.include_router(datasources.router)
-app.include_router(schemas.router)
-app.include_router(mappings.router)
-app.include_router(tests.router)
-app.include_router(ai.router)
-app.include_router(tfs.router)
-app.include_router(agents.router)
+# TODO: restore router includes when services are available
+# app.include_router(schemas.router)
+# app.include_router(mappings.router)
+# app.include_router(tests.router)
+# app.include_router(ai.router)
+# app.include_router(tfs.router)
+# app.include_router(agents.router)
 app.include_router(credentials.router)
-app.include_router(external_tools.router)
-app.include_router(odi.router)
-app.include_router(chat_assistant.router)
-app.include_router(regression_lab.router)
-app.include_router(system_watchdog.router)
+# app.include_router(external_tools.router)
+# app.include_router(odi.router)
+# app.include_router(chat_assistant.router)
+# app.include_router(regression_lab.router)
+# app.include_router(system_watchdog.router)
 
 
 @app.on_event("startup")

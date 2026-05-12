@@ -3,7 +3,7 @@ from typing import Optional
 from app.connectors.base import BaseConnector
 
 
-def get_connector_from_model(datasource_model: any) -> Optional[BaseConnector]:
+def get_connector(datasource_model: any) -> Optional[BaseConnector]:
     """Get a database connector instance from a datasource model.
     
     Args:
@@ -15,5 +15,11 @@ def get_connector_from_model(datasource_model: any) -> Optional[BaseConnector]:
     # TODO: implement connector factory
     # This is a stub implementation that returns None
     # Actual implementation would instantiate the correct connector based on
-    # datasource_model.connector_type
+    # datasource_model.connector_type or datasource_model.db_type
     return None
+
+
+def get_connector_from_model(datasource_model: any) -> Optional[BaseConnector]:
+    """Alias for get_connector."""
+    return get_connector(datasource_model)
+
