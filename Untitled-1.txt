@@ -1,4 +1,0 @@
-git config --global user.email "ikorostelev@rjf.com"
-git config --global user.name "ikorostelev"
-
-cd c:\GIT_Repo\db-testing-tool; c:\GIT_Repo\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8550 --reload --app-dir c:\GIT_Repo\db-testing-tool
