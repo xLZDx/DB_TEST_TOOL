@@ -1,0 +1,242 @@
+"""Test execution service – run test cases against live databases."""
+import asyncio
+from typing import List, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.models.test_case import TestCase, TestRun
+from app.models.datasource import DataSource
+from app.connectors.factory import get_connector_from_model
+import json, time, uuid, logging
+from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
+
+_DS_FAILURE_CACHE = {}
+_DS_FAILURE_TTL_SECONDS = 120  # 2-min cool-down after DPY-6005 / hard timeout
+
+# Only cache connection-level errors (not query-specific ORA errors)
+_CACHEABLE_ERROR_PREFIXES = ("DPY-", "TNS-", "ORA-12", "ORA-01017", "ORA-28")
+
+
+def _is_connection_error(error_msg: str) -> bool:
+    """Return True if error is a connection/auth problem (should cache), False for query errors."""
+    if not error_msg:
+        return False
+    return any(error_msg.strip().startswith(p) for p in _CACHEABLE_ERROR_PREFIXES)
+
+
+def _execute_single(connector, sql: str) -> dict:
+    """Run a query and return first-row dict or row count."""
+    try:
+        rows = connector.execute_query(sql)
+        return {"rows": rows, "count": len(rows), "error": None}
+    except Exception as e:
+        return {"rows": [], "count": 0, "error": str(e)}
+
+
+def _compare_results(test: TestCase, src_res: dict, tgt_res: dict) -> tuple:
+    """Returns (passed: bool, mismatch_count: int, detail: str)."""
+    if src_res.get("error"):
+        return False, 0, f"Source error: {src_res['error']}"
+    if tgt_res.get("error"):
+        return False, 0, f"Target error: {tgt_res['error']}"
+
+    if test.test_type == "row_count":
+        s_cnt = src_res["rows"][0].get("cnt", src_res["rows"][0].get("CNT", 0)) if src_res["rows"] else 0
+        t_cnt = tgt_res["rows"][0].get("cnt", tgt_res["rows"][0].get("CNT", 0)) if tgt_res["rows"] else 0
+        diff = abs(s_cnt - t_cnt)
+        passed = diff <= (test.tolerance or 0)
+        return passed, diff, f"Source={s_cnt}, Target={t_cnt}, Diff={diff}"
+
+    if test.test_type in ("null_check", "uniqueness"):
+        cnt = tgt_res["rows"][0].get("cnt", tgt_res["rows"][0].get("CNT", 0)) if tgt_res["rows"] else tgt_res["count"]
+        if test.test_type == "uniqueness":
+            cnt = tgt_res["count"]      # number of duplicate groups
+        passed = cnt == 0
+        return passed, cnt, f"Violations={cnt}"
+
+    if test.test_type == "value_match":
+        if not src_res["rows"] or not tgt_res["rows"]:
+            return False, 0, "No data returned"
+        mismatches = 0
+        details = []
+        sr = {k.lower(): v for k, v in src_res["rows"][0].items()}
+        tr = {k.lower(): v for k, v in tgt_res["rows"][0].items()}
+        for key in sr:
+            sv, tv = sr[key], tr.get(key)
+            if sv != tv:
+                mismatches += 1
+                details.append(f"{key}: src={sv} tgt={tv}")
+        return mismatches == 0, mismatches, "; ".join(details) if details else "Match"
+
+    if test.test_type == "freshness":
+        if tgt_res["rows"]:
+            last = tgt_res["rows"][0].get("last_update") or tgt_res["rows"][0].get("LAST_UPDATE")
+            return True, 0, f"Last update: {last}"
+        return False, 0, "No freshness data"
+
+    # custom_sql / schema_drift – just check for rows
+    # Pick whichever result set has data (single-DB mode: only src; dual-DB: prefer tgt)
+    result_set = src_res if (src_res["rows"] and not tgt_res["rows"]) else tgt_res
+
+    if test.expected_result:
+        expected = json.loads(test.expected_result)
+        if isinstance(expected, (int, float)):
+            exp_val = expected
+        elif isinstance(expected, dict):
+            exp_val = expected.get("cnt", expected.get("count", expected.get("rows", None)))
+        else:
+            exp_val = None
+
+        if exp_val is not None:
+            # Extract actual value: first column of first row (for COUNT(*) etc.)
+            actual_val = None
+            if result_set["rows"]:
+                first_row = result_set["rows"][0]
+                # Get first column value from the row dict
+                first_col_val = next(iter(first_row.values())) if first_row else None
+                if isinstance(first_col_val, (int, float)):
+                    actual_val = first_col_val
+                else:
+                    try:
+                        actual_val = int(first_col_val) if first_col_val is not None else None
+                    except (ValueError, TypeError):
+                        actual_val = result_set["count"]
+            else:
+                actual_val = result_set["count"]
+
+            if actual_val is not None:
+                diff = abs(actual_val - exp_val)
+                passed = diff <= (test.tolerance or 0)
+                return passed, diff, f"Expected={exp_val}, Actual={actual_val}"
+
+    return True, 0, "Executed (no specific assertion)"
+
+
+async def run_test(db: AsyncSession, test_id: int, batch_id: Optional[str] = None) -> TestRun:
+    """Execute a single test case and persist the result."""
+    test = await db.get(TestCase, test_id)
+    if not test:
+        raise ValueError(f"TestCase {test_id} not found")
+
+    batch_id = batch_id or str(uuid.uuid4())[:12]
+    run = TestRun(test_case_id=test.id, batch_id=batch_id, status="running")
+    db.add(run)
+    await db.flush()
+
+    connectors = {}
+    try:
+        start = time.time()
+
+        # Source query – run blocking connector calls in a thread so the event loop stays
+        # responsive (allows stop requests to be processed mid-execution).
+        src_res = {"rows": [], "count": 0, "error": None}
+        if test.source_query and test.source_datasource_id:
+            src_ds = await db.get(DataSource, test.source_datasource_id)
+            if src_ds:
+                if (src_ds.db_type or "").strip().lower() == "redshift":
+                    raise RuntimeError("Redshift testing is disabled. Use CDS or LH Oracle datasource.")
+                now = time.time()
+                src_key = f"{src_ds.id}:src"
+                cached = _DS_FAILURE_CACHE.get(src_key)
+                if cached and (now - cached.get("ts", 0)) < _DS_FAILURE_TTL_SECONDS:
+                    src_res = {"rows": [], "count": 0, "error": cached.get("error")}
+                else:
+                    c = get_connector_from_model(src_ds)
+                    await asyncio.to_thread(c.connect)
+                    connectors["src"] = c
+                    src_res = await asyncio.to_thread(_execute_single, c, test.source_query)
+                    if src_res.get("error") and _is_connection_error(src_res["error"]):
+                        _DS_FAILURE_CACHE[src_key] = {"error": src_res["error"], "ts": time.time()}
+                    else:
+                        _DS_FAILURE_CACHE.pop(src_key, None)
+
+        # Target query
+        tgt_res = {"rows": [], "count": 0, "error": None}
+        if test.target_query and test.target_datasource_id:
+            tgt_ds = await db.get(DataSource, test.target_datasource_id)
+            if tgt_ds:
+                if (tgt_ds.db_type or "").strip().lower() == "redshift":
+                    raise RuntimeError("Redshift testing is disabled. Use CDS or LH Oracle datasource.")
+                now = time.time()
+                tgt_key = f"{tgt_ds.id}:tgt"
+                cached = _DS_FAILURE_CACHE.get(tgt_key)
+                if cached and (now - cached.get("ts", 0)) < _DS_FAILURE_TTL_SECONDS:
+                    tgt_res = {"rows": [], "count": 0, "error": cached.get("error")}
+                else:
+                    c = get_connector_from_model(tgt_ds)
+                    await asyncio.to_thread(c.connect)
+                    connectors["tgt"] = c
+                    tgt_res = await asyncio.to_thread(_execute_single, c, test.target_query)
+                    if tgt_res.get("error") and _is_connection_error(tgt_res["error"]):
+                        _DS_FAILURE_CACHE[tgt_key] = {"error": tgt_res["error"], "ts": time.time()}
+                    else:
+                        _DS_FAILURE_CACHE.pop(tgt_key, None)
+
+        elapsed = int((time.time() - start) * 1000)
+
+        passed, mismatches, detail = _compare_results(test, src_res, tgt_res)
+
+        run.status = "passed" if passed else "failed"
+        run.source_result = json.dumps(src_res["rows"][:10] if isinstance(src_res["rows"], list) else [],
+                                        default=str) if src_res["rows"] else None
+        run.target_result = json.dumps(tgt_res["rows"][:10] if isinstance(tgt_res["rows"], list) else [],
+                                        default=str) if tgt_res["rows"] else None
+        run.actual_result = json.dumps({"detail": detail}, default=str)
+        run.mismatch_count = mismatches
+        run.mismatch_sample = json.dumps(
+            tgt_res["rows"][:5] if mismatches > 0 and tgt_res["rows"] else [],
+            default=str
+        )
+        run.execution_time_ms = elapsed
+
+        if src_res.get("error") or tgt_res.get("error"):
+            run.status = "error"
+            run.error_message = src_res.get("error") or tgt_res.get("error")
+
+    except asyncio.CancelledError:
+        # task.cancel() was called (Stop Execution). Mark run as stopped and let the
+        # batch loop's stopped-flag check terminate the batch cleanly.
+        run.status = "error"
+        run.error_message = "Execution stopped by user"
+        # Do NOT re-raise – run_test returns normally so the batch loop可以 check the
+        # stopped flag and break out cleanly.
+    except Exception as e:
+        run.status = "error"
+        run.error_message = str(e)
+        logger.exception("Test execution error")
+    finally:
+        for c in connectors.values():
+            try:
+                c.disconnect()
+            except Exception:
+                pass
+
+    await db.commit()
+    return run
+
+
+async def run_all_tests(db: AsyncSession, test_ids: Optional[List[int]] = None, max_concurrent: int = 2) -> dict:
+    """Run multiple tests. Uses sequential DB writes to keep AsyncSession usage safe."""
+    batch_id = str(uuid.uuid4())[:12]
+    if test_ids:
+        tests_r = await db.execute(select(TestCase).where(TestCase.id.in_(test_ids)))
+        tests = tests_r.scalars().all()
+    else:
+        tests_r = await db.execute(select(TestCase).where(TestCase.is_active == True))
+        all_tests = tests_r.scalars().all()
+        executed_ids_r = await db.execute(select(TestRun.test_case_id).distinct())
+        executed_ids = {row[0] for row in executed_ids_r.all() if row and row[0] is not None}
+        tests = [t for t in all_tests if t.id not in executed_ids]
+
+    summary = {"batch_id": batch_id, "total": len(tests), "passed": 0, "failed": 0, "error": 0, "skipped_executed": 0}
+    if not test_ids:
+        summary["skipped_executed"] = max(0, len(all_tests) - len(tests))
+
+    for idx, test in enumerate(tests):
+        run = await run_test(db, test.id, batch_id)
+        summary[run.status] = summary.get(run.status, 0) + 1
+        if idx < len(tests) - 1:
+            await asyncio.sleep(3)
+
+    return summary

@@ -1,0 +1,84 @@
+﻿```json
+[
+  {
+    "id": "TC_001",
+    "name": "Validate Source Data Count in STCCCALQ_GG",
+    "description": "Ensure the total record count in the source table STCCCALQ_GG matches the expected count.",
+    "category": "Source Validation",
+    "sql": "SELECT COUNT(*) AS record_count FROM CCAL_REPL_OWNER.STCCCALQ_GG;",
+    "expected_behavior": "The record count matches the expected count provided in the test data."
+  },
+  {
+    "id": "TC_002",
+    "name": "Validate Staging Table Record Count",
+    "description": "Ensure the total record count in the staging table STCCCALQ_STG matches the source table STCCCALQ_GG.",
+    "category": "Staging Validations",
+    "sql": "SELECT COUNT(*) AS record_count FROM CDS_STG_OWNER.STCCCALQ_STG;",
+    "expected_behavior": "The record count matches the source table STCCCALQ_GG."
+  },
+  {
+    "id": "TC_003",
+    "name": "Validate Trailer Mapping Logic",
+    "description": "Verify trailer mapping logic using CDSM_RULE_MAP and TRAILER_REGEX_RULES.",
+    "category": "Trailer Mapping (CDSMANUC)",
+    "sql": "SELECT t.TXN_ID, r.REGEX_PATTERN, t.TRL_VALUE FROM CDS_STG_OWNER.TXN_TRLR_STCCCALQ_STG t JOIN CDS_STG_OWNER.TRAILER_REGEX_RULES r ON t.REGEX_RULE_ID = r.REGEX_RULE_ID WHERE r.REC_TP = 7;",
+    "expected_behavior": "Trailer values in TXN_TRLR_STCCCALQ_STG match the regex patterns defined in TRAILER_REGEX_RULES."
+  },
+  {
+    "id": "TC_004",
+    "name": "Validate Target TXN Data",
+    "description": "Ensure TXN_TP_CODE and SRC_STM_ID mappings are correctly applied in the target TXN table.",
+    "category": "Target TXN",
+    "sql": "SELECT TXN_ID, TXN_TP_CODE, SRC_STM_ID FROM CCAL_OWNER.TXN WHERE SRC_STM_ID IN (29, 30, 71, 72);",
+    "expected_behavior": "SRC_STM_ID values map to correct TXN_TP_CODE patterns (e.g., 29=S10REC, 30=S10DEL)."
+  },
+  {
+    "id": "TC_005",
+    "name": "Validate APA Product Lookups",
+    "description": "Ensure APA product lookups are correctly populated in the APA table.",
+    "category": "Target APA",
+    "sql": "SELECT APA_ID, PRODUCT_CODE FROM CCAL_OWNER.APA WHERE PRODUCT_CODE IS NOT NULL;",
+    "expected_behavior": "All APA records have valid PRODUCT_CODE values."
+  },
+  {
+    "id": "TC_006",
+    "name": "Validate FIP Data Population",
+    "description": "Verify FIP table data is populated correctly based on staging transformations.",
+    "category": "Target FIP",
+    "sql": "SELECT FIP_ID, FIP_VALUE FROM CCAL_OWNER.FIP WHERE FIP_VALUE IS NOT NULL;",
+    "expected_behavior": "All FIP records have valid FIP_VALUE values derived from staging."
+  },
+  {
+    "id": "TC_007",
+    "name": "Validate TXN_RLTNP Relationships",
+    "description": "Ensure relationships in TXN_RLTNP table are correctly established.",
+    "category": "Target TXN_RLTNP",
+    "sql": "SELECT TXN_RLTNP_ID, TXN_ID, RELATED_TXN_ID FROM CCAL_OWNER.TXN_RLTNP WHERE TXN_ID IS NOT NULL AND RELATED_TXN_ID IS NOT NULL;",
+    "expected_behavior": "All TXN_RLTNP records have valid TXN_ID and RELATED_TXN_ID values."
+  },
+  {
+    "id": "TC_008",
+    "name": "Cross-Layer Reconciliation",
+    "description": "Reconcile record counts between staging and target layers.",
+    "category": "Cross-Layer Reconciliation",
+    "sql": "SELECT (SELECT COUNT(*) FROM CDS_STG_OWNER.STCCCALQ_STG) AS staging_count, (SELECT COUNT(*) FROM CCAL_OWNER.TXN) AS target_count FROM DUAL;",
+    "expected_behavior": "Record counts between staging and target layers match."
+  },
+  {
+    "id": "TC_009",
+    "name": "Check for Null Values in Target Tables",
+    "description": "Ensure no critical columns in target tables have null values.",
+    "category": "Data Quality",
+    "sql": "SELECT TXN_ID FROM CCAL_OWNER.TXN WHERE TXN_TP_CODE IS NULL OR SRC_STM_ID IS NULL;",
+    "expected_behavior": "No records with null values in critical columns."
+  },
+  {
+    "id": "TC_010",
+    "name": "Negative Test: Invalid SRC_STM_ID",
+    "description": "Ensure records with invalid SRC_STM_ID values are not loaded into the target TXN table.",
+    "category": "Negative Tests",
+    "sql": "SELECT TXN_ID FROM CCAL_OWNER.TXN WHERE SRC_STM_ID NOT IN (29, 30, 71, 72);",
+    "expected_behavior": "No records with invalid SRC_STM_ID values exist in the TXN table."
+  }
+]
+```

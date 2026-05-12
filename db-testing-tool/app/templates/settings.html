@@ -1,0 +1,819 @@
+{% extends "base.html" %}
+{% block title %}Settings – DB Testing Tool{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="card mb-16" id="ds-list-card">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+            <h2 style="margin:0">Data Source Connections</h2>
+            <button class="ds-sect-toggle" id="ds-list-toggle" type="button" onclick="toggleDsSection('ds-list-body','ds-list-toggle')">&#9660;</button>
+        </div>
+        <div class="flex gap-8">
+            <button class="btn btn-primary btn-sm" onclick="openAddDatasourceModal()">+ Add Data Source</button>
+            <button class="btn btn-info btn-sm" onclick="openModal('modal-rs-sso')">&#9889; Redshift SSO</button>
+            <button class="btn btn-outline btn-sm" onclick="copyDatasourceEnvBackup()">Copy Env Backup</button>
+        </div>
+    </div>
+    <div id="ds-list-body" class="ds-sect-body">
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Name</th><th>Type</th><th>Host</th><th>Port</th><th>Database</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="ds-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header ds-sect-hdr" onclick="toggleDsSection('sett-ai-body','sett-ai-toggle')">
+            <h2 style="margin:0">AI Configuration</h2>
+            <button class="ds-sect-toggle" id="sett-ai-toggle" type="button">&#9660;</button>
+        </div>
+        <div id="sett-ai-body" class="ds-sect-body">
+        <p class="text-muted mb-16">Configure AI access in the <code>.env</code> file in the project root. This deployment uses GitHub Copilot only.</p>
+        <div class="form-group"><label>AI_PROVIDER</label><input class="form-control" value="githubcopilot" disabled></div>
+        <div class="form-group"><label>GITHUB_OAUTH_CLIENT_ID (for Copilot Sign-In)</label><input class="form-control" value="set in .env" disabled></div>
+        <div class="form-group"><label>GITHUB_CA_BUNDLE (proxy/corporate CA path)</label><input class="form-control" value="optional path in .env" disabled></div>
+        <div class="form-group"><label>GITHUB_VERIFY_SSL</label><input class="form-control" value="true" disabled></div>
+        <div class="form-group"><label>COPILOT_AUTH_MODE</label><input class="form-control" value="automatic | manual (set in .env)" disabled></div>
+        <p class="text-muted" style="font-size:12px">Set <code>COPILOT_AUTH_MODE=automatic</code> to auto-open GitHub authorization on startup. Set to <code>manual</code> to sign in from the AI Assistant page.</p>
+        <p class="text-muted" style="font-size:12px">Edit <code>db-testing-tool/.env</code> and restart the app to apply changes.</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header ds-sect-hdr" onclick="toggleDsSection('sett-tfs-body','sett-tfs-toggle')">
+            <h2 style="margin:0">TFS / Azure DevOps</h2>
+            <button class="ds-sect-toggle" id="sett-tfs-toggle" type="button">&#9660;</button>
+        </div>
+        <div id="sett-tfs-body" class="ds-sect-body">
+        <p class="text-muted mb-16">Configure TFS integration in the <code>.env</code> file.</p>
+        <div class="form-group"><label>TFS_BASE_URL</label><input class="form-control" placeholder="https://tfs.rjf.com/tfs" disabled></div>
+        <div class="form-group"><label>TFS_PAT</label><input class="form-control" type="password" value="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" disabled></div>
+        <div class="form-group"><label>TFS_PROJECT</label><input class="form-control" placeholder="CDSIntegration,Lighthouse (comma-separated)" disabled></div>
+        <div class="form-group"><label>TFS_COLLECTION</label><input class="form-control" value="RJ_Git_Collection" disabled></div>
+        <p class="text-muted" style="font-size:12px">Edit <code>db-testing-tool/.env</code> and restart the app to apply changes.</p>
+        </div>
+    </div>
+</div>
+
+    <div class="card mt-16">
+    <div class="card-header ds-sect-hdr" onclick="toggleDsSection('sett-test-body','sett-test-toggle')">
+        <h2 style="margin:0">Test Settings</h2>
+        <button class="ds-sect-toggle" id="sett-test-toggle" type="button">&#9660;</button>
+    </div>
+    <div id="sett-test-body" class="ds-sect-body">
+    <p class="text-muted mb-16">Configure control-table generation in the <code>.env</code> file.</p>
+    <div class="form-group"><label>CONTROL_TABLE_SCHEMA</label><input class="form-control" placeholder="ikorostelev" disabled></div>
+    <p class="text-muted" style="font-size:12px">Schema used when generating control-table INSERT scripts and per-attribute validation tests. Default: <code>ikorostelev</code>.</p>
+    <p class="text-muted" style="font-size:12px">Edit <code>db-testing-tool/.env</code> and restart the app to apply changes.</p>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header ds-sect-hdr" onclick="toggleDsSection('sett-env-body','sett-env-toggle')">
+        <h2 style="margin:0">Environment</h2>
+        <button class="ds-sect-toggle" id="sett-env-toggle" type="button">&#9660;</button>
+    </div>
+    <div id="sett-env-body" class="ds-sect-body">
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+            <tbody>
+                <tr><td>App Version</td><td>1.0.0</td></tr>
+                <tr><td>Database</td><td>SQLite (local)</td></tr>
+                <tr><td>Primary Connectors</td><td>Oracle (oracledb), Redshift (psycopg2/redshift-connector)</td></tr>
+                <tr><td>Optional Connectors</td><td>SQL Server (pyodbc)</td></tr>
+                <tr><td>AI Engine</td><td>GitHub Copilot Chat API</td></tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header ds-sect-hdr" onclick="toggleDsSection('sett-sqleditor-body','sett-sqleditor-toggle')">
+        <h2 style="margin:0">SQL Editor Appearance</h2>
+        <button class="ds-sect-toggle" id="sett-sqleditor-toggle" type="button">&#9660;</button>
+    </div>
+    <div id="sett-sqleditor-body" class="ds-sect-body">
+    <p class="text-muted mb-16" style="font-size:12px">Applies to SQL terminals/editors across all tabs in this browser.</p>
+    <div class="grid grid-2" style="gap:12px">
+        <div class="form-group" style="margin:0">
+            <label>SQL Editor Theme</label>
+            <select class="form-control" id="sql-editor-theme-select">
+                <option value="dark">Black</option>
+                <option value="light">White</option>
+            </select>
+        </div>
+    </div>
+    <div class="flex gap-8 mt-16">
+        <button class="btn btn-primary" onclick="saveSqlEditorThemeSetting()">Save SQL Theme</button>
+    </div>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header ds-sect-hdr" onclick="toggleDsSection('sett-envtpl-body','sett-envtpl-toggle')">
+        <h2 style="margin:0">.env File Template</h2>
+        <button class="ds-sect-toggle" id="sett-envtpl-toggle" type="button">&#9660;</button>
+    </div>
+    <div id="sett-envtpl-body" class="ds-sect-body">
+    <pre class="code-block">
+# ── AI (GitHub Copilot) ─────────────────────
+AI_PROVIDER=githubcopilot
+GITHUB_OAUTH_CLIENT_ID=your-github-oauth-client-id
+GITHUB_OAUTH_SCOPE=read:user copilot
+GITHUB_VERIFY_SSL=true
+GITHUB_CA_BUNDLE=C:\path\to\corp-root-ca.pem
+COPILOT_AUTH_MODE=automatic
+
+# ── Test Settings ───────────────────────────
+CONTROL_TABLE_SCHEMA=ikorostelev
+
+# ── TFS / Azure DevOps ─────────────────────
+TFS_BASE_URL=https://tfs.rjf.com/tfs
+TFS_PAT=your-personal-access-token
+TFS_PROJECT=CDSIntegration,Lighthouse
+TFS_COLLECTION=RJ_Git_Collection
+    </pre>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+            <h2 style="margin:0">Credential Profiles</h2>
+            <button class="ds-sect-toggle" id="sett-cred-toggle" type="button" onclick="event.stopPropagation();toggleDsSection('sett-cred-body','sett-cred-toggle')">&#9660;</button>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openCredentialModal()">+ Add Profile</button>
+    </div>
+    <div id="sett-cred-body" class="ds-sect-body">
+    <p class="text-muted mb-16" style="font-size:12px">Store named credential sets on the server (passwords encrypted with AES-128). Use the <strong>Load</strong> button in the Data Sources page to pre-fill a connection form.</p>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>#</th><th>Name</th><th>Type</th><th>Username</th><th>Host Hint</th><th>Password</th><th>Notes</th><th>Actions</th></tr></thead>
+            <tbody id="cred-profiles-tbody"><tr><td colspan="8" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
+<!-- Credential Local Defaults (non-secret) -->
+<div class="card mt-16">
+    <div class="card-header ds-sect-hdr" onclick="toggleDsSection('sett-localdef-body','sett-localdef-toggle')">
+        <h2 style="margin:0">Local UI Defaults</h2>
+        <button class="ds-sect-toggle" id="sett-localdef-toggle" type="button">&#9660;</button>
+    </div>
+    <div id="sett-localdef-body" class="ds-sect-body">
+    <p class="text-muted mb-16" style="font-size:12px">Non-secret defaults stored in this browser only. No passwords here.</p>
+    <div class="grid grid-2" style="gap:12px">
+        <div class="form-group" style="margin:0">
+            <label>Default Oracle Username</label>
+            <input class="form-control" id="ui-default-oracle-user" placeholder="e.g. CDS_STG_OWNER">
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Default Redshift Username</label>
+            <input class="form-control" id="ui-default-redshift-user" placeholder="e.g. ikorostelev">
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Preferred TFS Project</label>
+            <input class="form-control" id="ui-default-tfs-project" placeholder="e.g. Lighthouse">
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Default Control Schema</label>
+            <input class="form-control" id="ui-default-control-schema" placeholder="e.g. ikorostelev">
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Default SQL Row Limit</label>
+            <input class="form-control" id="ui-default-sql-row-limit" type="number" min="1" max="1000" placeholder="50">
+        </div>
+    </div>
+    <div class="flex gap-8 mt-16">
+        <button class="btn btn-primary" onclick="saveUiCredentialProfile()">Save Defaults</button>
+        <button class="btn btn-outline" onclick="clearUiCredentialProfile()">Clear</button>
+    </div>
+    </div>
+</div>
+
+<!-- Add/Edit Credential Modal -->
+<div class="modal-overlay" id="modal-cred">
+    <div class="modal" style="max-width:520px">
+        <div class="modal-header"><h2 id="modal-cred-title">Add Credential Profile</h2><button class="modal-close" onclick="closeModal('modal-cred')">&times;</button></div>
+        <input type="hidden" id="cred-edit-id">
+        <div class="grid grid-2" style="gap:12px">
+            <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label>Profile Name <span class="text-danger">*</span></label>
+                <input class="form-control" id="cred-name" placeholder="e.g. CDSQA Oracle Admin">
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>DB Type</label>
+                <select class="form-control" id="cred-db-type">
+                    <option value="any">Any / Generic</option>
+                    <option value="oracle">Oracle</option>
+                    <option value="redshift">Redshift</option>
+                    <option value="sqlserver">SQL Server</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>Username</label>
+                <input class="form-control" id="cred-username" placeholder="e.g. CDS_STG_OWNER" autocomplete="username">
+            </div>
+            <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label>Password</label>
+                <input type="password" class="form-control" id="cred-password" placeholder="Leave blank to keep existing" autocomplete="new-password">
+                <p class="text-muted" style="font-size:11px;margin-top:4px">Stored encrypted on server. Leave blank when editing to keep existing password.</p>
+            </div>
+            <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label>Host / DSN Hint <span class="text-muted">(optional)</span></label>
+                <input class="form-control" id="cred-host-hint" placeholder="e.g. cdsqa-oracle.example.com or (DESCRIPTION=...)">
+            </div>
+            <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label>Notes</label>
+                <textarea class="form-control" id="cred-notes" rows="2" placeholder="e.g. CDSQA read-only access"></textarea>
+            </div>
+        </div>
+        <div class="flex gap-8 mt-16">
+            <button class="btn btn-primary" onclick="saveCredentialProfile()">Save</button>
+            <button class="btn btn-outline" onclick="closeModal('modal-cred')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add / Edit Data Source Modal -->
+<div class="modal-overlay" id="modal-add">
+    <div class="modal">
+        <div class="modal-header"><h2 id="modal-add-title">Add Data Source</h2><button class="modal-close" onclick="resetDatasourceForm(); closeModal('modal-add')">&times;</button></div>
+        <form id="form-add" onsubmit="return addDs(event)">
+            <input type="hidden" id="ds-edit-id" value="">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:8px;border-bottom:1px solid var(--border)">
+                <label style="font-size:12px;color:var(--text-muted);white-space:nowrap">&#128274; Load profile:</label>
+                <select class="form-control" id="ds-cred-profile-select" style="flex:1;font-size:12px;padding:4px 8px">
+                    <option value="">— select a saved credential profile —</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" onclick="applyCredentialProfileToForm()">Apply</button>
+            </div>
+            <div class="form-group"><label>Name</label><input class="form-control" id="ds-name" required></div>
+            <div class="form-group">
+                <label>Type</label>
+                <select class="form-control" id="ds-type" required>
+                    <option value="oracle">Oracle</option>
+                    <option value="redshift">Redshift</option>
+                    <option value="sqlserver">SQL Server (optional)</option>
+                </select>
+            </div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Host</label><input class="form-control" id="ds-host" required placeholder="hostname or IP"></div>
+                <div class="form-group"><label>Port</label><input class="form-control" id="ds-port" type="number" placeholder="auto"></div>
+            </div>
+            <div class="form-group"><label>Database / Service Name</label><input class="form-control" id="ds-db" placeholder="ORCL, mydb, etc."></div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Username</label><input class="form-control" id="ds-user"></div>
+                <div class="form-group"><label>Password</label><input class="form-control" id="ds-pass" type="password"></div>
+            </div>
+            <div class="form-group">
+                <label>Extra Params (JSON)</label>
+                <textarea class="form-control" id="ds-extra" rows="4" placeholder='{"ssl": true}'></textarea>
+                <p class="text-muted" style="font-size:12px;margin-top:6px">
+                    Redshift SSO example: <code>{"auth_mode":"sso","credentials_provider":"BrowserSamlCredentialsProvider","login_url":"https://...","region":"us-east-1","cluster_identifier":"db1-lighthouse"}</code>
+                </p>
+            </div>
+            <div class="flex gap-8 mt-16">
+                <button type="submit" class="btn btn-primary" id="ds-save-btn">Save</button>
+                <button type="button" class="btn btn-outline" onclick="resetDatasourceForm(); closeModal('modal-add')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Redshift SSO Connection Modal -->
+<div class="modal-overlay" id="modal-rs-sso">
+    <div class="modal" style="max-width:660px">
+        <div class="modal-header">
+            <h2>&#128994; Amazon Redshift &#8211; IAM / SSO Connection</h2>
+            <button class="modal-close" onclick="closeModal('modal-rs-sso')">&times;</button>
+        </div>
+        <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:18px">
+            <button id="rs-tab-main" onclick="rsTab('main')" style="padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:4px 4px 0 0;cursor:pointer;font-size:13px;font-weight:600">Main</button>
+            <button id="rs-tab-drv" onclick="rsTab('drv')" style="padding:8px 20px;background:var(--bg-dark);color:var(--text-muted);border:none;border-radius:4px 4px 0 0;cursor:pointer;font-size:13px">SSO / Driver Properties</button>
+        </div>
+        <div id="rs-panel-main">
+            <div style="background:var(--bg-dark);padding:10px 14px;border-radius:6px;margin-bottom:14px;border:1px solid var(--border)">
+                <span style="font-size:12px;color:var(--text-muted);margin-right:10px">Quick-fill environment:</span>
+                <button class="btn btn-outline btn-sm" onclick="rsFill('dev')">Dev</button>
+                <button class="btn btn-outline btn-sm" onclick="rsFill('qa')" style="margin-left:6px">QA</button>
+                <button class="btn btn-outline btn-sm" onclick="rsFill('prod')" style="margin-left:6px">Prod</button>
+            </div>
+            <div class="form-group"><label>Connection Name</label><input class="form-control" id="rs-name" placeholder="Lighthouse Dev (Redshift SSO)"></div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Host</label><input class="form-control" id="rs-host" placeholder="db1.lighthouse.redshift.dev.aws.rjf.com"></div>
+                <div class="form-group"><label>Port</label><input class="form-control" id="rs-port" type="number" value="5439"></div>
+            </div>
+            <div class="form-group"><label>Database</label><input class="form-control" id="rs-db" placeholder="ssdsdv"></div>
+            <div class="form-group"><label>Authentication</label>
+                <select class="form-control" id="rs-auth-type" onchange="rsToggleAuth()">
+                    <option value="sso">IAM / SSO (Browser SAML)</option>
+                    <option value="password">Username / Password</option>
+                </select>
+            </div>
+            <div id="rs-pw-fields" style="display:none">
+                <div class="grid grid-2">
+                    <div class="form-group"><label>Username</label><input class="form-control" id="rs-user"></div>
+                    <div class="form-group"><label>Password</label><input class="form-control" id="rs-pass" type="password"></div>
+                </div>
+            </div>
+        </div>
+        <div id="rs-panel-drv" style="display:none">
+            <div style="background:var(--bg-dark);padding:10px 14px;border-radius:6px;margin-bottom:14px;border:1px solid var(--border);font-size:12px;line-height:1.7">
+                The <strong>login_url</strong> below is the same property you add in DBeaver&#8217;s <em>Driver Properties</em> tab.
+            </div>
+            <div class="form-group"><label>Credentials Provider</label>
+                <input class="form-control" value="BrowserSamlCredentialsProvider" readonly style="opacity:0.7;cursor:default"></div>
+            <div class="form-group">
+                <label>login_url <span class="text-muted" style="font-size:12px">(AWS Access Portal)</span></label>
+                <input class="form-control" id="rs-login-url" placeholder="https://d-9a672bc7ce.awsapps.com/start/#/saml/default/...">
+            </div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Region</label><input class="form-control" id="rs-region" value="us-east-2"></div>
+                <div class="form-group"><label>Cluster Identifier <span class="text-muted">(optional)</span></label><input class="form-control" id="rs-cluster" placeholder="db1-lighthouse"></div>
+            </div>
+            <div class="form-group">
+                <label>Workgroup Name <span class="text-muted" style="font-size:12px">(Serverless with custom domain)</span></label>
+                <input class="form-control" id="rs-workgroup" placeholder="e.g. lighthouse-dev">
+            </div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>IdP Response Timeout (s)</label><input class="form-control" id="rs-idp-timeout" type="number" value="60"></div>
+                <div class="form-group" style="display:flex;align-items:center;gap:10px;padding-top:22px">
+                    <input type="checkbox" id="rs-serverless" checked style="width:16px;height:16px">
+                    <label for="rs-serverless" style="margin:0">isServerless</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>TLS CA Bundle Path <span class="text-muted" style="font-size:12px">(optional)</span></label>
+                <input class="form-control" id="rs-ca-bundle" placeholder="C:\\certs\\corp-root-ca.pem">
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:10px">
+                <input type="checkbox" id="rs-ssl-insecure" style="width:16px;height:16px">
+                <label for="rs-ssl-insecure" style="margin:0">Skip TLS certificate verification</label>
+            </div>
+        </div>
+        <div class="flex gap-8 mt-16" style="border-top:1px solid var(--border);padding-top:16px">
+            <button class="btn btn-primary" onclick="rsSave()">Save Connection</button>
+            <button class="btn btn-warning" onclick="rsTestAndSave()">Test Connection</button>
+            <button class="btn btn-outline" onclick="closeModal('modal-rs-sso')">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const UI_CREDENTIAL_PROFILE_KEY = 'settings.ui.credentials.profile.v1';
+const UI_SQL_DEFAULT_ROW_LIMIT_KEY = 'ui.sql.defaultRowLimit.v1';
+
+function loadSqlEditorThemeSetting() {
+    const sel = document.getElementById('sql-editor-theme-select');
+    if (!sel) return;
+    const theme = (typeof window.getSqlEditorThemePreference === 'function')
+        ? window.getSqlEditorThemePreference()
+        : (localStorage.getItem('ui.sql.editor.theme.v1') || 'dark');
+    sel.value = theme === 'light' ? 'light' : 'dark';
+}
+
+function saveSqlEditorThemeSetting() {
+    const sel = document.getElementById('sql-editor-theme-select');
+    const theme = sel?.value === 'light' ? 'light' : 'dark';
+    if (typeof window.setSqlEditorTheme === 'function') {
+        window.setSqlEditorTheme(theme);
+    } else {
+        localStorage.setItem('ui.sql.editor.theme.v1', theme);
+    }
+    showToast(`SQL editor theme set to ${theme === 'light' ? 'White' : 'Black'}`, 'success');
+}
+
+function loadUiCredentialProfile() {
+    let state = {};
+    try { state = JSON.parse(localStorage.getItem(UI_CREDENTIAL_PROFILE_KEY) || '{}'); } catch (_) { state = {}; }
+    document.getElementById('ui-default-oracle-user').value = state.oracle_user || '';
+    document.getElementById('ui-default-redshift-user').value = state.redshift_user || '';
+    document.getElementById('ui-default-tfs-project').value = state.tfs_project || '';
+    document.getElementById('ui-default-control-schema').value = state.control_schema || '';
+    const rowLimitEl = document.getElementById('ui-default-sql-row-limit');
+    if (rowLimitEl) {
+        const rawLimit = Number(localStorage.getItem(UI_SQL_DEFAULT_ROW_LIMIT_KEY) || 50);
+        rowLimitEl.value = Number.isFinite(rawLimit) ? Math.max(1, Math.min(1000, Math.floor(rawLimit))) : 50;
+    }
+}
+
+function saveUiCredentialProfile() {
+    const state = {
+        oracle_user: (document.getElementById('ui-default-oracle-user').value || '').trim(),
+        redshift_user: (document.getElementById('ui-default-redshift-user').value || '').trim(),
+        tfs_project: (document.getElementById('ui-default-tfs-project').value || '').trim(),
+        control_schema: (document.getElementById('ui-default-control-schema').value || '').trim(),
+    };
+    localStorage.setItem(UI_CREDENTIAL_PROFILE_KEY, JSON.stringify(state));
+    const rawLimit = Number(document.getElementById('ui-default-sql-row-limit')?.value || 50);
+    const safeLimit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(1000, Math.floor(rawLimit))) : 50;
+    localStorage.setItem(UI_SQL_DEFAULT_ROW_LIMIT_KEY, String(safeLimit));
+    showToast('Saved local defaults', 'success');
+}
+
+function clearUiCredentialProfile() {
+    localStorage.removeItem(UI_CREDENTIAL_PROFILE_KEY);
+    localStorage.removeItem(UI_SQL_DEFAULT_ROW_LIMIT_KEY);
+    loadUiCredentialProfile();
+    showToast('Cleared local defaults', 'warning');
+}
+
+// ── Backend Credential Profiles ──────────────────────────────────────────────
+
+async function credentialApiRequest(method, url, body = null) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`${res.status}: ${text}`);
+    }
+    return res.json();
+}
+
+const CredentialApi = {
+    list: () => (typeof API?.listCredentials === 'function'
+        ? API.listCredentials()
+        : credentialApiRequest('GET', '/api/credentials')),
+    get: (id) => (typeof API?.getCredential === 'function'
+        ? API.getCredential(id)
+        : credentialApiRequest('GET', `/api/credentials/${id}`)),
+    create: (body) => (typeof API?.createCredential === 'function'
+        ? API.createCredential(body)
+        : credentialApiRequest('POST', '/api/credentials', body)),
+    update: (id, body) => (typeof API?.updateCredential === 'function'
+        ? API.updateCredential(id, body)
+        : credentialApiRequest('PUT', `/api/credentials/${id}`, body)),
+    delete: (id) => (typeof API?.deleteCredential === 'function'
+        ? API.deleteCredential(id)
+        : credentialApiRequest('DELETE', `/api/credentials/${id}`)),
+};
+
+async function loadCredentialProfiles() {
+    const tbody = document.getElementById('cred-profiles-tbody');
+    try {
+        const profiles = await CredentialApi.list();
+        if (!profiles || !profiles.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No credential profiles saved yet.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = profiles.map((p, i) => `
+            <tr>
+                <td class="text-muted">${i + 1}</td>
+                <td><strong>${escapeHtml(p.name)}</strong></td>
+                <td><span class="badge badge-info" style="font-size:10px">${escapeHtml(p.db_type || 'any')}</span></td>
+                <td>${escapeHtml(p.username || '—')}</td>
+                <td class="text-muted" style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis">${escapeHtml(p.host_hint || '—')}</td>
+                <td>${p.has_password ? '<span class="badge badge-success" style="font-size:10px">Set &#128274;</span>' : '<span class="text-muted">—</span>'}</td>
+                <td class="text-muted" style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis">${escapeHtml(p.notes || '')}</td>
+                <td>
+                    <div class="flex gap-8">
+                        <button class="btn btn-outline btn-sm" onclick="editCredentialProfile(${p.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCredentialProfile(${p.id}, '${escapeHtml(p.name).replace(/'/g, "\\'")}')">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-danger">${escapeHtml(e.message || String(e))}</td></tr>`;
+    }
+}
+
+function openCredentialModal(id = null) {
+    document.getElementById('cred-edit-id').value = id || '';
+    document.getElementById('cred-name').value = '';
+    document.getElementById('cred-db-type').value = 'any';
+    document.getElementById('cred-username').value = '';
+    document.getElementById('cred-password').value = '';
+    document.getElementById('cred-host-hint').value = '';
+    document.getElementById('cred-notes').value = '';
+    document.getElementById('modal-cred-title').textContent = id ? 'Edit Credential Profile' : 'Add Credential Profile';
+    openModal('modal-cred');
+}
+
+async function editCredentialProfile(id) {
+    try {
+        const p = await CredentialApi.get(id);
+        document.getElementById('cred-edit-id').value = id;
+        document.getElementById('cred-name').value = p.name || '';
+        document.getElementById('cred-db-type').value = p.db_type || 'any';
+        document.getElementById('cred-username').value = p.username || '';
+        document.getElementById('cred-password').value = ''; // never pre-fill password
+        document.getElementById('cred-host-hint').value = p.host_hint || '';
+        document.getElementById('cred-notes').value = p.notes || '';
+        document.getElementById('modal-cred-title').textContent = 'Edit Credential Profile';
+        openModal('modal-cred');
+    } catch (e) {
+        showToast('Failed to load profile: ' + e.message, 'error');
+    }
+}
+
+async function saveCredentialProfile() {
+    const id = document.getElementById('cred-edit-id').value;
+    const name = document.getElementById('cred-name').value.trim();
+    if (!name) return showToast('Profile name is required', 'error');
+    const body = {
+        name,
+        db_type: document.getElementById('cred-db-type').value,
+        username: document.getElementById('cred-username').value.trim() || null,
+        host_hint: document.getElementById('cred-host-hint').value.trim() || null,
+        notes: document.getElementById('cred-notes').value.trim() || null,
+    };
+    const pwd = document.getElementById('cred-password').value;
+    if (pwd) body.password = pwd;
+    try {
+        if (id) {
+            await CredentialApi.update(parseInt(id), body);
+            showToast('Profile updated', 'success');
+        } else {
+            await CredentialApi.create(body);
+            showToast('Profile saved', 'success');
+        }
+        closeModal('modal-cred');
+        await loadCredentialProfiles();
+    } catch (e) {
+        showToast(e.message || 'Save failed', 'error');
+    }
+}
+
+async function deleteCredentialProfile(id, name) {
+    if (!confirm(`Delete credential profile "${name}"?`)) return;
+    try {
+        await CredentialApi.delete(id);
+        showToast('Profile deleted', 'warning');
+        await loadCredentialProfiles();
+    } catch (e) {
+        showToast(e.message || 'Delete failed', 'error');
+    }
+}
+
+loadSqlEditorThemeSetting();
+
+// ── Data Source Management ─────────────────────────────────────────────────
+function toggleDsSection(bodyId, toggleId) {
+    const body = document.getElementById(bodyId);
+    if (!body) return;
+    const collapsed = body.classList.toggle('ds-sect-collapsed');
+    const toggle = document.getElementById(toggleId);
+    if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
+}
+
+async function loadDs() {
+    const items = await API.getDatasources();
+    const tbody = document.getElementById('ds-tbody');
+    if (tbody) {
+        tbody.innerHTML = items.map((s, idx) => `
+            <tr>
+                <td>${idx + 1}</td>
+                <td><strong>${escapeHtml(s.name)}</strong></td>
+                <td><span class="badge badge-info">${s.db_type}</span></td>
+                <td>${escapeHtml(s.host)}</td>
+                <td>${s.port || 'auto'}</td>
+                <td>${escapeHtml(s.database_name || '-')}</td>
+                <td>${statusBadge(s.status)}</td>
+                <td class="flex gap-8">
+                    <button class="btn btn-outline btn-sm" onclick="testDs(${s.id})">Test</button>
+                    <button class="btn btn-info btn-sm" onclick="editDs(${s.id})">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteDs(${s.id})">Delete</button>
+                </td>
+            </tr>
+        `).join('') || '<tr><td colspan="8" class="empty-state">No data sources yet. Click &ldquo;+ Add Data Source&rdquo; to begin.</td></tr>';
+    }
+    return items;
+}
+
+async function addDs(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            name: document.getElementById('ds-name').value,
+            db_type: document.getElementById('ds-type').value,
+            host: document.getElementById('ds-host').value,
+            port: parseInt(document.getElementById('ds-port').value) || null,
+            database_name: document.getElementById('ds-db').value || null,
+            username: document.getElementById('ds-user').value || null,
+            password: document.getElementById('ds-pass').value || null,
+            extra_params: document.getElementById('ds-extra').value || null,
+        };
+        const editId = parseInt(document.getElementById('ds-edit-id').value || '0', 10);
+        if (editId) {
+            await API.updateDatasource(editId, payload);
+            showToast('Data source updated', 'success');
+        } else {
+            await API.createDatasource(payload);
+            showToast('Data source created', 'success');
+        }
+        closeModal('modal-add');
+        resetDatasourceForm();
+        loadDs();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+function resetDatasourceForm() {
+    document.getElementById('form-add')?.reset();
+    document.getElementById('ds-edit-id').value = '';
+    document.getElementById('modal-add-title').textContent = 'Add Data Source';
+    document.getElementById('ds-save-btn').textContent = 'Save';
+}
+
+async function _loadCredentialProfilesIntoSelect() {
+    const sel = document.getElementById('ds-cred-profile-select');
+    if (!sel) return;
+    try {
+        const profiles = await API.listCredentials();
+        sel.innerHTML = '<option value="">— select a saved credential profile —</option>' +
+            (profiles || []).map(p => `<option value="${p.id}">[${escapeHtml(p.db_type || 'any')}] ${escapeHtml(p.name)}</option>`).join('');
+    } catch (_) {
+        sel.innerHTML = '<option value="">— credential profiles unavailable —</option>';
+    }
+}
+
+async function applyCredentialProfileToForm() {
+    const sel = document.getElementById('ds-cred-profile-select');
+    const id = parseInt(sel?.value || '0');
+    if (!id) return showToast('Select a credential profile first', 'warning');
+    try {
+        const cred = await API.injectCredential(id);
+        if (cred.username) document.getElementById('ds-user').value = cred.username;
+        if (cred.password) document.getElementById('ds-pass').value = cred.password;
+        if (cred.host_hint) { const h = document.getElementById('ds-host'); if (h && !h.value) h.value = cred.host_hint; }
+        if (cred.db_type && cred.db_type !== 'any') {
+            const t = document.getElementById('ds-type');
+            if (t && Array.from(t.options).some(o => o.value === cred.db_type)) t.value = cred.db_type;
+        }
+        showToast(`Loaded profile: ${cred.name}`, 'success');
+    } catch (e) { showToast('Failed to load profile: ' + e.message, 'error'); }
+}
+
+function openAddDatasourceModal() {
+    resetDatasourceForm();
+    _loadCredentialProfilesIntoSelect();
+    openModal('modal-add');
+}
+
+async function editDs(id) {
+    try {
+        const ds = await API.getDatasource(id);
+        document.getElementById('ds-edit-id').value = String(ds.id);
+        document.getElementById('ds-name').value = ds.name || '';
+        document.getElementById('ds-type').value = ds.db_type || 'oracle';
+        document.getElementById('ds-host').value = ds.host || '';
+        document.getElementById('ds-port').value = ds.port || '';
+        document.getElementById('ds-db').value = ds.database_name || '';
+        document.getElementById('ds-user').value = ds.username || '';
+        document.getElementById('ds-pass').value = ds.password || '';
+        document.getElementById('ds-extra').value = ds.extra_params || '';
+        document.getElementById('modal-add-title').textContent = 'Edit Data Source';
+        document.getElementById('ds-save-btn').textContent = 'Update';
+        _loadCredentialProfilesIntoSelect();
+        openModal('modal-add');
+    } catch (e) { showToast('Failed to load connection details: ' + e.message, 'error'); }
+}
+
+async function testDs(id) {
+    showToast('Testing connection...', 'info');
+    try {
+        const res = await API.testConnection(id);
+        showToast(res.success ? `Connected! ${res.version || ''}` : `Failed: ${res.message}`, res.success ? 'success' : 'error');
+        loadDs();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function deleteDs(id) {
+    if (!confirm('Delete this data source?')) return;
+    try {
+        await API.deleteDatasource(id);
+        showToast('Deleted', 'success');
+        loadDs();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function copyDatasourceEnvBackup() {
+    try {
+        const res = await API.exportDatasourcesEnv();
+        const text = res.env_line || '';
+        if (!text) { showToast('No data sources to export', 'warning'); return; }
+        await navigator.clipboard.writeText(text);
+        showToast(`Copied DATASOURCES_JSON backup (${res.count || 0} connection(s))`, 'success');
+    } catch (e) { showToast('Failed to copy backup: ' + e.message, 'error'); }
+}
+
+// ── Redshift SSO ───────────────────────────────────────────────────────────
+const RS_PRESETS = {
+    dev: { name: 'Lighthouse Dev (Redshift SSO)', host: 'db1.lighthouse.redshift.dev.aws.rjf.com', db: 'ssdsdv', login_url: 'https://d-9a672bc7ce.awsapps.com/start/#/saml/default/rjf-data-shared-dev/ins-1cd5e5bc5fe4b80b', cluster: 'rjf-use2-lighthouse-d-tf-redshift', region: 'us-east-2', serverless: false },
+    qa:  { name: 'Lighthouse QA (Redshift SSO)',  host: 'db1.lighthouse.redshift.qa.aws.rjf.com',  db: 'lighthouse', login_url: 'https://d-9a672bc7ce.awsapps.com/start/#/saml/default/rjf-data-shared-qa/ins-ae9e9fa11b18ca63',  cluster: 'rjf-use2-lighthouse-q-tf-redshift', region: 'us-east-2', serverless: false },
+    prod: { name: 'Lighthouse Prod (Redshift SSO)', host: 'db1.lighthouse.redshift.aws.rjf.com', db: 'ssdspd', login_url: '', cluster: 'rjf-use2-lighthouse-p-tf-redshift', region: 'us-east-2', serverless: false },
+};
+
+function rsTab(tab) {
+    ['main', 'drv'].forEach(t => {
+        const btn = document.getElementById(`rs-tab-${t}`);
+        const panel = document.getElementById(`rs-panel-${t}`);
+        const active = t === tab;
+        btn.style.background = active ? 'var(--accent)' : 'var(--bg-dark)';
+        btn.style.color = active ? '#fff' : 'var(--text-muted)';
+        btn.style.fontWeight = active ? '600' : 'normal';
+        panel.style.display = active ? 'block' : 'none';
+    });
+}
+
+function rsFill(env) {
+    const p = RS_PRESETS[env];
+    if (!p) return;
+    document.getElementById('rs-name').value = p.name;
+    document.getElementById('rs-host').value = p.host;
+    document.getElementById('rs-db').value = p.db;
+    document.getElementById('rs-port').value = '5439';
+    document.getElementById('rs-login-url').value = p.login_url;
+    document.getElementById('rs-workgroup').value = '';
+    document.getElementById('rs-cluster').value = p.cluster || '';
+    document.getElementById('rs-region').value = p.region || 'us-east-2';
+    document.getElementById('rs-serverless').checked = !!p.serverless;
+    document.getElementById('rs-auth-type').value = 'sso';
+    rsToggleAuth();
+    if (!p.login_url) { rsTab('drv'); showToast(`${env.toUpperCase()} settings filled – paste the login_url in the SSO tab`, 'warning'); }
+    else showToast(`${env.toUpperCase()} environment settings filled`, 'success');
+}
+
+function rsToggleAuth() {
+    const mode = document.getElementById('rs-auth-type').value;
+    document.getElementById('rs-pw-fields').style.display = mode === 'password' ? 'block' : 'none';
+}
+
+function rsGetPayload() {
+    const authMode = document.getElementById('rs-auth-type').value;
+    const extra = { auth_mode: authMode };
+    if (authMode === 'sso') {
+        extra.credentials_provider = 'BrowserSamlCredentialsProvider';
+        extra.login_url = document.getElementById('rs-login-url').value.trim();
+        extra.region = document.getElementById('rs-region').value.trim() || 'us-east-1';
+        extra.is_serverless = document.getElementById('rs-serverless').checked;
+        extra.ssl_insecure = document.getElementById('rs-ssl-insecure').checked;
+        const caBundle = document.getElementById('rs-ca-bundle').value.trim();
+        if (caBundle) extra.ca_bundle = caBundle;
+        const cluster = document.getElementById('rs-cluster').value.trim();
+        if (cluster) extra.cluster_identifier = cluster;
+        const workgroup = document.getElementById('rs-workgroup').value.trim();
+        if (workgroup) extra.serverless_work_group = workgroup;
+        const idpT = parseInt(document.getElementById('rs-idp-timeout').value || '60');
+        if (idpT) extra.idp_response_timeout = idpT;
+    }
+    return {
+        name: document.getElementById('rs-name').value.trim(),
+        db_type: 'redshift',
+        host: document.getElementById('rs-host').value.trim(),
+        port: parseInt(document.getElementById('rs-port').value) || 5439,
+        database_name: document.getElementById('rs-db').value.trim() || null,
+        username: document.getElementById('rs-user').value || null,
+        password: document.getElementById('rs-pass').value || null,
+        extra_params: JSON.stringify(extra),
+    };
+}
+
+async function rsSave() {
+    const payload = rsGetPayload();
+    if (!payload.name) return showToast('Connection name is required', 'error');
+    if (!payload.host) return showToast('Host is required', 'error');
+    try {
+        await API.createDatasource(payload);
+        closeModal('modal-rs-sso');
+        showToast('Redshift SSO connection saved', 'success');
+        loadDs();
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function rsTestAndSave() {
+    const payload = rsGetPayload();
+    if (!payload.host) return showToast('Host is required', 'error');
+    if (!payload.name) payload.name = 'rs-test-' + Date.now();
+    let savedId = null;
+    try {
+        showToast('Saving and testing... (browser auth window may open for SSO)', 'info');
+        const r = await API.createDatasource(payload);
+        savedId = r.id;
+        const t = await API.testConnection(savedId);
+        if (t.success) { showToast('Connected! ' + (t.version || ''), 'success'); closeModal('modal-rs-sso'); }
+        else { showToast('Failed: ' + t.message, 'error'); if (savedId) await API.deleteDatasource(savedId).catch(() => {}); }
+    } catch(e) {
+        showToast(e.message, 'error');
+        if (savedId) await API.deleteDatasource(savedId).catch(() => {});
+    }
+    loadDs();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadUiCredentialProfile();
+    loadCredentialProfiles();
+    loadDs();
+});
+</script>
+{% endblock %}

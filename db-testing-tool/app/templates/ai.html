@@ -1,0 +1,1286 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant – DB Testing Tool{% endblock %}
+{% block page_title %}AI Assistant{% endblock %}
+
+{% block content %}
+<div class="card" id="copilot-bar" style="margin-bottom:16px;padding:12px 16px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <strong style="font-size:14px">&#9733; GitHub Copilot</strong>
+        <span id="copilot-status-badge" class="badge badge-muted">Checking...</span>
+        <span id="copilot-model-label" class="text-muted" style="font-size:12px;display:none"></span>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);margin-right:8px">
+                Auth Mode
+                <select id="copilot-auth-mode" class="form-control" style="width:120px;padding:4px 8px;font-size:12px" onchange="setCopilotAuthMode()">
+                    <option value="automatic">Automatic</option>
+                    <option value="manual">Manual</option>
+                </select>
+            </label>
+            <button class="btn btn-primary btn-sm" onclick="startCopilotSignIn()" id="copilot-connect-btn">Connect with GitHub</button>
+            <button class="btn btn-warning btn-sm" onclick="pollCopilotSignIn()" id="copilot-poll-btn" style="display:none">I've Authorized – Check Status</button>
+            <button class="btn btn-outline btn-sm" onclick="disconnectCopilot()" id="copilot-disconnect-btn" style="display:none">Disconnect</button>
+        </div>
+    </div>
+    <div id="copilot-login-instructions" style="display:none;margin-top:12px;padding:12px;background:var(--bg-dark);border-radius:6px;border:1px solid var(--border);font-size:13px;line-height:1.9"></div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+            <h2>Analyze SQL / Extract Rules</h2>
+            <span class="badge badge-info" style="font-size:11px">&#10022; GitHub Copilot</span>
+        </div>
+        <p class="text-muted mb-16">Paste SQL/ETL code OR upload a mapping document. GitHub Copilot will extract mapping rules, identify transformations, and suggest tests.</p>
+        
+        <div style="background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px">
+            <h3 style="margin:0 0 10px;font-size:14px;color:var(--text)">Option 1: Upload Mapping Document</h3>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Upload CSV/Excel mapping file to extract rules and generate tests.</p>
+            <div class="form-group" style="margin-bottom:8px">
+                <label>Mapping File (.csv, .xlsx, .xls)</label>
+                <input type="file" class="form-control" id="ai-mapping-file" accept=".csv,.xlsx,.xls" onchange="onAiMappingFileSelected(event)">
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+                <label>Target Table (optional)</label>
+                <input class="form-control" id="ai-mapping-target" placeholder="e.g. SCHEMA.TABLE_NAME">
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>SQL/ODI Code (optional, for comparison)</label>
+                <textarea class="form-control" id="ai-mapping-sql" rows="4" placeholder="Paste SQL/ODI code here to validate mapping against code"></textarea>
+            </div>
+            <div class="flex gap-8" style="margin-top:10px">
+                <button class="btn btn-primary btn-sm" onclick="aiGenerateTestsFromFile()">Generate Test Cases from File</button>
+            </div>
+            <div id="ai-mapping-file-result" style="margin-top:10px"></div>
+        </div>
+        
+        <div style="border-top:1px solid var(--border);padding-top:12px">
+            <h3 style="margin:0 0 10px;font-size:14px;color:var(--text)">Option 2: Analyze SQL/ETL Code</h3>
+            <div class="form-group">
+                <label>SQL / ETL Code</label>
+                <textarea class="form-control" id="ai-sql" rows="8" placeholder="Paste INSERT INTO ... SELECT ... or ETL procedure here"></textarea>
+            </div>
+            <div class="flex gap-8">
+                <button class="btn btn-primary" onclick="analyzeSql()">Analyze SQL</button>
+                <button class="btn btn-warning" onclick="extractRules()">Extract Mapping Rules</button>
+            </div>
+            <div id="ai-result" class="empty-state" style="margin-top:10px">Results will appear here</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h2>Results</h2></div>
+        <div id="ai-result" class="empty-state">Results will appear here</div>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+        <h2>Copilot Chat</h2>
+        <span class="badge badge-info" style="font-size:11px">&#10022; GitHub Copilot</span>
+    </div>
+    <p class="text-muted mb-16">Chat with GitHub Copilot about SQL, ETL mapping rules, data quality tests, Oracle/Redshift, and TFS work items.</p>
+    <div id="chat-messages" style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;background:var(--bg-dark)">
+        <div class="text-muted" style="text-align:center;padding:40px 0" id="chat-empty">Start a conversation with Copilot...</div>
+    </div>
+    <div class="form-group" style="margin-bottom:8px">
+        <label>Attach Files (optional)</label>
+        <input type="file" class="form-control" id="chat-attachments" multiple onchange="handleChatAttachments(event)">
+        <div id="chat-attachments-list" class="text-muted" style="font-size:12px;margin-top:6px">No files attached</div>
+    </div>
+    <div style="display:flex;gap:8px">
+        <textarea class="form-control" id="chat-input" rows="2" placeholder="Ask Copilot anything... (Shift+Enter for newline, Enter to send)" style="flex:1;resize:vertical" onkeydown="chatKeyDown(event)"></textarea>
+        <div style="display:flex;flex-direction:column;gap:4px">
+            <button class="btn btn-primary" onclick="sendChat()" id="chat-send-btn">Send</button>
+            <button class="btn btn-outline btn-sm" onclick="clearChat()">Clear</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let chatHistory = [];
+let chatAttachments = [];
+let copilotConnected = false;
+let copilotDeviceCode = '';
+let copilotUserCode = '';
+let copilotAutoPollHandle = null;
+let importedMappingTests = [];
+let aiMappingGeneratedTests = [];
+const aiStateKey = 'ai.assistant.state.v1';
+
+function getSelectedAgentIds() {
+    const sel = document.getElementById('ai-agent-select');
+    if (!sel) return [];
+    return Array.from(sel.selectedOptions).map(o => parseInt(o.value)).filter(n => !Number.isNaN(n));
+}
+
+function getTaskHint(defaultHint = '') {
+    const value = (document.getElementById('ai-task-hint')?.value || '').trim();
+    return value || defaultHint;
+}
+
+function getCopilotAuthMode() {
+    return localStorage.getItem('copilot.authMode') || 'manual';
+}
+
+function setCopilotAuthMode() {
+    const mode = document.getElementById('copilot-auth-mode')?.value || 'automatic';
+    localStorage.setItem('copilot.authMode', mode);
+}
+
+function stopCopilotAutoPoll() {
+    if (copilotAutoPollHandle) {
+        clearInterval(copilotAutoPollHandle);
+        copilotAutoPollHandle = null;
+    }
+}
+
+async function loadAiRules() {
+    try {
+        const rules = await API.getMappings();
+        const sel = document.getElementById('ai-rule-select');
+        sel.innerHTML = '<option value="">-- Select --</option>' +
+            rules.map(r => `<option value='${JSON.stringify(r).replace(/'/g, "&#39;")}'>${escapeHtml(r.name)}</option>`).join('');
+    } catch(e) {}
+}
+
+async function loadAgentsForAi() {
+    const sel = document.getElementById('ai-agent-select');
+    if (!sel) {
+        restoreAiState();
+        return;
+    }
+    try {
+        const agents = await API.getAgents();
+        sel.innerHTML = agents
+            .filter(a => a.is_active)
+            .map(a => `<option value="${a.id}">${escapeHtml(a.name)} (${escapeHtml(a.role)})</option>`)
+            .join('');
+    } catch (e) {
+        console.warn('Failed to load agents', e);
+    } finally {
+        restoreAiState();
+    }
+}
+
+function saveAiState() {
+    const state = {
+        selectedAgentIds: getSelectedAgentIds(),
+        taskHint: document.getElementById('ai-task-hint')?.value || '',
+        aiSql: document.getElementById('ai-sql')?.value || '',
+        mapSqlMapping: document.getElementById('map-sql-mapping')?.value || '',
+        mapSqlSql: document.getElementById('map-sql-sql')?.value || '',
+        mapSqlSource: document.getElementById('map-sql-source')?.value || '',
+        mapSqlTarget: document.getElementById('map-sql-target')?.value || '',
+        aiMapTarget: document.getElementById('ai-map-target')?.value || '',
+        aiMapSql: document.getElementById('ai-map-sql')?.value || '',
+        aiMapSrcDs: document.getElementById('ai-map-src-ds')?.value || '',
+        aiMapTgtDs: document.getElementById('ai-map-tgt-ds')?.value || '',
+        aiMapImproveResult: document.getElementById('ai-map-improve-result')?.innerHTML || '',
+        importedMappingTests,
+        chatHistory: chatHistory || [],
+        chatAttachments: chatAttachments || [],
+    };
+    localStorage.setItem(aiStateKey, JSON.stringify(state));
+}
+
+function restoreAiState() {
+    const raw = localStorage.getItem(aiStateKey);
+    if (!raw) return;
+    try {
+        const state = JSON.parse(raw);
+        if (document.getElementById('ai-task-hint')) document.getElementById('ai-task-hint').value = state.taskHint || '';
+        if (document.getElementById('ai-sql')) document.getElementById('ai-sql').value = state.aiSql || '';
+        if (document.getElementById('map-sql-mapping')) document.getElementById('map-sql-mapping').value = state.mapSqlMapping || '';
+        if (document.getElementById('map-sql-sql')) document.getElementById('map-sql-sql').value = state.mapSqlSql || '';
+        if (document.getElementById('map-sql-source')) document.getElementById('map-sql-source').value = state.mapSqlSource || '';
+        if (document.getElementById('map-sql-target')) document.getElementById('map-sql-target').value = state.mapSqlTarget || '';
+        if (document.getElementById('ai-map-target')) document.getElementById('ai-map-target').value = state.aiMapTarget || '';
+        if (document.getElementById('ai-map-sql')) document.getElementById('ai-map-sql').value = state.aiMapSql || '';
+        if (document.getElementById('ai-map-src-ds') && state.aiMapSrcDs) document.getElementById('ai-map-src-ds').value = state.aiMapSrcDs;
+        if (document.getElementById('ai-map-tgt-ds') && state.aiMapTgtDs) document.getElementById('ai-map-tgt-ds').value = state.aiMapTgtDs;
+        if (Array.isArray(state.selectedAgentIds)) {
+            const sel = document.getElementById('ai-agent-select');
+            if (sel) {
+                Array.from(sel.options).forEach(opt => {
+                    opt.selected = state.selectedAgentIds.includes(parseInt(opt.value));
+                });
+            }
+        }
+        importedMappingTests = Array.isArray(state.importedMappingTests) ? state.importedMappingTests : [];
+        if (importedMappingTests.length) {
+            renderImportedMappingTestsResult('Restored generated tests from previous session.');
+            const improve = document.getElementById('ai-map-improve-result');
+            if (improve && state.aiMapImproveResult) improve.innerHTML = state.aiMapImproveResult;
+        }
+        // Restore chat history and attachments
+        if (Array.isArray(state.chatHistory) && state.chatHistory.length) {
+            chatHistory = state.chatHistory;
+            chatAttachments = Array.isArray(state.chatAttachments) ? state.chatAttachments : [];
+            const empty = document.getElementById('chat-empty');
+            if (empty) empty.style.display = 'none';
+            chatHistory.forEach(msg => {
+                if (msg.role === 'user') {
+                    appendChatBubble('user', msg.content);
+                } else if (msg.is_error) {
+                    appendChatBubble('assistant', `<span class="text-danger">${escapeHtml(msg.content)}</span>`, true);
+                } else {
+                    appendChatBubble('assistant', formatChatMessage(msg.content), true);
+                }
+            });
+            renderChatAttachmentsList();
+            scrollChatToBottom();
+        }
+    } catch (e) {
+        console.warn('Failed to restore AI state', e);
+    }
+}
+
+function bindAiStateAutosave() {
+    [
+        'ai-task-hint','ai-sql','map-sql-mapping','map-sql-sql','map-sql-source','map-sql-target',
+        'ai-map-target','ai-map-sql','ai-map-src-ds','ai-map-tgt-ds',
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', saveAiState);
+        el.addEventListener('change', saveAiState);
+    });
+}
+
+async function analyzeSql() {
+    const sql = document.getElementById('ai-sql').value;
+    if (!sql.trim()) return showToast('Paste SQL first', 'error');
+    if (!copilotConnected) return showToast('Connect GitHub Copilot first (see status bar above)', 'warning');
+    document.getElementById('ai-result').innerHTML = '<span class="spinner"></span> Analyzing with GitHub Copilot...';
+    try {
+        const res = await API.analyzeSql(sql, getSelectedAgentIds(), getTaskHint('analyze SQL and transformations'));
+        if (res.error) { document.getElementById('ai-result').innerHTML = `<span class="text-danger">${escapeHtml(res.error)}</span>`; return; }
+        document.getElementById('ai-result').innerHTML = `
+            <h3>Summary</h3><p>${escapeHtml(res.summary || '')}</p>
+            <h3 class="mt-16">Source Tables</h3><p>${(res.source_tables || []).map(escapeHtml).join(', ') || 'None detected'}</p>
+            <h3 class="mt-16">Target Tables</h3><p>${(res.target_tables || []).map(escapeHtml).join(', ') || 'None detected'}</p>
+            <h3 class="mt-16">Transformations</h3>
+            <ul>${(res.transformations || []).map(t => `<li>${escapeHtml(typeof t === 'string' ? t : JSON.stringify(t))}</li>`).join('')}</ul>
+            <h3 class="mt-16">Potential Issues</h3>
+            <ul>${(res.potential_issues || []).map(i => `<li class="text-warning">${escapeHtml(typeof i === 'string' ? i : JSON.stringify(i))}</li>`).join('')}</ul>
+            <h3 class="mt-16">Suggested Tests</h3>
+            <ul>${(res.test_suggestions || []).map(t => `<li>${escapeHtml(typeof t === 'string' ? t : JSON.stringify(t))}</li>`).join('')}</ul>
+        `;
+    } catch (e) {
+        document.getElementById('ai-result').innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+    }
+}
+
+async function extractRules() {
+    const sql = document.getElementById('ai-sql').value;
+    if (!sql.trim()) return showToast('Paste SQL first', 'error');
+    if (!copilotConnected) return showToast('Connect GitHub Copilot first (see status bar above)', 'warning');
+    document.getElementById('ai-result').innerHTML = '<span class="spinner"></span> Extracting rules with GitHub Copilot...';
+    try {
+        const res = await API.extractRules(sql, getSelectedAgentIds(), getTaskHint('extract mappings and transformation rules'));
+        if (res.error) { document.getElementById('ai-result').innerHTML = `<span class="text-danger">${escapeHtml(res.error)}</span>`; return; }
+        const rules = res.rules || [];
+        document.getElementById('ai-result').innerHTML = `
+            <h3>Extracted ${rules.length} Rule(s) (confidence: ${res.confidence || 'N/A'})</h3>
+            <pre class="code-block mt-16">${escapeHtml(JSON.stringify(rules, null, 2))}</pre>
+        `;
+    } catch (e) {
+        document.getElementById('ai-result').innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+    }
+}
+
+async function suggestTests() {
+    const val = document.getElementById('ai-rule-select').value;
+    if (!val) return showToast('Select a rule', 'error');
+    const rule = JSON.parse(val);
+    if (!copilotConnected) return showToast('Connect GitHub Copilot first (see status bar above)', 'warning');
+    document.getElementById('ai-suggestions').innerHTML = '<span class="spinner"></span> Generating suggestions with GitHub Copilot...';
+    try {
+        const res = await API.suggestTests(rule, {}, getSelectedAgentIds(), getTaskHint('create high-value ETL test cases'));
+        if (res.error) { document.getElementById('ai-suggestions').innerHTML = `<span class="text-danger">${escapeHtml(res.error)}</span>`; return; }
+        const tests = res.tests || [];
+        document.getElementById('ai-suggestions').innerHTML = `
+            <h3>Suggested ${tests.length} Test(s)</h3>
+            <pre class="code-block mt-16">${escapeHtml(JSON.stringify(tests, null, 2))}</pre>
+        `;
+    } catch (e) {
+        document.getElementById('ai-suggestions').innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+    }
+}
+
+async function compareMappingSql() {
+    const mappingText = document.getElementById('map-sql-mapping').value.trim();
+    const sqlText = document.getElementById('map-sql-sql').value.trim();
+    if (!mappingText) return showToast('Paste mapping content first', 'error');
+    if (!sqlText) return showToast('Paste SQL/ODI code first', 'error');
+    if (!copilotConnected) return showToast('Connect GitHub Copilot first (see status bar above)', 'warning');
+
+    const out = document.getElementById('map-sql-result');
+    out.innerHTML = '<span class="spinner"></span> Comparing mapping and SQL with Copilot...';
+    try {
+        const res = await API.compareMappingSql({
+            mapping_text: mappingText,
+            sql_text: sqlText,
+            source_table: document.getElementById('map-sql-source').value.trim(),
+            target_table: document.getElementById('map-sql-target').value.trim(),
+            single_db_testing: true,
+            cross_db_optional: true,
+            agent_ids: getSelectedAgentIds(),
+            task_hint: getTaskHint('compare mapping file against SQL, identify joins, mismatches, and test cases'),
+        });
+
+        const joins = res.main_joins || [];
+        const mismatches = res.mismatch_highlights || [];
+        const tests = res.suggested_tests || [];
+        const joinsHtml = joins.length
+            ? `<ul style="margin-top:6px;padding-left:18px;font-size:12px;color:var(--text)">${joins.slice(0, 80).map(j => `<li>${escapeHtml(typeof j === 'string' ? j : (j.join || j.text || JSON.stringify(j)))}</li>`).join('')}</ul>`
+            : '<div class="text-muted" style="font-size:12px">No joins detected.</div>';
+        const mismatchesHtml = mismatches.length
+            ? `<ul style="margin-top:6px;padding-left:18px;font-size:12px;color:var(--text)">${mismatches.slice(0, 80).map(m => `<li>${escapeHtml(typeof m === 'string' ? m : ((m.field || m.target_field || 'Field') + ': ' + (m.issue || m.reason || m.message || JSON.stringify(m))))}</li>`).join('')}</ul>`
+            : '<div class="text-muted" style="font-size:12px">No mismatches detected.</div>';
+        const testsHtml = tests.length
+            ? `<ul style="margin-top:6px;padding-left:18px;font-size:12px;color:var(--text)">${tests.slice(0, 80).map(t => `<li><strong>${escapeHtml(t.name || t.target_field || 'Test')}</strong>${t.description ? ` — ${escapeHtml(t.description)}` : ''}</li>`).join('')}</ul>`
+            : '<div class="text-muted" style="font-size:12px">No suggested tests.</div>';
+        out.innerHTML = `
+            <div style="padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-dark)">
+                <div style="font-size:13px;color:var(--text);margin-bottom:8px">${escapeHtml(res.summary || 'Comparison completed')}</div>
+                <details style="margin-bottom:8px" open>
+                    <summary style="cursor:pointer;font-size:13px">Main Joins (${joins.length})</summary>
+                    ${joinsHtml}
+                </details>
+                <details style="margin-bottom:8px" open>
+                    <summary style="cursor:pointer;font-size:13px">Field Mismatches (${mismatches.length})</summary>
+                    ${mismatchesHtml}
+                </details>
+                <details>
+                    <summary style="cursor:pointer;font-size:13px">Suggested Tests with Field + Transformation (${tests.length})</summary>
+                    ${testsHtml}
+                </details>
+            </div>
+        `;
+    } catch (e) {
+        out.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+    }
+}
+
+async function generateTestsFromImportedMapping(mode = 'sample') {
+    const fileInput = document.getElementById('ai-map-file');
+    if (!fileInput.files || !fileInput.files[0]) {
+        showToast('Select mapping CSV/Excel file first', 'error');
+        return;
+    }
+
+    const target = document.getElementById('ai-map-target').value.trim();
+    if (!target) {
+        showToast('Provide target schema.table', 'error');
+        return;
+    }
+
+    let targetSchema = '';
+    let targetTable = target;
+    if (target.includes('.')) {
+        const parts = target.split('.', 2);
+        targetSchema = parts[0];
+        targetTable = parts[1];
+    }
+
+    const srcDs = document.getElementById('ai-map-src-ds').value || '1';
+    const tgtDs = document.getElementById('ai-map-tgt-ds').value || srcDs;
+    const sqlText = document.getElementById('ai-map-sql').value || '';
+    const out = document.getElementById('ai-map-import-result');
+    out.innerHTML = '<span class="spinner"></span> Generating tests from imported mapping...';
+
+    try {
+        const form = new FormData();
+        form.append('file', fileInput.files[0]);
+        const selectedFields = [
+            'logical_name','physical_name','source_schema','source_table',
+            'source_attribute','transformation','notes'
+        ].join(',');
+        const params = new URLSearchParams({
+            selected_fields: selectedFields,
+            target_schema: targetSchema,
+            target_table: targetTable,
+            source_datasource_id: srcDs,
+            target_datasource_id: tgtDs,
+            sql_text: sqlText,
+            generation_mode: mode,
+            sample_per_category: '2',
+            agent_ids: getSelectedAgentIds().join(','),
+            task_hint: getTaskHint('generate SQL tests from mapping file'),
+        });
+        const res = await fetch(`/api/ai/import-mapping-tests?${params.toString()}`, {
+            method: 'POST',
+            body: form,
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`${res.status}: ${text}`);
+        }
+        const data = await res.json();
+        const tests = data.suggested_tests || [];
+        importedMappingTests = tests.map(t => ({ ...t, selected: t.selected !== false }));
+        renderImportedMappingTestsResult(
+            data.message || 'Done',
+            data.mode || '',
+            tests.length,
+            data.total_available || tests.length,
+            data.category_counts || {}
+        );
+        saveAiState();
+        showToast(`Generated ${tests.length} test(s)`, 'success');
+    } catch (e) {
+        out.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+        showToast(e.message, 'error');
+    }
+}
+
+function renderImportedMappingTestsResult(message = '', mode = '', count = 0, totalAvailable = 0, categoryCounts = {}) {
+    const out = document.getElementById('ai-map-import-result');
+    out.innerHTML = `
+        <div style="padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-dark)">
+            <div style="font-size:13px;color:var(--text);margin-bottom:8px">${escapeHtml(message)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                ${mode ? `<span class="badge badge-info">Mode: ${escapeHtml(mode)}</span>` : ''}
+                <span class="badge badge-success">Tests: ${count || importedMappingTests.length}</span>
+                ${totalAvailable ? `<span class="badge badge-muted">Total Available: ${totalAvailable}</span>` : ''}
+                ${typeof categoryCounts.direct === 'number' ? `<span class="badge badge-info">Direct: ${categoryCounts.direct}</span>` : ''}
+                ${typeof categoryCounts.complex === 'number' ? `<span class="badge badge-warning">Complex: ${categoryCounts.complex}</span>` : ''}
+                ${typeof categoryCounts.row_count === 'number' ? `<span class="badge badge-muted">Row Count: ${categoryCounts.row_count}</span>` : ''}
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span class="text-muted" style="font-size:13px">Review/edit tests before creating</span>
+                <div class="flex gap-8">
+                    <button class="btn btn-sm btn-outline" onclick="selectAllImportedTests(true)">Select All</button>
+                    <button class="btn btn-sm btn-outline" onclick="selectAllImportedTests(false)">Deselect All</button>
+                    <button class="btn btn-sm btn-danger" onclick="removeSelectedImportedTests()">Remove Selected</button>
+                    <span id="ai-import-test-count" class="text-muted" style="font-size:13px;line-height:28px"></span>
+                </div>
+            </div>
+            <div id="ai-import-tests-grid" style="max-height:420px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px"></div>
+            <div class="flex gap-8 mt-16">
+                <button class="btn btn-success" onclick="createImportedMappingTests()">Create Selected Tests</button>
+                <button class="btn btn-primary" onclick="askCopilotImproveImportedTests()">Ask Copilot to Improve Selected Tests</button>
+                <button class="btn btn-outline" onclick="loadRemainingImportedTests()">Load Remaining Attributes</button>
+                <button class="btn btn-primary" onclick="exportImportedMappingTestsSql()">Export Selected .sql</button>
+            </div>
+            <div id="ai-map-improve-result" style="margin-top:10px"></div>
+        </div>
+    `;
+    renderImportedMappingTestsGrid();
+}
+
+function renderImportedMappingTestsGrid() {
+    const grid = document.getElementById('ai-import-tests-grid');
+    if (!grid) return;
+    grid.innerHTML = importedMappingTests.map((t, i) => `
+        <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;background:var(--bg-card)">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${t.selected ? 'checked' : ''} onchange="setImportedTestSelected(${i}, this.checked)"> Select</label>
+                <span class="badge badge-info">${escapeHtml(t.test_type || 'value_match')}</span>
+                <span class="badge ${t.severity === 'critical' ? 'badge-danger' : t.severity === 'high' ? 'badge-warning' : 'badge-muted'}">${escapeHtml(t.severity || 'medium')}</span>
+                <button class="btn btn-danger btn-sm" onclick="removeImportedTest(${i})">Delete</button>
+            </div>
+            <div class="form-group" style="margin-bottom:8px"><label>Name</label><input class="form-control" value="${escapeHtml(t.name || '')}" oninput="setImportedTestField(${i}, 'name', this.value)"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div class="form-group" style="margin:0"><label>Source SQL</label><textarea class="form-control" rows="4" oninput="setImportedTestField(${i}, 'source_query', this.value)">${escapeHtml(t.source_query || '')}</textarea></div>
+                <div class="form-group" style="margin:0"><label>Target SQL</label><textarea class="form-control" rows="4" oninput="setImportedTestField(${i}, 'target_query', this.value)">${escapeHtml(t.target_query || '')}</textarea></div>
+            </div>
+            <div class="form-group" style="margin-top:8px"><label>Description</label><textarea class="form-control" rows="2" oninput="setImportedTestField(${i}, 'description', this.value)">${escapeHtml(t.description || '')}</textarea></div>
+        </div>
+    `).join('') || '<div class="empty-state">No tests generated.</div>';
+    updateImportedTestsCount();
+}
+
+function setImportedTestSelected(index, selected) {
+    importedMappingTests[index].selected = selected;
+    updateImportedTestsCount();
+    saveAiState();
+}
+
+function setImportedTestField(index, field, value) {
+    importedMappingTests[index][field] = value;
+    saveAiState();
+}
+
+function updateImportedTestsCount() {
+    const el = document.getElementById('ai-import-test-count');
+    if (!el) return;
+    const total = importedMappingTests.length;
+    const selected = importedMappingTests.filter(t => t.selected).length;
+    el.textContent = `${selected}/${total} selected`;
+}
+
+function selectAllImportedTests(state) {
+    importedMappingTests.forEach(t => t.selected = state);
+    renderImportedMappingTestsGrid();
+    saveAiState();
+}
+
+function removeImportedTest(index) {
+    importedMappingTests.splice(index, 1);
+    renderImportedMappingTestsGrid();
+    saveAiState();
+}
+
+function removeSelectedImportedTests() {
+    const before = importedMappingTests.length;
+    importedMappingTests = importedMappingTests.filter(t => !t.selected);
+    const removed = before - importedMappingTests.length;
+    renderImportedMappingTestsGrid();
+    saveAiState();
+    showToast(`Removed ${removed} test(s)`, 'success');
+}
+
+function applyFixToImportedTests() {
+    const find = document.getElementById('ai-map-fix-find').value;
+    const replace = document.getElementById('ai-map-fix-replace').value;
+    if (!find) {
+        showToast('Enter text to find', 'error');
+        return;
+    }
+    const fixName = document.getElementById('ai-map-fix-name').checked;
+    const fixSource = document.getElementById('ai-map-fix-source').checked;
+    const fixTarget = document.getElementById('ai-map-fix-target').checked;
+    const fixDesc = document.getElementById('ai-map-fix-desc').checked;
+    const onlySelected = document.getElementById('ai-map-fix-selected').checked;
+    let changed = 0;
+    importedMappingTests.forEach(t => {
+        if (onlySelected && !t.selected) return;
+        const repl = (v) => (v || '').split(find).join(replace);
+        if (fixName) t.name = repl(t.name);
+        if (fixSource) t.source_query = repl(t.source_query);
+        if (fixTarget) t.target_query = repl(t.target_query);
+        if (fixDesc) t.description = repl(t.description);
+        changed += 1;
+    });
+    renderImportedMappingTestsGrid();
+    saveAiState();
+    showToast(`Applied fix to ${changed} test(s)`, 'success');
+}
+
+async function createImportedMappingTests() {
+    try {
+        const tests = (importedMappingTests || []).filter(t => t.selected);
+        if (!tests.length) {
+            showToast('No selected tests to create', 'warning');
+            return;
+        }
+        const payload = tests.map(t => ({
+            name: t.name,
+            test_type: t.test_type || 'value_match',
+            mapping_rule_id: t.mapping_rule_id || null,
+            source_datasource_id: t.source_datasource_id,
+            target_datasource_id: t.target_datasource_id,
+            source_query: t.source_query || '',
+            target_query: t.target_query || '',
+            severity: t.severity || 'medium',
+            description: t.description || '',
+        }));
+        const res = await API.createSelectedTests(payload);
+        showToast(`Created ${res.count} test(s)`, 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+function exportImportedMappingTestsSql() {
+    const selected = (importedMappingTests || []).filter(t => t.selected);
+    if (!selected.length) {
+        showToast('Select at least one imported test', 'warning');
+        return;
+    }
+
+    const ts = new Date().toISOString();
+    let sql = `-- Imported Mapping Tests\n-- Generated at: ${ts}\n\n`;
+    selected.forEach((t, idx) => {
+        sql += `-- =====================================================================\n`;
+        sql += `-- Test ${idx + 1}: ${(t.name || 'Unnamed Test')}\n`;
+        sql += `-- Type: ${(t.test_type || '')} | Severity: ${(t.severity || '')}\n`;
+        if (t.description) sql += `-- Description: ${t.description}\n`;
+        sql += `-- =====================================================================\n`;
+        if (t.source_query) sql += `${t.source_query.trim()}\n\n`;
+        if (t.target_query) {
+            sql += `-- Target Query\n`;
+            sql += `${t.target_query.trim()}\n\n`;
+        }
+        sql += `\n`;
+    });
+
+    const blob = new Blob([sql], { type: 'text/sql;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `imported_mapping_tests_${Date.now()}.sql`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${selected.length} imported test(s) to .sql`, 'success');
+}
+
+async function askCopilotImproveImportedTests() {
+    if (!copilotConnected) {
+        showToast('Connect GitHub Copilot first', 'warning');
+        return;
+    }
+    const selected = (importedMappingTests || []).filter(t => t.selected);
+    if (!selected.length) {
+        showToast('Select at least one test', 'error');
+        return;
+    }
+    const panel = document.getElementById('ai-map-improve-result');
+    if (!panel) return;
+    panel.innerHTML = '<span class="spinner"></span> Asking Copilot for test improvements...';
+    try {
+        const prompt = `Review these suggested Oracle SQL test cases and propose improvements.\n`
+            + `Requirements: use join conditions from mapping/lookup logic, explain missing joins, and provide corrected SQL per test.\n`
+            + `Tests:\n${JSON.stringify(selected, null, 2)}`;
+        const res = await API.aiChat(
+            [{ role: 'user', content: prompt }],
+            'Improve suggested test cases with join-based source->lookup->target validation.',
+            'githubcopilot',
+            getSelectedAgentIds(),
+            getTaskHint('improve suggested SQL tests using mapping join conditions')
+        );
+        if (res.error) {
+            panel.innerHTML = `<div class="text-danger">${escapeHtml(res.error)}</div>`;
+            return;
+        }
+        panel.innerHTML = `
+            <div style="padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card)">
+                <div style="font-size:13px;margin-bottom:6px"><strong>Copilot Improvements</strong></div>
+                <div style="font-size:12px;line-height:1.5">${formatChatMessage(res.reply || '')}</div>
+            </div>
+        `;
+        saveAiState();
+    } catch (e) {
+        panel.innerHTML = `<div class="text-danger">${escapeHtml(e.message)}</div>`;
+    }
+}
+
+function _importedTestKey(t) {
+    return [
+        (t.name || '').trim().toUpperCase(),
+        (t.source_field || '').trim().toUpperCase(),
+        (t.target_field || '').trim().toUpperCase(),
+        (t.source_query || '').trim().toUpperCase(),
+        (t.target_query || '').trim().toUpperCase(),
+    ].join('|');
+}
+
+async function loadRemainingImportedTests() {
+    const fileInput = document.getElementById('ai-map-file');
+    if (!fileInput.files || !fileInput.files[0]) {
+        showToast('Select mapping CSV/Excel file first', 'error');
+        return;
+    }
+
+    const target = document.getElementById('ai-map-target').value.trim();
+    if (!target) {
+        showToast('Provide target schema.table', 'error');
+        return;
+    }
+
+    let targetSchema = '';
+    let targetTable = target;
+    if (target.includes('.')) {
+        const parts = target.split('.', 2);
+        targetSchema = parts[0];
+        targetTable = parts[1];
+    }
+
+    const srcDs = document.getElementById('ai-map-src-ds').value || '1';
+    const tgtDs = document.getElementById('ai-map-tgt-ds').value || srcDs;
+    const sqlText = document.getElementById('ai-map-sql').value || '';
+
+    try {
+        const form = new FormData();
+        form.append('file', fileInput.files[0]);
+        const selectedFields = [
+            'logical_name','physical_name','source_schema','source_table',
+            'source_attribute','transformation','notes'
+        ].join(',');
+        const params = new URLSearchParams({
+            selected_fields: selectedFields,
+            target_schema: targetSchema,
+            target_table: targetTable,
+            source_datasource_id: srcDs,
+            target_datasource_id: tgtDs,
+            sql_text: sqlText,
+            generation_mode: 'all',
+            sample_per_category: '2',
+            agent_ids: getSelectedAgentIds().join(','),
+            task_hint: getTaskHint('generate all remaining SQL tests from mapping file'),
+        });
+        const res = await fetch(`/api/ai/import-mapping-tests?${params.toString()}`, {
+            method: 'POST',
+            body: form,
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`${res.status}: ${text}`);
+        }
+        const data = await res.json();
+        const allTests = (data.suggested_tests || []).map(t => ({ ...t, selected: true }));
+
+        const existingKeys = new Set((importedMappingTests || []).map(_importedTestKey));
+        const toAppend = allTests.filter(t => !existingKeys.has(_importedTestKey(t)));
+
+        importedMappingTests = [...(importedMappingTests || []), ...toAppend];
+        renderImportedMappingTestsResult(
+            `Loaded remaining attributes. Added ${toAppend.length} new test(s).`,
+            data.mode || 'sql_compare',
+            importedMappingTests.length,
+            data.total_available || importedMappingTests.length,
+            data.category_counts || {}
+        );
+        saveAiState();
+        showToast(`Added ${toAppend.length} remaining test(s)`, 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function readAttachmentAsText(file, maxChars = 20000) {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(`/api/ai/attachment-text?max_chars=${encodeURIComponent(maxChars)}`, {
+        method: 'POST',
+        body: form,
+    });
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Attachment parse failed (${res.status}): ${text}`);
+    }
+    return await res.json();
+}
+
+function renderChatAttachmentsList() {
+    const list = document.getElementById('chat-attachments-list');
+    if (!list) return;
+    if (!chatAttachments.length) {
+        list.textContent = 'No files attached';
+        return;
+    }
+    list.innerHTML = chatAttachments
+        .map(a => `${escapeHtml(a.name)} (${Math.ceil((a.size || 0) / 1024)} KB${a.note ? `, ${escapeHtml(a.note)}` : ''})`)
+        .join('<br>');
+}
+
+async function handleChatAttachments(event) {
+    const files = Array.from(event.target?.files || []);
+    if (!files.length) {
+        chatAttachments = [];
+        renderChatAttachmentsList();
+        return;
+    }
+    try {
+        chatAttachments = await Promise.all(files.map(f => readAttachmentAsText(f)));
+    } catch (e) {
+        showToast(`Failed to read attachment: ${e.message}`, 'error');
+        chatAttachments = [];
+    }
+    renderChatAttachmentsList();
+}
+
+function chatKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChat();
+    }
+}
+
+async function sendChat() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const empty = document.getElementById('chat-empty');
+    if (empty) empty.style.display = 'none';
+
+    chatHistory.push({ role: 'user', content: text });
+    const attachmentLabel = chatAttachments.length
+        ? `${text}\n\n[Attached files: ${chatAttachments.map(a => a.name).join(', ')}]`
+        : text;
+    appendChatBubble('user', attachmentLabel);
+    input.value = '';
+
+    const typingId = appendChatBubble('assistant', '<span class="spinner" style="width:16px;height:16px"></span> Thinking...', true);
+    document.getElementById('chat-send-btn').disabled = true;
+
+    try {
+        const provider = copilotConnected ? 'githubcopilot' : '';
+        const attachmentContext = chatAttachments.length
+            ? `Attached files context:\n${chatAttachments.map(a => (
+                `- ${a.name} (${a.type || 'unknown'}, ${a.size || 0} bytes)${a.note ? ` - ${a.note}` : ''}`
+                + (a.content ? `\n${a.content}` : '')
+            )).join('\n\n')}`
+            : '';
+        const res = await API.aiChat(
+            chatHistory,
+            attachmentContext,
+            provider,
+            getSelectedAgentIds(),
+            getTaskHint('cross-functional implementation support'),
+            chatAttachments
+        );
+        document.getElementById(typingId)?.remove();
+
+        if (res.error) {
+            const errorMsg = res.error;
+            chatHistory.push({ role: 'assistant', content: errorMsg, is_error: true });
+            appendChatBubble('assistant', `<span class="text-danger">${escapeHtml(errorMsg)}</span>`, true);
+        } else {
+            const reply = res.reply || '(empty response)';
+            chatHistory.push({ role: 'assistant', content: reply });
+            appendChatBubble('assistant', formatChatMessage(reply), true);
+        }
+    } catch(e) {
+        document.getElementById(typingId)?.remove();
+        const errorMsg = e.message;
+        chatHistory.push({ role: 'assistant', content: errorMsg, is_error: true });
+        appendChatBubble('assistant', `<span class="text-danger">${escapeHtml(errorMsg)}</span>`, true);
+    }
+
+    document.getElementById('chat-send-btn').disabled = false;
+    scrollChatToBottom();
+    saveAiState();
+
+    chatAttachments = [];
+    const attachmentInput = document.getElementById('chat-attachments');
+    if (attachmentInput) attachmentInput.value = '';
+    renderChatAttachmentsList();
+}
+
+async function refreshCopilotStatus() {
+    try {
+        const res = await API.copilotStatus();
+        copilotConnected = !!res.connected;
+        const badge = document.getElementById('copilot-status-badge');
+        const connectBtn = document.getElementById('copilot-connect-btn');
+        const pollBtn = document.getElementById('copilot-poll-btn');
+        const disconnectBtn = document.getElementById('copilot-disconnect-btn');
+        const modelLabel = document.getElementById('copilot-model-label');
+        if (copilotConnected) {
+            badge.className = 'badge badge-success';
+            badge.textContent = '● Connected';
+            connectBtn.style.display = 'none';
+            pollBtn.style.display = 'none';
+            disconnectBtn.style.display = 'inline-block';
+            if (modelLabel) { modelLabel.style.display = 'inline'; modelLabel.textContent = 'Model: ' + (res.model || '(auto)'); }
+        } else {
+            badge.className = 'badge badge-muted';
+            badge.textContent = 'Not Connected';
+            connectBtn.style.display = 'inline-block';
+            disconnectBtn.style.display = 'none';
+            if (modelLabel) modelLabel.style.display = 'none';
+            if (!copilotDeviceCode) pollBtn.style.display = 'none';
+        }
+    } catch (e) {
+        document.getElementById('copilot-status-badge').className = 'badge badge-danger';
+        document.getElementById('copilot-status-badge').textContent = 'Status Error';
+    }
+}
+
+async function startCopilotSignIn() {
+    try {
+        const res = await API.copilotStartDevice();
+        if (res.error) {
+            showToast(res.error, 'error');
+            return;
+        }
+        copilotDeviceCode = res.device_code || '';
+        copilotUserCode = res.user_code || '';
+        const instructions = document.getElementById('copilot-login-instructions');
+        instructions.style.display = 'block';
+        instructions.innerHTML = `
+            <div><strong>1.</strong> Open <a href="${escapeHtml(res.verification_uri)}" target="_blank" rel="noopener">${escapeHtml(res.verification_uri)}</a></div>
+            <div class="mt-8" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <strong>2.</strong>
+                <span>Enter code:</span>
+                <code id="copilot-user-code">${escapeHtml(res.user_code || '')}</code>
+                <button type="button" class="btn btn-outline btn-sm" onclick="copyCopilotUserCode()">Copy code</button>
+            </div>
+            <div class="mt-8"><strong>3.</strong> Authorize access for GitHub account <code>ikorostelev_RJF</code>.</div>
+        `;
+        document.getElementById('copilot-poll-btn').style.display = 'inline-block';
+
+        if (getCopilotAuthMode() === 'automatic') {
+            window.open(res.verification_uri, '_blank', 'width=1200,height=900');
+            if (res.user_code && navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(res.user_code).catch(() => {});
+            }
+            stopCopilotAutoPoll();
+            copilotAutoPollHandle = setInterval(() => pollCopilotSignIn(true), 5000);
+            showToast('Device sign-in started. Browser opened and auto-check is running...', 'info');
+            return;
+        }
+        showToast('GitHub device sign-in started', 'info');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function pollCopilotSignIn(silent = false) {
+    if (!copilotDeviceCode) {
+        if (!silent) showToast('Start sign-in first', 'error');
+        return;
+    }
+    try {
+        const res = await API.copilotPollDevice(copilotDeviceCode);
+        if (res.error) {
+            if (!silent) showToast(res.error, 'error');
+            return;
+        }
+        if (res.status === 'authorization_pending' || res.status === 'slow_down') {
+            if (!silent) showToast('Authorization still pending in GitHub. Complete it and retry.', 'warning');
+            return;
+        }
+        if (res.connected) {
+            copilotDeviceCode = '';
+            copilotUserCode = '';
+            stopCopilotAutoPoll();
+            document.getElementById('copilot-login-instructions').style.display = 'none';
+            showToast('Copilot connected successfully', 'success');
+            await refreshCopilotStatus();
+            return;
+        }
+        if (!silent) showToast('Unexpected response during Copilot sign-in', 'warning');
+    } catch (e) {
+        if (!silent) showToast(e.message, 'error');
+    }
+}
+
+async function copyCopilotUserCode() {
+    const code = (copilotUserCode || document.getElementById('copilot-user-code')?.textContent || '').trim();
+    if (!code) {
+        showToast('No code available to copy', 'warning');
+        return;
+    }
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(code);
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = code;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+        }
+        showToast('Code copied', 'success');
+    } catch (e) {
+        showToast('Unable to copy automatically. Please copy manually.', 'warning');
+    }
+}
+
+async function disconnectCopilot() {
+    try {
+        stopCopilotAutoPoll();
+        await API.copilotLogout();
+        copilotConnected = false;
+        copilotUserCode = '';
+        document.getElementById('copilot-login-instructions').style.display = 'none';
+        showToast('Copilot disconnected', 'success');
+        await refreshCopilotStatus();
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+function appendChatBubble(role, content, isHtml = false) {
+    const container = document.getElementById('chat-messages');
+    const id = 'chat-msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+    const align = role === 'user' ? 'flex-end' : 'flex-start';
+    const bgColor = role === 'user' ? 'var(--primary)' : 'var(--bg-card)';
+    const textColor = role === 'user' ? '#fff' : 'var(--text)';
+    const label = role === 'user' ? 'You' : 'Copilot';
+    const borderStyle = role === 'user' ? '' : 'border:1px solid var(--border);';
+
+    const div = document.createElement('div');
+    div.id = id;
+    div.style.cssText = `display:flex;flex-direction:column;align-items:${align};margin-bottom:12px`;
+    div.innerHTML = `
+        <span style="font-size:11px;color:var(--text-muted);margin-bottom:2px">${label}</span>
+        <div style="background:${bgColor};color:${textColor};padding:10px 14px;border-radius:12px;max-width:85%;${borderStyle}line-height:1.5;word-break:break-word">
+            ${isHtml ? content : escapeHtml(content)}
+        </div>
+    `;
+    container.appendChild(div);
+    scrollChatToBottom();
+    return id;
+}
+
+function formatChatMessage(text) {
+    let html = escapeHtml(text);
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => `<pre class="code-block" style="margin:8px 0;font-size:12px;white-space:pre-wrap">${code}</pre>`);
+    html = html.replace(/`([^`]+)`/g, '<code style="background:var(--bg-dark);padding:2px 6px;border-radius:4px;font-size:12px">$1</code>');
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\n/g, '<br>');
+    return html;
+}
+
+function scrollChatToBottom() {
+    const container = document.getElementById('chat-messages');
+    container.scrollTop = container.scrollHeight;
+}
+
+function clearChat() {
+    if (!confirm('Clear all chat messages? (This cannot be undone)')) return;
+    chatHistory = [];
+    chatAttachments = [];
+    const attachmentInput = document.getElementById('chat-attachments');
+    if (attachmentInput) attachmentInput.value = '';
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) chatInput.value = '';
+    renderChatAttachmentsList();
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = '<div class="text-muted" style="text-align:center;padding:40px 0" id="chat-empty">Start a conversation with Copilot...</div>';
+    saveAiState();
+    showToast('Chat cleared', 'info');
+}
+
+function onAiMappingFileSelected(event) {
+    const file = event.target?.files?.[0];
+    if (file) {
+        showToast(`Selected: ${file.name}`, 'info');
+    }
+}
+
+async function aiGenerateTestsFromFile() {
+    const fileInput = document.getElementById('ai-mapping-file');
+    if (!fileInput.files || !fileInput.files[0]) {
+        showToast('Select a mapping file first', 'error');
+        return;
+    }
+    const file = fileInput.files[0];
+    const target = document.getElementById('ai-mapping-target').value.trim();
+    
+    if (!copilotConnected) {
+        showToast('Connect GitHub Copilot first (see status bar above)', 'warning');
+        return;
+    }
+    
+    const out = document.getElementById('ai-mapping-file-result');
+    out.innerHTML = '<span class="spinner"></span> Generating test cases from mapping file using Copilot...';
+    
+    try {
+        const form = new FormData();
+        form.append('file', file);
+        const params = new URLSearchParams({
+            target_table: target || '',
+            generation_mode: 'sample',
+            sample_per_category: '2',
+            agent_ids: getSelectedAgentIds().join(','),
+            task_hint: getTaskHint('generate SQL test cases from mapping file'),
+        });
+        
+        const res = await fetch(`/api/ai/generate-tests-from-mapping-file?${params.toString()}`, {
+            method: 'POST',
+            body: form,
+        });
+        
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`${res.status}: ${text}`);
+        }
+        
+        const data = await res.json();
+        if (data.error) {
+            out.innerHTML = `<span class="text-danger">${escapeHtml(data.error)}</span>`;
+            return;
+        }
+        
+        const tests = data.tests || [];
+        aiMappingGeneratedTests = (data.tests || []).map(t => ({ ...t, selected: true }));
+        const directCount = data.category_counts?.direct || 0;
+        const complexCount = data.category_counts?.complex || 0;
+        const rcCount = data.category_counts?.row_count || 0;
+        const usingGhc = (data.ai_provider || '').toLowerCase() === 'githubcopilot';
+        const baselineTotal = Number.isFinite(data.baseline_total) ? data.baseline_total : null;
+        const modeBadge = usingGhc
+            ? `<span class="badge badge-info">Using GHC + KB${baselineTotal !== null ? ` (baseline ${baselineTotal})` : ''}</span>`
+            : '<span class="badge badge-muted">Using Local KB</span>';
+        
+        out.innerHTML = `
+            <div style="padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card)">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                    <span class="badge badge-success">Generated: ${aiMappingGeneratedTests.length} test(s)</span>
+                    ${modeBadge}
+                    <span class="badge badge-muted">Row Count: ${rcCount}</span>
+                    <span class="badge badge-info">Direct: ${directCount}</span>
+                    <span class="badge badge-warning">Complex: ${complexCount}</span>
+                </div>
+                <details style="margin-bottom:8px" open>
+                    <summary style="cursor:pointer;font-size:13px;color:var(--text-muted)">Review Test Cases (${aiMappingGeneratedTests.length})</summary>
+                    <div id="ai-mapping-tests-grid" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:8px;margin-top:6px"></div>
+                </details>
+                <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap">
+                    <span id="ai-mapping-tests-count" class="text-muted" style="font-size:12px"></span>
+                    <div class="flex gap-8">
+                        <button class="btn btn-sm btn-outline" onclick="selectAllAiMappingGeneratedTests(true)">Select All</button>
+                        <button class="btn btn-sm btn-outline" onclick="selectAllAiMappingGeneratedTests(false)">Deselect All</button>
+                        <button class="btn btn-success btn-sm" onclick="createAiMappingGeneratedTests()">Add Selected Tests</button>
+                        <button class="btn btn-warning btn-sm" onclick="createAndRunAiMappingGeneratedTests()">Add &amp; Run Selected</button>
+                        <button class="btn btn-primary btn-sm" onclick="exportAiMappingGeneratedTestsSql()">Export Selected .sql</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        renderAiMappingTestsGrid();
+        showToast(`Generated ${aiMappingGeneratedTests.length} test case(s)`, 'success');
+    } catch (e) {
+        out.innerHTML = `<span class="text-danger">${escapeHtml(e.message)}</span>`;
+        showToast(e.message, 'error');
+    }
+}
+
+function renderAiMappingTestsGrid() {
+    const grid = document.getElementById('ai-mapping-tests-grid');
+    if (!grid) return;
+    grid.innerHTML = aiMappingGeneratedTests.map((t, i) => `
+        <div style="border:1px solid var(--border);border-radius:6px;padding:8px;margin-bottom:6px;background:var(--bg-dark)">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" ${t.selected ? 'checked' : ''} onchange="setAiMappingGeneratedTestSelected(${i}, this.checked)"> Select</label>
+                <div style="font-size:12px;font-weight:bold;color:var(--text)">${escapeHtml(t.name || '')}</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
+                <strong>Type:</strong> ${escapeHtml(t.test_type || 'value_match')}
+                <strong style="margin-left:12px">Severity:</strong> ${escapeHtml(t.severity || 'medium')}
+                ${t.mapping_type ? `<strong style="margin-left:12px">Mapping:</strong> ${escapeHtml(t.mapping_type)}` : ''}
+            </div>
+            ${t.description ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">${escapeHtml(t.description)}</div>` : ''}
+            <details style="margin-top:6px"><summary style="cursor:pointer;font-size:11px;color:var(--accent)">View SQL</summary>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+                    <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Source SQL</div><pre class="code-block" style="font-size:11px;max-height:120px">${escapeHtml(t.source_query || '')}</pre></div>
+                    <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Target SQL</div><pre class="code-block" style="font-size:11px;max-height:120px">${escapeHtml(t.target_query || '')}</pre></div>
+                </div>
+            </details>
+        </div>
+    `).join('') || '<div class="empty-state">No tests generated.</div>';
+    updateAiMappingGeneratedTestsCount();
+}
+
+function setAiMappingGeneratedTestSelected(index, state) {
+    if (!aiMappingGeneratedTests[index]) return;
+    aiMappingGeneratedTests[index].selected = state;
+    updateAiMappingGeneratedTestsCount();
+}
+
+function selectAllAiMappingGeneratedTests(state) {
+    aiMappingGeneratedTests.forEach(t => t.selected = state);
+    renderAiMappingTestsGrid();
+}
+
+function updateAiMappingGeneratedTestsCount() {
+    const el = document.getElementById('ai-mapping-tests-count');
+    if (!el) return;
+    const total = aiMappingGeneratedTests.length;
+    const selected = aiMappingGeneratedTests.filter(t => t.selected).length;
+    el.textContent = `${selected}/${total} selected`;
+}
+
+async function createAiMappingGeneratedTests() {
+    const selected = aiMappingGeneratedTests.filter(t => t.selected);
+    if (!selected.length) {
+        showToast('Select at least one test', 'warning');
+        return;
+    }
+    try {
+        const payload = selected.map(t => ({
+            name: t.name,
+            test_type: t.test_type || 'custom_sql',
+            mapping_rule_id: null,
+            source_datasource_id: t.source_datasource_id || 1,
+            target_datasource_id: t.target_datasource_id || 1,
+            source_query: t.source_query || '',
+            target_query: t.target_query || '',
+            severity: t.severity || 'medium',
+            description: t.description || '',
+        }));
+        const res = await API.createSelectedTests(payload);
+        showToast(`Added ${res.count} test(s). You can run them from Tests tab.`, 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function createAndRunAiMappingGeneratedTests() {
+    const selected = aiMappingGeneratedTests.filter(t => t.selected);
+    if (!selected.length) {
+        showToast('Select at least one test', 'warning');
+        return;
+    }
+    try {
+        const payload = selected.map(t => ({
+            name: t.name,
+            test_type: t.test_type || 'custom_sql',
+            mapping_rule_id: null,
+            source_datasource_id: t.source_datasource_id || 1,
+            target_datasource_id: t.target_datasource_id || 1,
+            source_query: t.source_query || '',
+            target_query: t.target_query || '',
+            severity: t.severity || 'medium',
+            description: t.description || '',
+        }));
+        const created = await API.createSelectedTests(payload);
+        const ids = (created.tests || []).map(t => t.id).filter(Boolean);
+        if (!ids.length) {
+            showToast('Tests were added but no IDs returned to run', 'warning');
+            return;
+        }
+        await API.runBatch(ids);
+        showToast(`Added and started run for ${ids.length} test(s)`, 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+function exportAiMappingGeneratedTestsSql() {
+    const selected = aiMappingGeneratedTests.filter(t => t.selected);
+    if (!selected.length) {
+        showToast('Select at least one test', 'warning');
+        return;
+    }
+
+    const ts = new Date().toISOString();
+    let sql = `-- AI Mapping Generated Tests\n-- Generated at: ${ts}\n\n`;
+    selected.forEach((t, idx) => {
+        sql += `-- =====================================================================\n`;
+        sql += `-- Test ${idx + 1}: ${(t.name || 'Unnamed Test')}\n`;
+        sql += `-- Type: ${(t.test_type || '')} | Severity: ${(t.severity || '')}\n`;
+        if (t.description) sql += `-- Description: ${t.description}\n`;
+        sql += `-- =====================================================================\n`;
+        if (t.source_query) sql += `${t.source_query.trim()}\n\n`;
+        if (t.target_query) {
+            sql += `-- Target Query\n`;
+            sql += `${t.target_query.trim()}\n\n`;
+        }
+        sql += `\n`;
+    });
+
+    const blob = new Blob([sql], { type: 'text/sql;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ai_generated_tests_${Date.now()}.sql`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${selected.length} test(s) to .sql`, 'success');
+}
+
+document.getElementById('copilot-auth-mode').value = getCopilotAuthMode();
+populateDatasourceSelects();
+setTimeout(() => {
+    restoreAiState();
+    bindAiStateAutosave();
+}, 0);
+loadAiRules();
+loadAgentsForAi();
+refreshCopilotStatus();
+</script>
+{% endblock %}

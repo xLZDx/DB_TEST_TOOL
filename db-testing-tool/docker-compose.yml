@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  db-testing-tool:
+    build: .
+    image: db-testing-tool:latest
+    container_name: db-testing-tool
+    restart: unless-stopped
+    ports:
+      - "8550:8550"
+    volumes:
+      # Persistent data: SQLite DB, credential key, local KB, training packs, reports
+      - db-testing-data:/data
+      # Optional: mount a local .env file with secrets
+      # - ./.env:/app/.env:ro
+    environment:
+      - DB_TESTING_TOOL_DATA_DIR=/data
+      # Override AI / TFS settings here or use an .env file
+      # - GITHUBCOPILOT_API_KEY=your-key
+      # - TFS_BASE_URL=https://tfs.example.com/tfs/Collection
+      # - TFS_PAT=your-tfs-pat
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8550/api/datasources"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  db-testing-data:
+    driver: local

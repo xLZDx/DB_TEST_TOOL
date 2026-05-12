@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – DB Testing Tool{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid grid-4" id="statsGrid">
+    <div class="card stat-card info"><div class="stat-value" id="statTests">-</div><div class="stat-label">Test Cases</div></div>
+    <div class="card stat-card"><div class="stat-value" id="statRuns">-</div><div class="stat-label">Total Runs</div></div>
+    <div class="card stat-card success"><div class="stat-value" id="statPassed">-</div><div class="stat-label">Passed</div></div>
+    <div class="card stat-card danger"><div class="stat-value" id="statFailed">-</div><div class="stat-label">Failed</div></div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2>Pass Rate</h2>
+        </div>
+        <div style="text-align:center">
+            <div id="passRate" style="font-size:64px;font-weight:700;color:var(--success)">–</div>
+            <div class="text-muted">Overall Pass Rate</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h2>Watchdog Status</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+                <div>
+                    <div class="text-muted">Status</div>
+                    <div id="watchdog-status-badge" style="font-weight:600;color:var(--warning)">–</div>
+                </div>
+                <div>
+                    <div class="text-muted">Interval</div>
+                    <div id="watchdog-interval" style="font-weight:600">–</div>
+                </div>
+                <div>
+                    <div class="text-muted">Last Sweep</div>
+                    <div id="watchdog-last-sweep" style="font-weight:600;font-size:12px">–</div>
+                </div>
+                <div>
+                    <div class="text-muted">Killed Sessions</div>
+                    <div id="watchdog-killed-count" style="font-weight:600;color:var(--danger)">–</div>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-success" id="watchdog-sweep-btn" onclick="triggerWatchdogSweep()" style="width:100%">⚡ Manual Sweep</button>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2>Quick Actions</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+            <a href="/datasources" class="btn btn-primary">+ Add Data Source</a>
+            <a href="/mappings" class="btn btn-outline">+ Create Mapping Rule</a>
+            <button class="btn btn-success" onclick="runAllTests()">▶ Run All Tests</button>
+            <a href="/ai-assistant" class="btn btn-warning">✦ AI Assistant</a>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header">
+        <h2>Recent Test Runs</h2>
+        <a href="/runs" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>ID</th><th>Batch</th><th>Test</th><th>Status</th><th>Mismatches</th><th>Time (ms)</th><th>Executed</th></tr></thead>
+            <tbody id="recentRuns"><tr><td colspan="7" class="text-muted">Loading...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadDashboard() {
+    try {
+        const stats = await API.getDashboardStats();
+        document.getElementById('statTests').textContent = stats.total_tests;
+        document.getElementById('statRuns').textContent = stats.total_runs;
+        document.getElementById('statPassed').textContent = stats.passed;
+        document.getElementById('statFailed').textContent = stats.failed + stats.errors;
+        document.getElementById('passRate').textContent = stats.pass_rate + '%';
+    } catch(e) { console.error(e); }
+
+    try {
+        const runs = await API.getRuns();
+        const tbody = document.getElementById('recentRuns');
+        if (!runs.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No runs yet. Create tests and execute them.</td></tr>'; return; }
+        tbody.innerHTML = runs.slice(0, 10).map(r => `
+            <tr>
+                <td>${r.id}</td>
+                <td><code>${r.batch_id || '-'}</code></td>
+                <td>#${r.test_case_id}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td>${r.mismatch_count || 0}</td>
+                <td>${r.execution_time_ms || '-'}</td>
+                <td class="text-muted">${r.executed_at || '-'}</td>
+            </tr>
+        `).join('');
+    } catch(e) { console.error(e); }
+
+    loadWatchdogStatus();
+}
+
+async function loadWatchdogStatus() {
+    try {
+        const status = await API.getWatchdogStatus();
+        const badge = document.getElementById('watchdog-status-badge');
+        const interval = document.getElementById('watchdog-interval');
+        const lastSweep = document.getElementById('watchdog-last-sweep');
+        const killedCount = document.getElementById('watchdog-killed-count');
+        const btn = document.getElementById('watchdog-sweep-btn');
+        
+        // Status badge
+        if (status.enabled && status.running) {
+            badge.textContent = '✓ Active';
+            badge.style.color = 'var(--success)';
+        } else if (status.enabled && !status.running) {
+            badge.textContent = '⋯ Inactive';
+            badge.style.color = 'var(--warning)';
+        } else {
+            badge.textContent = '✕ Disabled';
+            badge.style.color = 'var(--muted)';
+        }
+        
+        // Interval
+        interval.textContent = status.interval_seconds + 's';
+        
+        // Last sweep time relative
+        if (status.last_sweep_at) {
+            const lastTime = new Date(status.last_sweep_at);
+            const now = new Date();
+            const diffMs = now - lastTime;
+            const diffSecs = Math.floor(diffMs / 1000);
+            if (diffSecs < 60) {
+                lastSweep.textContent = `${diffSecs}s ago`;
+            } else if (diffSecs < 3600) {
+                lastSweep.textContent = `${Math.floor(diffSecs / 60)}m ago`;
+            } else {
+                lastSweep.textContent = lastTime.toLocaleTimeString();
+            }
+        } else {
+            lastSweep.textContent = 'Never';
+        }
+        
+        // Killed sessions count from last sweep
+        let killedTotal = 0;
+        if (status.last_result && status.last_result.operation) {
+            killedTotal += status.last_result.operation.stale_stopped || 0;
+        }
+        if (status.last_result && status.last_result.odi) {
+            killedTotal += status.last_result.odi.killed_stale || 0;
+            killedTotal += status.last_result.odi.killed_zombie_processes || 0;
+        }
+        killedCount.textContent = killedTotal;
+        
+        // Enable button during sweep
+        btn.disabled = false;
+    } catch(e) {
+        console.error('Failed to load watchdog status:', e);
+        document.getElementById('watchdog-status-badge').textContent = '? Error';
+        document.getElementById('watchdog-status-badge').style.color = 'var(--danger)';
+    }
+}
+
+async function triggerWatchdogSweep() {
+    const btn = document.getElementById('watchdog-sweep-btn');
+    btn.disabled = true;
+    try {
+        const result = await API.runWatchdogSweep();
+        let killedCount = 0;
+        if (result.operation_stats) {
+            killedCount += result.operation_stats.stale_stopped || 0;
+        }
+        if (result.odi_stats) {
+            killedCount += result.odi_stats.killed_stale || 0;
+            killedCount += result.odi_stats.killed_zombie_processes || 0;
+        }
+        showToast(`Watchdog sweep complete: ${killedCount} session(s) killed`, 'success');
+        await loadWatchdogStatus();
+    } catch(e) {
+        showToast('Watchdog sweep failed: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// Refresh watchdog status every 5 seconds  
+setInterval(loadWatchdogStatus, 5000);
+
+async function runAllTests() {
+    if (!confirm('Run all active tests now?')) return;
+    try {
+        showToast('Starting batch execution...', 'info');
+        const result = await API.runBatch(null);
+        showToast(`Batch ${result.batch_id}: ${result.passed} passed, ${result.failed} failed, ${result.error} errors`, result.failed ? 'error' : 'success');
+        loadDashboard();
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+loadDashboard();
+</script>
+{% endblock %}

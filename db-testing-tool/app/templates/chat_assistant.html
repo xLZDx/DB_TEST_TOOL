@@ -1,0 +1,725 @@
+{% extends "base.html" %}
+{% block title %}AI Chat Assistant – DB Testing Tool{% endblock %}
+{% block page_title %}AI Chat Assistant{% endblock %}
+
+{% block topbar_actions %}
+<button class="btn btn-success btn-sm" onclick="newConversation()">+ New Chat</button>
+<select class="form-control" id="chat-mode-select" style="width:auto" title="Generation Mode">
+    <option value="test_generation">Test Generation</option>
+    <option value="sql_compare">SQL Compare</option>
+    <option value="general">General</option>
+</select>
+<select class="form-control" id="agent-mode-select" style="width:auto" title="Agent Execution Mode">
+    <option value="auto" title="Run all 4 agent phases automatically and show a full report at the end">&#9881; Auto</option>
+    <option value="semi_manual" title="Run one agent phase at a time, show its report and wait for your approval before proceeding">&#128065; Step-by-Step</option>
+</select>
+<button class="btn btn-outline btn-sm" onclick="saveLatestSqlToTests()">Save SQL to Tests</button>
+<button class="btn btn-outline btn-sm" onclick="toggleArtifactPanel()">&#128196; Artifacts</button>
+{% endblock %}
+
+{% block content %}
+<style>
+#chat-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 16px;
+    height: calc(100vh - 130px);
+    min-height: 500px;
+}
+#chat-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+}
+#chat-history-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.conv-item {
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    transition: background .15s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+.conv-item:hover { background: var(--bg-dark); border-color: var(--border); }
+.conv-item.active { background: rgba(96,165,250,.1); border-color: var(--info); color: var(--text); }
+.conv-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conv-item-del { opacity: 0; font-size: 12px; padding: 2px 4px; border-radius: 3px; cursor: pointer; }
+.conv-item-del:hover { background: rgba(239,68,68,.2); color: #f87171; }
+.conv-item:hover .conv-item-del { opacity: 1; }
+#chat-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+}
+#artifact-panel {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: none;
+}
+#artifact-panel.visible { display: block; }
+#chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.chat-msg {
+    display: flex;
+    gap: 10px;
+    max-width: 90%;
+}
+.chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.chat-msg.assistant { align-self: flex-start; }
+.chat-bubble {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 100%;
+    word-break: break-word;
+}
+.chat-msg.user .chat-bubble {
+    background: rgba(96,165,250,.15);
+    border: 1px solid rgba(96,165,250,.3);
+    color: var(--text);
+}
+.chat-msg.assistant .chat-bubble {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+.chat-bubble pre {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 10px;
+    overflow-x: auto;
+    font-size: 12px;
+    margin: 8px 0;
+}
+.chat-bubble code { font-family: monospace; }
+.chat-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.chat-avatar.user-av { background: rgba(96,165,250,.2); }
+.chat-avatar.bot-av { background: rgba(168,85,247,.2); }
+#chat-input-area {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 10px;
+}
+#chat-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+#chat-input {
+    flex: 1;
+    resize: none;
+    min-height: 52px;
+    max-height: 140px;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+#chat-input:focus { border-color: var(--info); }
+.chat-toolbar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.art-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(34,197,94,.1);
+    border: 1px solid rgba(34,197,94,.3);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #4ade80;
+    cursor: default;
+}
+.art-chip-del { cursor: pointer; opacity: .7; }
+.art-chip-del:hover { opacity: 1; }
+#tfs-badge {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: rgba(168,85,247,.1);
+    border: 1px solid rgba(168,85,247,.3);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #c084fc;
+    cursor: pointer;
+}
+#tfs-badge.visible { display: inline-flex; }
+</style>
+
+<div id="chat-layout">
+    <!-- Left sidebar: conversations -->
+    <div id="chat-sidebar">
+        <div class="card" style="padding:10px;flex-shrink:0">
+            <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px">CONVERSATIONS</div>
+            <button class="btn btn-outline btn-sm w-100" onclick="newConversation()" style="margin-bottom:8px">+ New Chat</button>
+        </div>
+        <div class="card" style="padding:10px;overflow:hidden;display:flex;flex-direction:column;flex:1">
+            <div id="chat-history-list"></div>
+        </div>
+    </div>
+
+    <!-- Main chat area -->
+    <div id="chat-main">
+        <!-- Artifact panel (collapsible) -->
+        <div id="artifact-panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <h3 style="margin:0;font-size:13px;color:var(--text)">&#128196; Context Artifacts</h3>
+                <div class="flex gap-8">
+                    <label class="btn btn-outline btn-sm" style="cursor:pointer">
+                        + Upload File
+                        <input type="file" id="artifact-upload-input" style="display:none" multiple accept=".csv,.xlsx,.xls,.sql,.txt,.md,.json,.xml" onchange="uploadArtifacts(this.files)">
+                    </label>
+                    <button class="btn btn-outline btn-sm" onclick="toggleTfsContextPanel()">TFS Work Item</button>
+                </div>
+            </div>
+            <!-- TFS context row -->
+            <div id="tfs-context-row" style="display:none;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.3);border-radius:6px;padding:10px;margin-bottom:10px">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+                    <div class="form-group" style="margin:0;flex:0 0 160px">
+                        <label style="font-size:11px">Work Item ID</label>
+                        <input class="form-control" id="chat-tfs-item-id" placeholder="e.g. 123456" type="number">
+                    </div>
+                    <div class="form-group" style="margin:0;flex:1;min-width:120px">
+                        <label style="font-size:11px">Project</label>
+                        <select class="form-control" id="chat-tfs-project"></select>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="fetchChatTfsContext()">Fetch</button>
+                    <button class="btn btn-outline btn-sm" id="chat-tfs-clear-btn" onclick="clearChatTfsContext()" style="display:none">Clear</button>
+                </div>
+                <div id="chat-tfs-summary" style="display:none;margin-top:8px;font-size:11px;color:var(--text-muted)"></div>
+            </div>
+            <!-- Artifact list -->
+            <div id="artifact-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:24px">
+                <span class="text-muted" id="no-artifacts-msg" style="font-size:12px">No artifacts uploaded. Upload DRD, SQL, mapping docs to give the AI full context.</span>
+            </div>
+        </div>
+
+        <!-- Message log -->
+        <div id="chat-messages">
+            <div id="chat-welcome" style="text-align:center;padding:40px 20px;color:var(--text-muted)">
+                <div style="font-size:48px;margin-bottom:16px">&#129302;</div>
+                <div style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px">AI Test Generation Assistant</div>
+                <div style="font-size:13px;max-width:500px;margin:auto">
+                    Upload DRD/mapping documents, attach a TFS work item, and describe in plain language what tests you need.<br><br>
+                    <strong>Examples:</strong><br>
+                    &ldquo;Look at the DRD I uploaded and generate validation tests for the ACTIVITY_FACT table&rdquo;<br>
+                    &ldquo;Check if column X in TFS PBI 12345 is correctly populated using the mapping logic&rdquo;<br>
+                    &ldquo;Find patterns between SOURCE.TABLE_A and TARGET.TABLE_B to build a comparison query&rdquo;
+                </div>
+            </div>
+        </div>
+
+        <!-- Input area -->
+        <div id="chat-input-area">
+            <div class="chat-toolbar" id="active-artifacts-bar"></div>
+            <div id="chat-input-row">
+                <textarea class="form-control" id="chat-input" placeholder="Describe what tests you need, ask about your mappings, or request SQL analysis..." rows="2" onkeydown="onChatKeyDown(event)"></textarea>
+                <button class="btn btn-primary" id="chat-send-btn" onclick="sendChatMessage()" style="height:52px;padding:0 18px" title="Send (Ctrl+Enter)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Ctrl+Enter to send &bull; All conversations are saved automatically</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let _activeConvId = null;
+let _allArtifacts = [];
+let _activeArtifactIds = [];
+let _chatTfsContext = null;
+let _tfsProjects = [];
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    await Promise.all([loadConversationList(), loadArtifactList(), loadTfsProjects()]);
+    toggleArtifactPanel(true); // auto-open artifact panel
+});
+
+async function loadTfsProjects() {
+    try {
+        const resp = await fetch('/api/tfs/projects');
+        if (!resp.ok) return;
+        const d = await resp.json();
+        _tfsProjects = d.projects || [];
+        const sel = document.getElementById('chat-tfs-project');
+        if (sel) {
+            sel.innerHTML = '<option value="">(default)</option>' +
+                _tfsProjects.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join('');
+        }
+    } catch (_) {}
+}
+
+// ── Conversation List ──────────────────────────────────────────────────────
+async function loadConversationList() {
+    try {
+        const resp = await fetch('/api/chat/conversations');
+        const data = await resp.json();
+        const convs = data.conversations || [];
+        renderConversationList(convs);
+        if (convs.length > 0 && !_activeConvId) {
+            await loadConversation(convs[0].id);
+        }
+    } catch (e) {
+        console.error('Failed to load conversations', e);
+    }
+}
+
+function renderConversationList(convs) {
+    const list = document.getElementById('chat-history-list');
+    if (!list) return;
+    if (convs.length === 0) {
+        list.innerHTML = '<span class="text-muted" style="font-size:12px;padding:8px">No conversations yet.<br>Start a new chat above.</span>';
+        return;
+    }
+    list.innerHTML = convs.map(c => `
+        <div class="conv-item ${c.id === _activeConvId ? 'active' : ''}" onclick="loadConversation('${escHtml(c.id)}')">
+            <span class="conv-item-title" title="${escHtml(c.title)}">${escHtml(c.title)}</span>
+            <span class="conv-item-del" onclick="deleteConversation(event, '${escHtml(c.id)}')" title="Delete">&#10005;</span>
+        </div>
+    `).join('');
+}
+
+async function loadConversation(convId) {
+    _activeConvId = convId;
+    try {
+        const resp = await fetch(`/api/chat/conversations/${encodeURIComponent(convId)}`);
+        if (!resp.ok) return;
+        const conv = await resp.json();
+        renderMessages(conv.messages || []);
+        // Update sidebar active state
+        document.querySelectorAll('.conv-item').forEach(el => {
+            el.classList.toggle('active', el.onclick?.toString().includes(convId));
+        });
+        // Restore active artifacts from conversation
+        _activeArtifactIds = [...(conv.artifact_ids || [])];
+        renderActiveArtifactsBar();
+        // Restore TFS context
+        if (conv.tfs_context) {
+            _chatTfsContext = conv.tfs_context;
+            document.getElementById('tfs-badge')?.classList.add('visible');
+            showChatTfsSummary(conv.tfs_context);
+        } else {
+            _chatTfsContext = null;
+        }
+    } catch (e) {
+        console.error('Failed to load conversation', e);
+    }
+}
+
+function renderMessages(messages) {
+    const container = document.getElementById('chat-messages');
+    const welcome = document.getElementById('chat-welcome');
+    if (!messages || messages.length === 0) {
+        if (welcome) welcome.style.display = 'block';
+        // Remove old messages but keep welcome
+        container.querySelectorAll('.chat-msg').forEach(el => el.remove());
+        return;
+    }
+    if (welcome) welcome.style.display = 'none';
+    container.querySelectorAll('.chat-msg').forEach(el => el.remove());
+    messages.forEach(msg => appendMessageToUI(msg.role, msg.content));
+    // Scroll to bottom
+    container.scrollTop = container.scrollHeight;
+}
+
+
+// Track last user message and parameters for rerun
+let _lastUserMsg = null;
+let _lastUserParams = null;
+
+function appendMessageToUI(role, content) {
+    const welcome = document.getElementById('chat-welcome');
+    if (welcome) welcome.style.display = 'none';
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = `chat-msg ${role}`;
+    const avatar = role === 'user' ? '&#128100;' : '&#129302;';
+    const avClass = role === 'user' ? 'user-av' : 'bot-av';
+    let bubbleHtml = `<div class="chat-bubble">${renderMarkdown(content)}</div>`;
+    // Add rerun button after user message
+    if (role === 'user') {
+        bubbleHtml += `<button class="btn btn-outline btn-xs" style="margin-left:8px;margin-top:4px" onclick="rerunLastMessage()" title="Rerun this request">&#8635; Rerun</button>`;
+        // Save last user message and parameters
+        _lastUserMsg = content;
+        _lastUserParams = getCurrentUserParams();
+    }
+    div.innerHTML = `
+        <div class="chat-avatar ${avClass}">${avatar}</div>
+        ${bubbleHtml}
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function getCurrentUserParams() {
+    // Capture current chat state for rerun
+    return {
+        conversation_id: _activeConvId,
+        artifact_ids: [..._activeArtifactIds],
+        tfs_context: _chatTfsContext || null,
+        mode: document.getElementById('chat-mode-select')?.value || 'test_generation',
+        agent_mode: document.getElementById('agent-mode-select')?.value || 'auto',
+    };
+}
+
+async function rerunLastMessage() {
+    if (!_lastUserMsg || !_lastUserParams) {
+        showToast('No previous message to rerun.', 'warning');
+        return;
+    }
+    // Optionally show loading spinner
+    appendMessageToUI('user', _lastUserMsg + ' (rerun)');
+    const sendBtn = document.getElementById('chat-send-btn');
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<span class="spinner"></span>'; }
+    try {
+        const resp = await fetch('/api/chat/message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ..._lastUserParams,
+                message: _lastUserMsg,
+            }),
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+            throw new Error(err.detail || resp.statusText);
+        }
+        const data = await resp.json();
+        appendMessageToUI('assistant', data.content);
+        await loadConversationList();
+    } catch (e) {
+        appendMessageToUI('assistant', `❌ Error: ${e.message}`);
+    } finally {
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'; }
+    }
+}
+
+function renderMarkdown(text) {
+    // Very basic markdown → HTML for code blocks and bold
+    return escHtml(text)
+        // Code blocks
+        .replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+            `<pre><code>${code.trim()}</code></pre>`)
+        // Inline code
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        // Bold
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        // Newlines
+        .replace(/\n/g, '<br>');
+}
+
+async function newConversation() {
+    try {
+        const resp = await fetch('/api/chat/conversations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: 'New Conversation' }),
+        });
+        const data = await resp.json();
+        _activeConvId = data.conversation.id;
+        _activeArtifactIds = [];
+        _chatTfsContext = null;
+        renderMessages([]);
+        renderActiveArtifactsBar();
+        await loadConversationList();
+    } catch (e) {
+        showToast('Failed to create conversation: ' + e.message, 'error');
+    }
+}
+
+async function deleteConversation(e, convId) {
+    e.stopPropagation();
+    if (!confirm('Delete this conversation?')) return;
+    await fetch(`/api/chat/conversations/${encodeURIComponent(convId)}`, { method: 'DELETE' });
+    if (_activeConvId === convId) {
+        _activeConvId = null;
+        renderMessages([]);
+    }
+    await loadConversationList();
+}
+
+// ── Send Message ───────────────────────────────────────────────────────────
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const msg = (input?.value || '').trim();
+    if (!msg) return;
+
+    // Ensure we have an active conversation
+    if (!_activeConvId) await newConversation();
+    if (!_activeConvId) return;
+
+    input.value = '';
+    input.style.height = '';
+    appendMessageToUI('user', msg);
+
+    const sendBtn = document.getElementById('chat-send-btn');
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<span class="spinner"></span>'; }
+
+    try {
+        const mode = document.getElementById('chat-mode-select')?.value || 'test_generation';
+        const agentMode = document.getElementById('agent-mode-select')?.value || 'auto';
+        const resp = await fetch('/api/chat/message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                conversation_id: _activeConvId,
+                message: msg,
+                artifact_ids: [..._activeArtifactIds],
+                tfs_context: _chatTfsContext || null,
+                mode: mode,
+                agent_mode: agentMode,
+            }),
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+            throw new Error(err.detail || resp.statusText);
+        }
+        const data = await resp.json();
+        appendMessageToUI('assistant', data.content);
+        // Refresh conversation list (title may have updated)
+        await loadConversationList();
+    } catch (e) {
+        appendMessageToUI('assistant', `❌ Error: ${e.message}`);
+    } finally {
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'; }
+    }
+}
+
+async function saveLatestSqlToTests() {
+    if (!_activeConvId) {
+        showToast('Open a conversation first', 'warning');
+        return;
+    }
+
+    const folderName = (prompt('Folder name for saved tests:', 'PBI1736268-TrailerParsing-AIChat') || '').trim();
+    if (!folderName) return;
+    const dsRaw = (prompt('Source datasource id:', '2') || '').trim();
+    const sourceDs = parseInt(dsRaw, 10);
+    if (!Number.isInteger(sourceDs) || sourceDs <= 0) {
+        showToast('Invalid datasource id', 'error');
+        return;
+    }
+
+    try {
+        const resp = await fetch(`/api/chat/conversations/${encodeURIComponent(_activeConvId)}/save-sql-tests`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                source_datasource_id: sourceDs,
+                target_datasource_id: null,
+                folder_name: folderName,
+                severity: 'high',
+                expected_result: '0',
+                only_select: true,
+            }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || resp.statusText);
+        showToast(`Saved ${data.saved_count || 0} SQL test(s) to folder '${data.folder || folderName}'`, 'success');
+    } catch (e) {
+        showToast(`Failed to save SQL tests: ${e.message}`, 'error');
+    }
+}
+
+function onChatKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+        return;
+    }
+    // Auto-resize textarea
+    const ta = e.target;
+    setTimeout(() => {
+        ta.style.height = '';
+        ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+    }, 0);
+}
+
+// ── Artifacts ──────────────────────────────────────────────────────────────
+async function loadArtifactList() {
+    try {
+        const resp = await fetch('/api/chat/artifacts');
+        const data = await resp.json();
+        _allArtifacts = data.artifacts || [];
+        renderArtifactPanel();
+    } catch (_) {}
+}
+
+function renderArtifactPanel() {
+    const list = document.getElementById('artifact-list');
+    const noMsg = document.getElementById('no-artifacts-msg');
+    if (!list) return;
+    if (_allArtifacts.length === 0) {
+        list.innerHTML = '';
+        if (noMsg) noMsg.style.display = 'inline';
+        return;
+    }
+    if (noMsg) noMsg.style.display = 'none';
+    list.innerHTML = _allArtifacts.map(a => {
+        const isActive = _activeArtifactIds.includes(a.id);
+        return `<div class="art-chip" style="${isActive ? 'background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.5)' : ''}" title="${escHtml(a.name)} (${a.type}, ${Math.round(a.content_length / 1024 * 10) / 10}KB)">
+            <span onclick="toggleArtifact('${escHtml(a.id)}')" style="cursor:pointer">${escHtml(a.name.substring(0, 30))}${isActive ? ' ✓' : ''}</span>
+            <span class="art-chip-del" onclick="removeArtifact('${escHtml(a.id)}')" title="Delete artifact">&#10005;</span>
+        </div>`;
+    }).join('');
+}
+
+function toggleArtifact(artId) {
+    const idx = _activeArtifactIds.indexOf(artId);
+    if (idx >= 0) { _activeArtifactIds.splice(idx, 1); }
+    else { _activeArtifactIds.push(artId); }
+    renderArtifactPanel();
+    renderActiveArtifactsBar();
+}
+
+function renderActiveArtifactsBar() {
+    const bar = document.getElementById('active-artifacts-bar');
+    if (!bar) return;
+    const active = _allArtifacts.filter(a => _activeArtifactIds.includes(a.id));
+    const tfsEl = document.getElementById('tfs-badge');
+    bar.innerHTML = active.map(a =>
+        `<span class="art-chip">${escHtml(a.name.substring(0, 25))} <span class="art-chip-del" onclick="toggleArtifact('${escHtml(a.id)}')">&#10005;</span></span>`
+    ).join('');
+    if (_chatTfsContext) {
+        bar.innerHTML += `<span id="tfs-badge" class="visible" onclick="toggleTfsContextPanel()" title="TFS Work Item ${_chatTfsContext.id}">&#128196; TFS #${_chatTfsContext.id} <span class="art-chip-del" onclick="clearChatTfsContext()">&#10005;</span></span>`;
+    }
+}
+
+async function uploadArtifacts(files) {
+    if (!files || files.length === 0) return;
+    for (const file of Array.from(files)) {
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            if (_activeConvId) fd.append('conversation_id', _activeConvId);
+            const resp = await fetch('/api/chat/artifacts/upload', { method: 'POST', body: fd });
+            if (!resp.ok) throw new Error(await resp.text());
+            const data = await resp.json();
+            _allArtifacts.unshift(data.artifact);
+            _activeArtifactIds.push(data.artifact.id);
+            showToast(`Uploaded: ${file.name}`, 'success');
+        } catch (e) {
+            showToast(`Failed to upload ${file.name}: ${e.message}`, 'error');
+        }
+    }
+    renderArtifactPanel();
+    renderActiveArtifactsBar();
+    // Reset file input
+    const inp = document.getElementById('artifact-upload-input');
+    if (inp) inp.value = '';
+}
+
+async function removeArtifact(artId) {
+    if (!confirm('Delete artifact from history?')) return;
+    await fetch(`/api/chat/artifacts/${encodeURIComponent(artId)}`, { method: 'DELETE' });
+    _allArtifacts = _allArtifacts.filter(a => a.id !== artId);
+    _activeArtifactIds = _activeArtifactIds.filter(id => id !== artId);
+    renderArtifactPanel();
+    renderActiveArtifactsBar();
+}
+
+function toggleArtifactPanel(forceOpen = false) {
+    const panel = document.getElementById('artifact-panel');
+    if (!panel) return;
+    if (forceOpen) { panel.classList.add('visible'); return; }
+    panel.classList.toggle('visible');
+}
+
+// ── TFS Context ────────────────────────────────────────────────────────────
+function toggleTfsContextPanel() {
+    const row = document.getElementById('tfs-context-row');
+    if (row) row.style.display = row.style.display === 'none' ? 'block' : 'none';
+}
+
+async function fetchChatTfsContext() {
+    const itemId = (document.getElementById('chat-tfs-item-id')?.value || '').trim();
+    const project = (document.getElementById('chat-tfs-project')?.value || '').trim();
+    if (!itemId) { showToast('Enter a Work Item ID', 'warning'); return; }
+    if (!project) { showToast('Select a Project before fetching.', 'warning'); return; }
+    try {
+        const params = new URLSearchParams({ project });
+        const resp = await fetch(`/api/tfs/work-item-context/${encodeURIComponent(itemId)}?${params}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${await resp.text()}`);
+        const data = await resp.json();
+        _chatTfsContext = data;
+        if (_activeConvId) {
+            await fetch(`/api/chat/conversations/${encodeURIComponent(_activeConvId)}/tfs-context`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tfs_context: data }),
+            });
+        }
+        showChatTfsSummary(data);
+        document.getElementById('chat-tfs-clear-btn')?.removeAttribute('style');
+        renderActiveArtifactsBar();
+        showToast(`TFS #${itemId}: ${data.title}`, 'success');
+    } catch (e) {
+        showToast('Failed to fetch TFS context: ' + e.message, 'error');
+    }
+}
+
+function showChatTfsSummary(ctx) {
+    const summary = document.getElementById('chat-tfs-summary');
+    if (!summary) return;
+    summary.innerHTML = `<strong>#${ctx.id}: ${escHtml(ctx.title || '')}</strong> [${escHtml(ctx.state || '')}]${ctx.description_text ? ` — ${escHtml(ctx.description_text.substring(0, 120))}…` : ''}`;
+    summary.style.display = 'block';
+}
+
+function clearChatTfsContext() {
+    _chatTfsContext = null;
+    const summary = document.getElementById('chat-tfs-summary');
+    if (summary) { summary.innerHTML = ''; summary.style.display = 'none'; }
+    const clearBtn = document.getElementById('chat-tfs-clear-btn');
+    if (clearBtn) clearBtn.style.display = 'none';
+    renderActiveArtifactsBar();
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+{% endblock %}

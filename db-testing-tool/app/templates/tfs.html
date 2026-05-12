@@ -1,0 +1,1025 @@
+{% extends "base.html" %}
+{% block title %}TFS Integration – DB Testing Tool{% endblock %}
+{% block page_title %}TFS / Azure DevOps Integration{% endblock %}
+{% block topbar_actions %}
+    <button class="btn btn-outline" onclick="openCreatePlanModal()">+ Test Plan</button>
+    <button class="btn btn-outline" onclick="openCreateSuiteModal()">+ Test Suite</button>
+    <button class="btn btn-primary" onclick="openCreateModal()">+ Create Bug</button>
+{% endblock %}
+
+{% block content %}
+<style>
+.tfs-sect-hdr { display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none; gap:12px; }
+.tfs-sect-toggle { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:14px; padding:0 4px; line-height:1; }
+.tfs-sect-body.tfs-sect-collapsed { display:none !important; }
+</style>
+<!-- TFS Query Panel -->
+<div class="card mb-16">
+    <div class="card-header tfs-sect-hdr" onclick="toggleTfsSection('tfs-query-body','tfs-query-toggle')"><h2 style="margin:0">TFS Query</h2><button class="tfs-sect-toggle" id="tfs-query-toggle" type="button">▼</button></div>
+    <div class="tfs-sect-body" id="tfs-query-body">
+    <div class="grid grid-2" style="gap:12px;padding:0 0 12px 0">
+        <div class="form-group" style="margin:0">
+            <label>Project</label>
+            <select class="form-control" id="query-project"></select>
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Work Item Type</label>
+            <select class="form-control" id="query-type">
+                <option value="Bug">Bugs</option>
+                <option value="Product Backlog Item">PBIs</option>
+                <option value="Task">Tasks</option>
+                <option value="">All Types</option>
+            </select>
+        </div>
+    </div>
+    <div class="grid grid-2" style="gap:12px;padding:0 0 12px 0">
+        <div class="form-group" style="margin:0">
+            <label>Assigned To Me Window</label>
+            <select class="form-control" id="query-assigned-days">
+                <option value="30">Last 30 days</option>
+                <option value="90" selected>Last 90 days</option>
+                <option value="180">Last 180 days</option>
+                <option value="360">Last 360 days</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Status Filter</label>
+            <select class="form-control" id="query-status-filter">
+                <option value="all" selected>All statuses</option>
+                <option value="not-done">Not done</option>
+                <option value="done">Done / closed</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" style="margin:0 0 12px 0">
+        <label>WIQL Query <span class="text-muted">(or use quick filters above and click Search)</span></label>
+        <textarea class="form-control" id="query-wiql" rows="3" placeholder="SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.TeamProject] = @project AND [System.WorkItemType] = 'Bug' ORDER BY [System.Id] DESC"></textarea>
+    </div>
+    <div class="flex gap-8">
+        <button class="btn btn-primary" onclick="runQuery()">Search TFS</button>
+        <button class="btn btn-outline" onclick="quickQuery('active-bugs')">Active Bugs</button>
+        <button class="btn btn-outline" onclick="quickQuery('my-items')">My Items</button>
+        <button class="btn btn-outline" onclick="quickQuery('my-open-items')">Assigned To Me Not Done</button>
+        <button class="btn btn-outline" onclick="quickQuery('recent-pbis')">Recent PBIs</button>
+    </div>
+    <div class="table-wrap mt-16" id="query-results-wrap" style="display:none">
+        <p class="text-muted" id="query-count"></p>
+        <table>
+            <thead><tr><th>TFS ID</th><th>Type</th><th>Title</th><th>State</th><th>Priority</th><th>Assigned To</th><th>Tags</th></tr></thead>
+            <tbody id="query-tbody"></tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
+<!-- Saved / Preset Queries (CDSIntegration) -->
+<div class="card mb-16">
+    <div class="card-header tfs-sect-hdr" onclick="toggleTfsSection('tfs-saved-body','tfs-saved-toggle')">
+        <h2 style="margin:0">CDSIntegration Queries</h2>
+        <button class="tfs-sect-toggle" id="tfs-saved-toggle" type="button">▼</button>
+    </div>
+    <div class="tfs-sect-body" id="tfs-saved-body">
+    <p class="text-muted mb-16">Pre-built queries based on the CDSIntegration TFS project template. Click a query to run it against TFS.</p>
+
+    <div class="grid grid-2" style="gap:12px;margin-bottom:12px">
+        <div class="form-group" style="margin:0">
+            <label>Project</label>
+            <select class="form-control" id="sq-project" onchange="rerenderQueriesUi()"></select>
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Load from TFS</label>
+            <div class="flex gap-8" style="margin-top:4px">
+                <button class="btn btn-outline btn-sm" onclick="loadSavedQueries('Shared Queries')">Shared Queries</button>
+                <button class="btn btn-outline btn-sm" onclick="loadSavedQueries('My Queries')">My Queries</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex gap-8" style="align-items:center;margin-bottom:12px">
+        <label class="checkbox-label" style="margin:0">
+            <input type="checkbox" id="sq-favorites-only" onchange="handleFavoritesOnlyChanged()">
+            Favorites only
+        </label>
+        <label class="checkbox-label" style="margin:0">
+            <input type="checkbox" id="sq-modified-by-me" onchange="rerenderQueriesUi()" checked>
+            Modified by name
+        </label>
+        <input class="form-control" id="sq-my-name" placeholder="e.g. ikorostelev" style="max-width:220px" value="ikorostelev" oninput="rerenderQueriesUi()">
+        <span class="text-muted" style="font-size:12px">Click ☆ to favorite preset and saved queries.</span>
+        <button class="btn btn-outline btn-sm" onclick="loadFavoriteSavedQueries()">Load Favorite Saved Queries</button>
+    </div>
+
+    <!-- Preset query buttons -->
+    <div id="preset-queries-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;margin-bottom:16px"></div>
+
+    <!-- TFS saved queries tree (loaded on demand) -->
+    <div id="tfs-saved-queries-list" style="display:none;margin-bottom:16px">
+        <h3 style="color:var(--text);margin-bottom:8px">TFS Saved Queries</h3>
+        <div id="tfs-saved-tbody"></div>
+    </div>
+
+    <!-- Results panel -->
+    <div id="sq-results-wrap" style="display:none">
+        <div class="flex gap-8" style="align-items:center;margin-bottom:8px">
+            <h3 style="color:var(--text);margin:0" id="sq-query-name">Results</h3>
+            <span class="text-muted" id="sq-count"></span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Type</th><th>Title</th><th>State</th><th>Priority</th><th>Assigned To</th><th>Area Path</th><th>Iteration</th><th>Tags</th></tr></thead>
+                <tbody id="sq-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- Local Work Items Table -->
+<div class="card">
+    <div class="card-header tfs-sect-hdr" onclick="toggleTfsSection('tfs-local-body','tfs-local-toggle')"><h2 style="margin:0">Local Work Items</h2><button class="tfs-sect-toggle" id="tfs-local-toggle" type="button">▼</button></div>
+    <div class="tfs-sect-body" id="tfs-local-body">
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>ID</th><th>TFS ID</th><th>Title</th><th>Type</th><th>State</th><th>Priority</th><th>Assigned To</th><th>Project</th><th>Actions</th></tr></thead>
+            <tbody id="wi-tbody"></tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
+<!-- Create Bug Modal -->
+<div class="modal-overlay" id="modal-bug">
+    <div class="modal" style="max-width:700px">
+        <div class="modal-header"><h2 id="modal-bug-title">Create TFS Bug</h2><button class="modal-close" onclick="closeModal('modal-bug')">&times;</button></div>
+        <form onsubmit="return saveBug(event)">
+            <input type="hidden" id="bug-edit-id">
+            <div class="form-group"><label>Title</label><input class="form-control" id="bug-title" required></div>
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label>TFS Project</label>
+                        <select class="form-control" id="bug-project" onchange="handleTfsPathProjectChange('bug-create', this.value, 'bug-area', 'bug-iteration')"></select>
+                </div>
+                <div class="form-group">
+                    <label>Work Item Type</label>
+                    <select class="form-control" id="bug-type">
+                        <option value="Bug">Bug</option>
+                        <option value="Product Backlog Item">PBI</option>
+                        <option value="Task">Task</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-3">
+                <div class="form-group">
+                    <label>State</label>
+                    <select class="form-control" id="bug-state">
+                        <option value="New">New</option>
+                        <option value="Active">Active</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select class="form-control" id="bug-priority">
+                        <option value="1">1 - Critical</option>
+                        <option value="2" selected>2 - High</option>
+                        <option value="3">3 - Medium</option>
+                        <option value="4">4 - Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Severity</label>
+                    <select class="form-control" id="bug-sev">
+                        <option value="1 - Critical">1 - Critical</option>
+                        <option value="2 - High">2 - High</option>
+                        <option value="3 - Medium" selected>3 - Medium</option>
+                        <option value="4 - Low">4 - Low</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group"><label>Assigned To</label><input class="form-control" id="bug-assigned" placeholder="e.g. Ivan Korostelev - IC"></div>
+            <div class="form-group"><label>Description</label><textarea class="form-control" id="bug-desc" rows="3"></textarea></div>
+            <div class="form-group"><label>Repro Steps</label><textarea class="form-control" id="bug-repro" rows="3"></textarea></div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Area Path</label><input class="form-control" id="bug-area" list="bug-area-options" placeholder="CDSIntegration\CDSCAL\..."></div>
+                <div class="form-group"><label>Iteration Path</label><input class="form-control" id="bug-iteration" list="bug-iteration-options" placeholder="CDSIntegration\CCAL Performance\..."></div>
+            </div>
+            <datalist id="bug-area-options"></datalist>
+            <datalist id="bug-iteration-options"></datalist>
+            <div class="form-group"><label>Tags</label><input class="form-control" id="bug-tags" value="AutoTest,DBTestTool"></div>
+            <div class="flex gap-8 mt-16">
+                <button type="submit" class="btn btn-primary" id="bug-submit-btn">Create</button>
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-bug')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create Test Plan Modal -->
+<div class="modal-overlay" id="modal-test-plan">
+    <div class="modal" style="max-width:640px">
+        <div class="modal-header"><h2>Create TFS Test Plan</h2><button class="modal-close" onclick="closeModal('modal-test-plan')">&times;</button></div>
+        <form onsubmit="return saveTestPlan(event)">
+            <div class="form-group"><label>Project</label><select class="form-control" id="tp-project" onchange="handleTfsPathProjectChange('test-plan', this.value, 'tp-area', 'tp-iteration')"></select></div>
+            <div class="form-group"><label>Plan Name</label><input class="form-control" id="tp-name" required></div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Area Path</label><input class="form-control" id="tp-area" list="tp-area-options" placeholder="Project\Area"></div>
+                <div class="form-group"><label>Iteration Path</label><input class="form-control" id="tp-iteration" list="tp-iteration-options" placeholder="Project\Iteration"></div>
+            </div>
+            <datalist id="tp-area-options"></datalist>
+            <datalist id="tp-iteration-options"></datalist>
+            <div class="form-group"><label>Description</label><textarea class="form-control" id="tp-desc" rows="3"></textarea></div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Start Date</label><input class="form-control" id="tp-start" type="date"></div>
+                <div class="form-group"><label>End Date</label><input class="form-control" id="tp-end" type="date"></div>
+            </div>
+            <div class="flex gap-8 mt-16">
+                <button type="submit" class="btn btn-primary">Create Plan</button>
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-test-plan')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create Test Suite Modal -->
+<div class="modal-overlay" id="modal-test-suite">
+    <div class="modal" style="max-width:640px">
+        <div class="modal-header"><h2>Create TFS Test Suite</h2><button class="modal-close" onclick="closeModal('modal-test-suite')">&times;</button></div>
+        <form onsubmit="return saveTestSuite(event)">
+            <div class="form-group"><label>Project</label><select class="form-control" id="ts-project"></select></div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Plan ID</label><input class="form-control" id="ts-plan-id" type="number" required></div>
+                <div class="form-group"><label>Parent Suite ID <span class="text-muted">(optional, defaults to root suite)</span></label><input class="form-control" id="ts-parent-suite-id" type="number"></div>
+            </div>
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label>Suite Type</label>
+                    <select class="form-control" id="ts-suite-type" onchange="onSuiteTypeChanged()">
+                        <option value="StaticTestSuite" selected>Static Test Suite</option>
+                        <option value="RequirementTestSuite">Requirement-Based Suite</option>
+                    </select>
+                </div>
+                <div class="form-group" id="ts-name-wrap"><label>Suite Name</label><input class="form-control" id="ts-name" required></div>
+            </div>
+            <div class="form-group" id="ts-req-wrap" style="display:none"><label>Requirement ID</label><input class="form-control" id="ts-requirement-id" type="number" placeholder="PBI / User Story / Requirement work item ID"></div>
+            <div class="flex gap-8 mt-16">
+                <button type="submit" class="btn btn-primary">Create Suite</button>
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-test-suite')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let tfsProjects = [];
+let _savedQueriesState = { project: '', folder: '', queries: [] };
+let _lastCreatedPlan = null;
+let _tfsWebConfig = { base_url: '', collection: '' };
+let _classificationCache = { areas: {}, iterations: {} };
+const TFS_QUERY_FAVORITES_KEY = 'dbTestingTool.tfsQueryFavorites.v1';
+const TFS_PAGE_STATE_KEY = 'tfs.page.state.v1';
+
+function _tfsSafeJson(raw, fallback) {
+    try { const v = JSON.parse(raw); return v !== null && v !== undefined ? v : fallback; } catch (_) { return fallback; }
+}
+
+function persistTfsPageState() {
+    const state = {};
+    ['sq-project','bug-project','query-project','tp-project','ts-project'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) state[id] = el.value || '';
+    });
+    ['bug-title','bug-desc','query-wiql','tp-name','ts-name'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) state[id] = el.value || '';
+    });
+    localStorage.setItem(TFS_PAGE_STATE_KEY, JSON.stringify(state));
+}
+
+function restoreTfsPageState() {
+    const state = _tfsSafeJson(localStorage.getItem(TFS_PAGE_STATE_KEY), null);
+    if (!state) return;
+    window._tfsPendingState = state;
+}
+
+function applyTfsPageState() {
+    const state = window._tfsPendingState;
+    if (!state) return;
+    ['sq-project','bug-project','query-project','tp-project','ts-project'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && state[id]) {
+            const has = Array.from(el.options || []).some(o => o.value === state[id]);
+            if (has) el.value = state[id];
+        }
+    });
+    ['bug-title','bug-desc','query-wiql','tp-name','ts-name'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && state[id]) el.value = state[id];
+    });
+    delete window._tfsPendingState;
+}
+
+function _bindTfsPersistListeners() {
+    ['bug-title','bug-desc','query-wiql','tp-name','ts-name'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', persistTfsPageState);
+    });
+    ['sq-project','bug-project','query-project','tp-project','ts-project'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', persistTfsPageState);
+    });
+}
+
+function restoreRememberedTfsPathInputs(project, context, areaInputId, iterationInputId) {
+    const remembered = window.getRememberedTfsPaths?.(project, context) || {};
+    const areaInput = document.getElementById(areaInputId);
+    const iterationInput = document.getElementById(iterationInputId);
+    if (areaInput) areaInput.value = remembered.areaPath || '';
+    if (iterationInput) iterationInput.value = remembered.iterationPath || '';
+}
+
+function rememberCurrentTfsPathInputs(project, context, areaInputId, iterationInputId) {
+    window.rememberTfsPaths?.(project, context, {
+        areaPath: document.getElementById(areaInputId)?.value?.trim() || '',
+        iterationPath: document.getElementById(iterationInputId)?.value?.trim() || '',
+    });
+}
+
+async function handleTfsPathProjectChange(context, project, areaInputId, iterationInputId) {
+    await refreshPlanPathSuggestions(project);
+    restoreRememberedTfsPathInputs(project, context, areaInputId, iterationInputId);
+}
+
+// ── Init ────────────────────────────────────────────────
+async function initPage() {
+    restoreTfsPageState();
+    try {
+        const data = await API.getTfsProjects();
+        tfsProjects = data.projects || [];
+        populateProjectDropdowns();
+        applyTfsPageState();
+        try {
+            _tfsWebConfig = await API.getTfsConfig();
+        } catch (_) {
+            _tfsWebConfig = { base_url: '', collection: '' };
+        }
+        const favoritesToggle = document.getElementById('sq-favorites-only');
+        if (favoritesToggle && !favoritesToggle.dataset.bound) {
+            favoritesToggle.addEventListener('change', handleFavoritesOnlyChanged);
+            favoritesToggle.dataset.bound = '1';
+        }
+        const savedProject = document.getElementById('sq-project');
+        if (savedProject && !savedProject.dataset.bound) {
+            savedProject.addEventListener('change', handleSavedQueryProjectChanged);
+            savedProject.dataset.bound = '1';
+        }
+    } catch(e) { console.error('Failed to load TFS projects', e); }
+    loadWorkItems();
+    loadPresetQueries();
+    _bindTfsPersistListeners();
+}
+
+function toggleTfsSection(bodyId, toggleId) {
+    const body = document.getElementById(bodyId);
+    const toggle = document.getElementById(toggleId);
+    if (!body) return;
+    const collapsed = body.classList.toggle('tfs-sect-collapsed');
+    if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
+}
+
+function openTfsItemWindow(project, itemId, webUrl = '') {
+    if (webUrl) {
+        openExternalWindow(webUrl);
+        return;
+    }
+    if (!project || !itemId) return;
+    const baseUrl = String(_tfsWebConfig.base_url || '').replace(/\/$/, '');
+    const collection = String(_tfsWebConfig.collection || '').replace(/^\/+|\/+$/g, '');
+    if (!baseUrl || !collection) {
+        showToast('TFS base URL is not configured', 'error');
+        return;
+    }
+    openExternalWindow(`${baseUrl}/${collection}/${encodeURIComponent(project)}/_workitems/edit/${itemId}`);
+}
+
+function buildStateClause(statusFilter) {
+    if (statusFilter === 'not-done') return " AND [System.State] NOT IN ('Done', 'Closed', 'Resolved', 'Removed')";
+    if (statusFilter === 'done') return " AND [System.State] IN ('Done', 'Closed', 'Resolved', 'Removed')";
+    return '';
+}
+
+function tfsOpenButtonAttrs(project, webUrl = '') {
+    return `data-project="${encodeURIComponent(project || '')}" data-web-url="${encodeURIComponent(webUrl || '')}"`;
+}
+
+function openTfsItemWindowFromButton(button, itemId) {
+    openTfsItemWindow(
+        decodeURIComponent(button?.dataset?.project || ''),
+        itemId,
+        decodeURIComponent(button?.dataset?.webUrl || '')
+    );
+}
+
+async function loadClassificationSuggestions(project, structureGroup) {
+    if (!project) return [];
+    if (_classificationCache[structureGroup]?.[project]) return _classificationCache[structureGroup][project];
+    const resp = await API.getTfsClassificationNodes(project, structureGroup, 8);
+    _classificationCache[structureGroup][project] = resp.nodes || [];
+    return _classificationCache[structureGroup][project];
+}
+
+function bindDatalist(inputId, datalistId, nodes) {
+    const input = document.getElementById(inputId);
+    let datalist = document.getElementById(datalistId);
+    if (!input) return;
+    if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = datalistId;
+        document.body.appendChild(datalist);
+    }
+    input.setAttribute('list', datalistId);
+    datalist.innerHTML = (nodes || []).map(node => `<option value="${escapeHtml(node.path || '')}">${escapeHtml(node.path || '')}</option>`).join('');
+}
+
+async function refreshPlanPathSuggestions(project) {
+    const areas = await loadClassificationSuggestions(project, 'areas');
+    const iterations = await loadClassificationSuggestions(project, 'iterations');
+    bindDatalist('tp-area', 'tp-area-options', areas);
+    bindDatalist('tp-iteration', 'tp-iteration-options', iterations);
+    bindDatalist('bug-area', 'bug-area-options', areas);
+    bindDatalist('bug-iteration', 'bug-iteration-options', iterations);
+    bindDatalist('ts-area', 'ts-area-options', areas);
+    bindDatalist('ts-iteration', 'ts-iteration-options', iterations);
+}
+
+function populateProjectDropdowns() {
+    ['bug-project', 'query-project', 'sq-project', 'tp-project', 'ts-project'].forEach(selId => {
+        const sel = document.getElementById(selId);
+        if (!sel) return;
+        if (tfsProjects.length) {
+            sel.innerHTML = tfsProjects.map((p, i) =>
+                `<option value="${escapeHtml(p)}" ${i === 0 ? 'selected' : ''}>${escapeHtml(p)}</option>`
+            ).join('');
+        } else {
+            sel.innerHTML = '<option value="">No projects configured</option>';
+        }
+    });
+}
+
+// ── Work Items Table ───────────────────────────────────
+async function loadWorkItems() {
+    const items = await API.getWorkItems();
+    const tbody = document.getElementById('wi-tbody');
+    tbody.innerHTML = items.map(i => `
+        <tr>
+            <td>${i.id}</td>
+            <td>${i.tfs_id ? `<div class="flex gap-8" style="align-items:center"><span>${i.tfs_id}</span><button class="btn btn-outline btn-sm" ${tfsOpenButtonAttrs(i.project || '', i.web_url || '')} onclick="openTfsItemWindowFromButton(this, ${i.tfs_id})">Open</button></div>` : '<span class="text-muted">local</span>'}</td>
+            <td><strong>${escapeHtml(i.title)}</strong></td>
+            <td>${escapeHtml(i.work_item_type || 'Bug')}</td>
+            <td>${statusBadge(i.state)}</td>
+            <td>${priorityBadge(i.priority)}</td>
+            <td>${escapeHtml(i.assigned_to || '-')}</td>
+            <td>${escapeHtml(i.project || '-')}</td>
+            <td class="flex gap-8">
+                <button class="btn btn-outline btn-sm" onclick="editBug(${i.id})">Edit</button>
+                <button class="btn btn-outline btn-sm" onclick="syncWi(${i.id})" ${i.tfs_id ? '' : 'disabled'}>Sync</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteBug(${i.id})">Del</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="9" class="empty-state">No work items tracked yet.</td></tr>';
+}
+
+function priorityBadge(p) {
+    const map = {1: 'danger', 2: 'warning', 3: 'info', 4: 'muted'};
+    const labels = {1: 'P1', 2: 'P2', 3: 'P3', 4: 'P4'};
+    return `<span class="badge badge-${map[p] || 'muted'}">${labels[p] || 'P' + (p||'?')}</span>`;
+}
+
+// ── Create / Edit Modal ─────────────────────────────────
+function openCreateModal() {
+    document.getElementById('bug-edit-id').value = '';
+    document.getElementById('modal-bug-title').textContent = 'Create TFS Bug';
+    document.getElementById('bug-submit-btn').textContent = 'Create';
+    document.getElementById('bug-title').value = '';
+    document.getElementById('bug-type').value = 'Bug';
+    document.getElementById('bug-state').value = 'New';
+    document.getElementById('bug-priority').value = '2';
+    document.getElementById('bug-sev').value = '3 - Medium';
+    document.getElementById('bug-assigned').value = '';
+    document.getElementById('bug-desc').value = '';
+    document.getElementById('bug-repro').value = '';
+    document.getElementById('bug-area').value = '';
+    document.getElementById('bug-iteration').value = '';
+    document.getElementById('bug-tags').value = 'AutoTest,DBTestTool';
+    populateProjectDropdowns();
+    const project = document.getElementById('bug-project').value || tfsProjects[0] || '';
+    handleTfsPathProjectChange('bug-create', project, 'bug-area', 'bug-iteration');
+    openModal('modal-bug');
+}
+
+function openCreatePlanModal() {
+    populateProjectDropdowns();
+    document.getElementById('tp-name').value = '';
+    document.getElementById('tp-desc').value = '';
+    document.getElementById('tp-area').value = '';
+    document.getElementById('tp-iteration').value = '';
+    document.getElementById('tp-start').value = '';
+    document.getElementById('tp-end').value = '';
+    const project = document.getElementById('tp-project').value || tfsProjects[0] || '';
+    handleTfsPathProjectChange('test-plan', project, 'tp-area', 'tp-iteration');
+    openModal('modal-test-plan');
+}
+
+function openCreateSuiteModal() {
+    populateProjectDropdowns();
+    if (_lastCreatedPlan) {
+        document.getElementById('ts-project').value = _lastCreatedPlan.project || '';
+        document.getElementById('ts-plan-id').value = _lastCreatedPlan.plan_id || '';
+        document.getElementById('ts-parent-suite-id').value = _lastCreatedPlan.root_suite_id || '';
+    }
+    if (!document.getElementById('ts-suite-type').value) {
+        document.getElementById('ts-suite-type').value = 'StaticTestSuite';
+    }
+    onSuiteTypeChanged();
+    refreshPlanPathSuggestions(document.getElementById('ts-project').value || tfsProjects[0] || '');
+    openModal('modal-test-suite');
+}
+
+function onSuiteTypeChanged() {
+    const type = document.getElementById('ts-suite-type').value;
+    const isRequirement = type === 'RequirementTestSuite';
+    document.getElementById('ts-name-wrap').style.display = isRequirement ? 'none' : '';
+    document.getElementById('ts-req-wrap').style.display = isRequirement ? '' : 'none';
+    document.getElementById('ts-name').required = !isRequirement;
+    document.getElementById('ts-requirement-id').required = isRequirement;
+}
+
+async function editBug(id) {
+    try {
+        const wi = await API.getWorkItem(id);
+        document.getElementById('bug-edit-id').value = wi.id;
+        document.getElementById('modal-bug-title').textContent = 'Edit Work Item #' + wi.id + (wi.tfs_id ? ' (TFS ' + wi.tfs_id + ')' : '');
+        document.getElementById('bug-submit-btn').textContent = 'Update';
+        document.getElementById('bug-title').value = wi.title || '';
+        document.getElementById('bug-type').value = wi.work_item_type || 'Bug';
+        document.getElementById('bug-state').value = wi.state || 'New';
+        document.getElementById('bug-priority').value = wi.priority || 2;
+        document.getElementById('bug-sev').value = '3 - Medium';
+        document.getElementById('bug-assigned').value = wi.assigned_to || '';
+        document.getElementById('bug-desc').value = wi.description || '';
+        document.getElementById('bug-repro').value = wi.repro_steps || '';
+        document.getElementById('bug-area').value = wi.area_path || '';
+        document.getElementById('bug-iteration').value = wi.iteration_path || '';
+        document.getElementById('bug-tags').value = wi.tags || '';
+        populateProjectDropdowns();
+        if (wi.project) document.getElementById('bug-project').value = wi.project;
+        openModal('modal-bug');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function saveBug(e) {
+    e.preventDefault();
+    const editId = document.getElementById('bug-edit-id').value;
+    try {
+        if (editId) {
+            // UPDATE
+            await API.updateBug(editId, {
+                title: document.getElementById('bug-title').value,
+                state: document.getElementById('bug-state').value,
+                assigned_to: document.getElementById('bug-assigned').value || null,
+                priority: parseInt(document.getElementById('bug-priority').value),
+                severity: document.getElementById('bug-sev').value,
+                description: document.getElementById('bug-desc').value || null,
+                area_path: document.getElementById('bug-area').value || null,
+                iteration_path: document.getElementById('bug-iteration').value || null,
+                tags: document.getElementById('bug-tags').value || null,
+            });
+            showToast('Work item updated', 'success');
+        } else {
+            // CREATE
+            rememberCurrentTfsPathInputs(
+                document.getElementById('bug-project').value,
+                'bug-create',
+                'bug-area',
+                'bug-iteration'
+            );
+            await API.createBug({
+                title: document.getElementById('bug-title').value,
+                work_item_type: document.getElementById('bug-type').value,
+                state: document.getElementById('bug-state').value,
+                priority: parseInt(document.getElementById('bug-priority').value),
+                severity: document.getElementById('bug-sev').value,
+                assigned_to: document.getElementById('bug-assigned').value,
+                description: document.getElementById('bug-desc').value,
+                repro_steps: document.getElementById('bug-repro').value,
+                tags: document.getElementById('bug-tags').value,
+                area_path: document.getElementById('bug-area').value,
+                iteration_path: document.getElementById('bug-iteration').value,
+                project: document.getElementById('bug-project').value,
+                test_run_ids: [],
+            });
+            showToast('Bug created', 'success');
+        }
+        closeModal('modal-bug');
+        loadWorkItems();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function deleteBug(id) {
+    if (!confirm('Delete this work item?')) return;
+    try { await API.deleteBug(id); showToast('Deleted', 'success'); loadWorkItems(); }
+    catch (e) { showToast(e.message, 'error'); }
+}
+
+async function syncWi(id) {
+    try {
+        await API.syncWorkItem(id);
+        showToast('Synced with TFS', 'success');
+        loadWorkItems();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function saveTestPlan(e) {
+    e.preventDefault();
+    try {
+        rememberCurrentTfsPathInputs(
+            document.getElementById('tp-project').value,
+            'test-plan',
+            'tp-area',
+            'tp-iteration'
+        );
+        const res = await API.createTfsTestPlan({
+            project: document.getElementById('tp-project').value,
+            name: document.getElementById('tp-name').value.trim(),
+            description: document.getElementById('tp-desc').value.trim(),
+            area_path: document.getElementById('tp-area').value.trim(),
+            iteration_path: document.getElementById('tp-iteration').value.trim(),
+            start_date: document.getElementById('tp-start').value || '',
+            end_date: document.getElementById('tp-end').value || '',
+        });
+        _lastCreatedPlan = res;
+        closeModal('modal-test-plan');
+        showToast(`Created plan ${res.plan_id} (${res.name})`, 'success');
+    } catch (e2) {
+        showToast(`Create plan failed: ${e2.message}`, 'error');
+    }
+    return false;
+}
+
+async function saveTestSuite(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            project: document.getElementById('ts-project').value,
+            plan_id: parseInt(document.getElementById('ts-plan-id').value || '0'),
+            parent_suite_id: parseInt(document.getElementById('ts-parent-suite-id').value || '0') || null,
+            suite_type: document.getElementById('ts-suite-type').value,
+            name: document.getElementById('ts-name').value.trim(),
+            requirement_id: parseInt(document.getElementById('ts-requirement-id').value || '0') || null,
+        };
+        const res = await API.createTfsTestSuite(payload);
+        closeModal('modal-test-suite');
+        showToast(`Created suite ${res.suite_id} (${res.name})`, 'success');
+    } catch (e2) {
+        showToast(`Create suite failed: ${e2.message}`, 'error');
+    }
+    return false;
+}
+
+// ── TFS Query ──────────────────────────────────────────
+function quickQuery(preset) {
+    const proj = document.getElementById('query-project').value;
+    const assignedDays = parseInt(document.getElementById('query-assigned-days')?.value || '90', 10) || 90;
+    const statusClause = buildStateClause(document.getElementById('query-status-filter')?.value || 'all');
+    let wiql = '';
+    if (preset === 'active-bugs') {
+        wiql = `SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.TeamProject] = '${proj}' AND [System.WorkItemType] = 'Bug'${statusClause || " AND [System.State] <> 'Closed'"} ORDER BY [System.Id] DESC`;
+    } else if (preset === 'my-items') {
+        wiql = `SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.TeamProject] = '${proj}' AND [System.WorkItemType] IN ('Bug', 'Product Backlog Item') AND [System.AssignedTo] = @me${statusClause} AND [System.ChangedDate] >= @StartOfDay('-${assignedDays}d') ORDER BY [System.ChangedDate] DESC`;
+    } else if (preset === 'my-open-items') {
+        wiql = `SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.TeamProject] = '${proj}' AND [System.AssignedTo] = @me AND [System.WorkItemType] IN ('Bug', 'Product Backlog Item') AND [System.State] NOT IN ('Done', 'Closed', 'Resolved', 'Removed') AND [System.ChangedDate] >= @StartOfDay('-${assignedDays}d') ORDER BY [System.ChangedDate] DESC`;
+    } else if (preset === 'recent-pbis') {
+        wiql = `SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.TeamProject] = '${proj}' AND [System.WorkItemType] = 'Product Backlog Item'${statusClause} ORDER BY [System.CreatedDate] DESC`;
+    }
+    document.getElementById('query-wiql').value = wiql;
+    runQuery();
+}
+
+async function runQuery() {
+    const project = document.getElementById('query-project').value;
+    let wiql = document.getElementById('query-wiql').value.trim();
+    if (!wiql) {
+        // Build from quick filters
+        const wiType = document.getElementById('query-type').value;
+        const statusClause = buildStateClause(document.getElementById('query-status-filter')?.value || 'all');
+        wiql = `SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.TeamProject] = '${project}'`;
+        if (wiType) wiql += ` AND [System.WorkItemType] = '${wiType}'`;
+        wiql += statusClause;
+        wiql += ` ORDER BY [System.Id] DESC`;
+        document.getElementById('query-wiql').value = wiql;
+    }
+
+    showToast('Querying TFS...', 'info');
+    try {
+        const res = await API.runTfsQuery(project, wiql);
+        const wrap = document.getElementById('query-results-wrap');
+        wrap.style.display = '';
+        document.getElementById('query-count').textContent = `${res.count} result(s)`;
+        const tbody = document.getElementById('query-tbody');
+        if (res.items && res.items.length && !res.items[0].error) {
+            tbody.innerHTML = res.items.map(i => `
+                <tr>
+                    <td><div class="flex gap-8" style="align-items:center"><strong>${i.id}</strong><button class="btn btn-outline btn-sm" ${tfsOpenButtonAttrs(project, i.web_url || '')} onclick="openTfsItemWindowFromButton(this, ${i.id})">Open</button></div></td>
+                    <td>${escapeHtml(i.work_item_type || '')}</td>
+                    <td>${escapeHtml(i.title || '')}</td>
+                    <td>${statusBadge(i.state || '')}</td>
+                    <td>${priorityBadge(i.priority)}</td>
+                    <td>${escapeHtml(i.assigned_to || '-')}</td>
+                    <td>${escapeHtml(i.tags || '')}</td>
+                </tr>
+            `).join('');
+        } else if (res.items && res.items[0] && res.items[0].error) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-muted">${escapeHtml(res.items[0].error)}</td></tr>`;
+        } else {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-muted">No results found.</td></tr>';
+        }
+        showToast(`Found ${res.count} items`, 'success');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ── Saved / Preset Queries ──────────────────────────────
+function _loadQueryFavorites() {
+    try {
+        return JSON.parse(localStorage.getItem(TFS_QUERY_FAVORITES_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+function _saveQueryFavorites(favorites) {
+    localStorage.setItem(TFS_QUERY_FAVORITES_KEY, JSON.stringify(favorites || {}));
+}
+
+function _favoriteKey(kind, project, queryKey) {
+    return `${kind}::${project || ''}::${queryKey || ''}`;
+}
+
+function _isFavoriteQuery(kind, project, queryKey) {
+    const favorites = _loadQueryFavorites();
+    return !!favorites[_favoriteKey(kind, project, queryKey)];
+}
+
+function favoritesOnlyEnabled() {
+    return !!document.getElementById('sq-favorites-only')?.checked;
+}
+
+function modifiedByMeEnabled() {
+    return !!document.getElementById('sq-modified-by-me')?.checked;
+}
+
+function myNameFilters() {
+    const raw = (document.getElementById('sq-my-name')?.value || '').trim().toLowerCase();
+    if (!raw) return [];
+    return raw.split(',').map(x => x.trim()).filter(Boolean);
+}
+
+function queryModifiedByName(query) {
+    const filters = myNameFilters();
+    if (!filters.length) return false;
+    const by = String(query?.last_modified_by || '').toLowerCase();
+    return filters.some(f => by.includes(f));
+}
+
+function toggleQueryFavorite(kind, project, queryKey, event) {
+    if (event) event.stopPropagation();
+    const favorites = _loadQueryFavorites();
+    const key = _favoriteKey(kind, project, queryKey);
+    favorites[key] = !favorites[key];
+    if (!favorites[key]) delete favorites[key];
+    _saveQueryFavorites(favorites);
+    rerenderQueriesUi();
+}
+
+function rerenderQueriesUi() {
+    renderPresetQueries();
+    if (_savedQueriesState.folder) {
+        renderSavedQueriesList(_savedQueriesState.project, _savedQueriesState.queries);
+    }
+}
+
+async function handleFavoritesOnlyChanged() {
+    if (favoritesOnlyEnabled()) {
+        await loadFavoriteSavedQueries();
+        return;
+    }
+    rerenderQueriesUi();
+}
+
+function handleSavedQueryProjectChanged() {
+    _savedQueriesState = { project: '', folder: '', queries: [] };
+    const list = document.getElementById('tfs-saved-queries-list');
+    if (list) list.style.display = 'none';
+    renderPresetQueries();
+    if (favoritesOnlyEnabled()) {
+        loadFavoriteSavedQueries();
+    }
+}
+
+function renderPresetQueries() {
+    const grid = document.getElementById('preset-queries-grid');
+    const project = document.getElementById('sq-project').value || (tfsProjects[0] || 'CDSIntegration');
+    const entries = (window._presetQueries || []).map((q, i) => ({ q, i }));
+    const filtered = favoritesOnlyEnabled()
+        ? entries.filter(({ q }) => _isFavoriteQuery('preset', project, q.name))
+        : entries;
+
+    if (!filtered.length) {
+        grid.innerHTML = '<div class="text-muted" style="padding:12px;border:1px dashed var(--border);border-radius:8px">No preset queries match the current favorites filter.</div>';
+        return;
+    }
+
+    grid.innerHTML = filtered.map(({ q, i }) => {
+        const favorite = _isFavoriteQuery('preset', project, q.name);
+        return `
+            <div class="card" style="padding:12px;cursor:pointer;border:1px solid var(--border);transition:border-color .2s;position:relative"
+                 onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'"
+                 onclick="runPresetQuery(${i})">
+                <button class="btn btn-outline btn-sm" style="position:absolute;top:8px;right:8px;padding:2px 8px" onclick="toggleQueryFavorite('preset', '${escapeHtml(project)}', '${escapeHtml(q.name)}', event)">${favorite ? '★' : '☆'}</button>
+                <strong style="color:var(--text);display:block;padding-right:40px">${escapeHtml(q.name)}</strong>
+                <p class="text-muted" style="font-size:12px;margin:4px 0 0 0">${escapeHtml(q.description)}</p>
+            </div>
+        `;
+    }).join('');
+}
+
+async function loadPresetQueries() {
+    try {
+        const res = await API.getPresetQueries();
+        window._presetQueries = res.queries || [];
+        renderPresetQueries();
+    } catch(e) { console.error('Failed to load preset queries', e); }
+}
+
+async function runPresetQuery(idx) {
+    const q = window._presetQueries[idx];
+    if (!q) return;
+    const project = document.getElementById('sq-project').value || (tfsProjects[0] || 'CDSIntegration');
+    document.getElementById('sq-query-name').textContent = q.name;
+    document.getElementById('sq-results-wrap').style.display = '';
+    document.getElementById('sq-tbody').innerHTML = '<tr><td colspan="9"><span class="spinner"></span> Running query...</td></tr>';
+    document.getElementById('sq-count').textContent = '';
+
+    try {
+        const res = await API.runTfsQuery(project, q.wiql);
+        renderSqResults(res);
+    } catch(e) {
+        document.getElementById('sq-tbody').innerHTML = `<tr><td colspan="9" class="text-muted">${escapeHtml(e.message)}</td></tr>`;
+        showToast(e.message, 'error');
+    }
+}
+
+function renderSavedQueriesList(project, queries) {
+    const container = document.getElementById('tfs-saved-tbody');
+    document.getElementById('tfs-saved-queries-list').style.display = '';
+
+    if (!queries.length) {
+        container.innerHTML = '<p class="text-muted" style="padding:12px">No saved queries found in this folder.</p>';
+        return;
+    }
+    if (queries[0] && queries[0].error) {
+        container.innerHTML = `<p class="text-muted" style="padding:12px">${escapeHtml(queries[0].error)}</p>`;
+        return;
+    }
+
+    const filtered = queries.filter(q => {
+        const favOk = !favoritesOnlyEnabled() || _isFavoriteQuery('saved', project, q.id);
+        const meOk = !modifiedByMeEnabled() || queryModifiedByName(q);
+        return favOk && meOk;
+    });
+
+    if (!filtered.length) {
+        container.innerHTML = '<p class="text-muted" style="padding:12px">No saved queries match the current favorites filter.</p>';
+        return;
+    }
+
+    container.innerHTML = filtered.map(q => {
+        const favorite = _isFavoriteQuery('saved', project, q.id);
+        return `
+            <div style="padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px"
+                 onmouseover="this.style.background='var(--bg-dark)'" onmouseout="this.style.background=''"
+                 onclick="runTfsSavedQuery('${escapeHtml(project)}', '${escapeHtml(q.id)}', '${escapeHtml(q.name)}')">
+                <div style="min-width:0;flex:1">
+                    <strong style="color:var(--text)">${escapeHtml(q.name)}</strong>
+                    <span class="text-muted" style="font-size:11px;margin-left:8px">${escapeHtml(q.path)}</span>
+                    <div class="text-muted" style="font-size:11px;margin-top:2px">Last modified: ${escapeHtml(q.last_modified_by || '-')} ${q.last_modified_date ? `| ${escapeHtml(String(q.last_modified_date))}` : ''}</div>
+                </div>
+                <div class="flex gap-8" style="align-items:center">
+                    <span class="badge badge-info">${escapeHtml(q.query_type)}</span>
+                    <button class="btn btn-outline btn-sm" style="padding:2px 8px" onclick="toggleQueryFavorite('saved', '${escapeHtml(project)}', '${escapeHtml(q.id)}', event)">${favorite ? '★' : '☆'}</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function loadSavedQueries(folder) {
+    const project = document.getElementById('sq-project').value || (tfsProjects[0] || 'CDSIntegration');
+    showToast('Loading saved queries from TFS...', 'info');
+    try {
+        const res = await API.getSavedQueries(project, folder);
+        const queries = res.queries || [];
+        _savedQueriesState = { project, folder, queries };
+        renderSavedQueriesList(project, queries);
+        if (queries.length && !(queries[0] && queries[0].error)) {
+            showToast(`Found ${queries.length} saved queries`, 'success');
+        } else if (queries[0] && queries[0].error) {
+            showToast('Failed to load: ' + queries[0].error, 'error');
+        }
+    } catch(e) {
+        showToast(e.message, 'error');
+    }
+}
+
+async function loadFavoriteSavedQueries() {
+    const project = document.getElementById('sq-project').value || (tfsProjects[0] || 'CDSIntegration');
+    showToast('Loading favorite saved queries...', 'info');
+    try {
+        const [shared, mine] = await Promise.all([
+            API.getSavedQueries(project, 'Shared Queries', 2),
+            API.getSavedQueries(project, 'My Queries', 2),
+        ]);
+        const merged = [...(shared.queries || []), ...(mine.queries || [])];
+        const seen = new Set();
+        const deduped = [];
+        for (const query of merged) {
+            if (!query || !query.id || seen.has(query.id)) continue;
+            seen.add(query.id);
+            deduped.push(query);
+        }
+        const favorites = deduped.filter(q => {
+            const fav = _isFavoriteQuery('saved', project, q.id);
+            const mine = modifiedByMeEnabled() && queryModifiedByName(q);
+            return fav || mine;
+        });
+        _savedQueriesState = { project, folder: 'favorites', queries: favorites };
+        renderSavedQueriesList(project, favorites);
+        showToast(`Loaded ${favorites.length} saved quer${favorites.length === 1 ? 'y' : 'ies'} (favorites + modified by name)`, 'success');
+    } catch (e) {
+        showToast(`Failed to load favorites: ${e.message}`, 'error');
+    }
+}
+
+async function runTfsSavedQuery(project, queryId, name) {
+    document.getElementById('sq-query-name').textContent = name;
+    document.getElementById('sq-results-wrap').style.display = '';
+    document.getElementById('sq-tbody').innerHTML = '<tr><td colspan="9"><span class="spinner"></span> Running query...</td></tr>';
+    document.getElementById('sq-count').textContent = '';
+
+    try {
+        const res = await API.runSavedQuery(project, queryId);
+        renderSqResults(res);
+    } catch(e) {
+        document.getElementById('sq-tbody').innerHTML = `<tr><td colspan="9" class="text-muted">${escapeHtml(e.message)}</td></tr>`;
+        showToast(e.message, 'error');
+    }
+}
+
+function renderSqResults(res) {
+    const tbody = document.getElementById('sq-tbody');
+    const countEl = document.getElementById('sq-count');
+
+    if (res.error) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-muted">${escapeHtml(res.error)}</td></tr>`;
+        countEl.textContent = 'Error';
+        return;
+    }
+
+    const items = res.items || [];
+    countEl.textContent = `${res.total || items.length} result(s)` + (res.total > 200 ? ' (showing first 200)' : '');
+
+    if (!items.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-muted">No results found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = items.map(i => `
+        <tr>
+            <td><div class="flex gap-8" style="align-items:center"><strong>${i.id}</strong><button class="btn btn-outline btn-sm" ${tfsOpenButtonAttrs(document.getElementById('sq-project').value || '', i.web_url || '')} onclick="openTfsItemWindowFromButton(this, ${i.id})">Open</button></div></td>
+            <td>${escapeHtml(i.work_item_type || '')}</td>
+            <td>${escapeHtml(i.title || '')}</td>
+            <td>${statusBadge(i.state || '')}</td>
+            <td>${priorityBadge(i.priority)}</td>
+            <td>${escapeHtml(i.assigned_to || '-')}</td>
+            <td style="font-size:11px">${escapeHtml(i.area_path || '-')}</td>
+            <td style="font-size:11px">${escapeHtml(i.iteration_path || '-')}</td>
+            <td>${escapeHtml(i.tags || '')}</td>
+        </tr>
+    `).join('');
+    showToast(`Found ${items.length} items`, 'success');
+}
+
+initPage();
+</script>
+{% endblock %}

@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+{% block title %}External Tools - DB Testing Tool{% endblock %}
+{% block page_title %}External Tools{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header"><h2>Launch ODI Studio and SQL Developer</h2></div>
+    <p class="text-muted mb-16">
+        Use this page to start your installed desktop tools from DB Testing Tool without switching manually.
+        Native Windows applications cannot be embedded directly inside a browser tab, so they are launched as normal desktop windows in background.
+    </p>
+
+    <div class="grid grid-2" style="gap:16px">
+        <div class="card" style="margin:0">
+            <div class="card-header"><h3 style="margin:0">ODI Studio</h3></div>
+            <div class="form-group">
+                <label>Executable Path</label>
+                <input class="form-control" id="odi-path" placeholder="e.g. C:\\Oracle\\Middleware\\Oracle_Home\\odi\\studio\\odi.exe">
+            </div>
+            <div class="form-group">
+                <label>Optional Arguments</label>
+                <input class="form-control" id="odi-args" placeholder="optional launch args">
+            </div>
+            <div class="flex gap-8">
+                <button class="btn btn-primary" onclick="launchTool('odi')">Launch ODI</button>
+                <button class="btn btn-outline" onclick="stopTool('odi')">Stop ODI</button>
+                <button class="btn btn-outline" onclick="detectPaths()">Auto-Detect</button>
+                <button class="btn btn-outline" onclick="savePathsToEnv()">Save to .env</button>
+            </div>
+            <p class="text-muted mt-16" id="odi-status">Status: checking...</p>
+        </div>
+
+        <div class="card" style="margin:0">
+            <div class="card-header"><h3 style="margin:0">SQL Developer</h3></div>
+            <div class="form-group">
+                <label>Executable Path</label>
+                <input class="form-control" id="sqldeveloper-path" placeholder="e.g. C:\\sqldeveloper\\sqldeveloper.exe">
+            </div>
+            <div class="form-group">
+                <label>Optional Arguments</label>
+                <input class="form-control" id="sqldeveloper-args" placeholder="optional launch args">
+            </div>
+            <div class="flex gap-8">
+                <button class="btn btn-primary" onclick="launchTool('sqldeveloper')">Launch SQL Developer</button>
+                <button class="btn btn-outline" onclick="stopTool('sqldeveloper')">Stop SQL Developer</button>
+                <button class="btn btn-outline" onclick="detectPaths()">Auto-Detect</button>
+                <button class="btn btn-outline" onclick="savePathsToEnv()">Save to .env</button>
+            </div>
+            <p class="text-muted mt-16" id="sqldeveloper-status">Status: checking...</p>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header"><h2>SQL Developer Inside This Tool</h2></div>
+    <p class="text-muted mb-16">
+        Full 1:1 SQL Developer clone is not practical in a short POC, but your built-in SQL worksheet is available now.
+    </p>
+    <div class="flex gap-8">
+        <a class="btn btn-primary" href="/datasources">Open Built-in SQL Worksheet</a>
+        <a class="btn btn-outline" href="/schema-browser">Open Schema Browser</a>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header"><h2>Optional Live Window Stream Panel</h2></div>
+    <p class="text-muted mb-16">
+        By default this page can open a built-in local MJPEG desktop stream for ODI or SQL Developer with no extra install.
+        Built-in mode is read-only. For keyboard/mouse interaction inside the browser, provide your own noVNC, Guacamole,
+        RDP-web gateway, or custom WebRTC relay URL below.
+    </p>
+
+    <div class="grid grid-2" style="gap:12px">
+        <div class="form-group" style="margin:0">
+            <label>ODI Stream URL (optional)</label>
+            <input class="form-control" id="odi-live-url" placeholder="https://localhost:6080/vnc_odi.html">
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>SQL Developer Stream URL (optional)</label>
+            <input class="form-control" id="sqldeveloper-live-url" placeholder="https://localhost:6080/vnc_sqldev.html">
+        </div>
+    </div>
+    <div class="flex gap-8 mt-16" style="flex-wrap:wrap">
+        <button class="btn btn-outline" onclick="saveAllConfigToEnv()">Save All to .env</button>
+        <button class="btn btn-outline" onclick="checkStreamHealth('odi')">Check ODI Stream</button>
+        <button class="btn btn-outline" onclick="checkStreamHealth('sqldeveloper')">Check SQLDev Stream</button>
+        <button class="btn btn-primary" onclick="launchAndOpen('odi')">Launch + Open ODI Panel</button>
+        <button class="btn btn-primary" onclick="launchAndOpen('sqldeveloper')">Launch + Open SQLDev Panel</button>
+        <button class="btn btn-primary" onclick="openLiveWindowPanel('odi')">Open ODI Live Panel</button>
+        <button class="btn btn-primary" onclick="openLiveWindowPanel('sqldeveloper')">Open SQL Developer Live Panel</button>
+        <button class="btn btn-outline" onclick="openLiveWindowInNewWindow('odi')">Open ODI in New Window</button>
+        <button class="btn btn-outline" onclick="openLiveWindowInNewWindow('sqldeveloper')">Open SQLDev in New Window</button>
+        <button class="btn btn-outline" onclick="closeLiveWindowPanel()">Close Live Panel</button>
+    </div>
+
+    <div id="live-window-wrap" class="mt-16" style="display:none;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg-dark)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border)">
+            <strong id="live-window-title">Live Panel</strong>
+            <span class="text-muted" id="live-window-url" style="font-size:12px"></span>
+        </div>
+        <div id="live-window-mode-note" class="text-muted" style="padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px"></div>
+        <iframe id="live-window-iframe" src="about:blank" style="width:100%;height:620px;border:0;background:#0f172a"></iframe>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const TOOL_PATH_KEYS = {
+    odi: 'externalTools.odi.path.v1',
+    sqldeveloper: 'externalTools.sqldeveloper.path.v1',
+};
+
+function getToolPathInput(tool) {
+    return document.getElementById(`${tool}-path`);
+}
+
+function getToolArgsInput(tool) {
+    return document.getElementById(`${tool}-args`);
+}
+
+function setStatus(tool, message, tone = 'muted') {
+    const el = document.getElementById(`${tool}-status`);
+    if (!el) return;
+    el.textContent = `Status: ${message}`;
+    el.classList.remove('text-success', 'text-danger', 'text-warning', 'text-muted');
+    if (tone === 'success') el.classList.add('text-success');
+    else if (tone === 'danger') el.classList.add('text-danger');
+    else if (tone === 'warning') el.classList.add('text-warning');
+    else el.classList.add('text-muted');
+}
+
+function savePath(tool) {
+    const input = getToolPathInput(tool);
+    if (!input) return;
+    localStorage.setItem(TOOL_PATH_KEYS[tool], (input.value || '').trim());
+}
+
+function loadSavedPaths() {
+    for (const tool of Object.keys(TOOL_PATH_KEYS)) {
+        const input = getToolPathInput(tool);
+        if (!input) continue;
+        input.value = localStorage.getItem(TOOL_PATH_KEYS[tool]) || '';
+    }
+}
+
+async function refreshStatus() {
+    try {
+        const res = await API.getExternalToolsStatus();
+        const rows = Array.isArray(res.tools) ? res.tools : [];
+        rows.forEach((row) => {
+            const tool = row.tool;
+            const savedPath = (getToolPathInput(tool)?.value || '').trim();
+            if (!savedPath && row.configured_path) {
+                getToolPathInput(tool).value = row.configured_path;
+            }
+            if (row.running) {
+                setStatus(tool, `running (PID ${row.pid})`, 'success');
+            } else if (row.configured_path && row.configured_exists) {
+                setStatus(tool, 'ready (configured path found)', 'muted');
+            } else if ((getToolPathInput(tool)?.value || '').trim()) {
+                setStatus(tool, 'path set (not running)', 'muted');
+            } else {
+                setStatus(tool, 'path not set', 'warning');
+            }
+        });
+    } catch (e) {
+        setStatus('odi', e.message || 'status unavailable', 'danger');
+        setStatus('sqldeveloper', e.message || 'status unavailable', 'danger');
+    }
+}
+
+async function detectPaths() {
+    try {
+        const found = await API.detectExternalTools();
+        for (const tool of ['odi', 'sqldeveloper']) {
+            const arr = found?.[tool] || [];
+            const input = getToolPathInput(tool);
+            if (input && !input.value && arr.length) {
+                input.value = arr[0];
+                savePath(tool);
+            }
+        }
+        await refreshStatus();
+        showToast('Auto-detect completed', 'success');
+    } catch (e) {
+        showToast(e.message || 'Auto-detect failed', 'error');
+    }
+}
+
+async function savePathsToEnv() {
+    try {
+        const res = await saveAllConfigToEnv();
+        showToast(`Saved paths to .env (${res.env_file})`, 'success');
+    } catch (e) {
+        showToast(e.message || 'Failed to save .env config', 'error');
+    }
+}
+
+async function loadLiveWindowConfigFromServer() {
+    const cfg = await API.getExternalToolsConfig();
+    const odiInput = document.getElementById('odi-live-url');
+    const sqldevInput = document.getElementById('sqldeveloper-live-url');
+    if (odiInput) odiInput.value = cfg?.odi_stream_url || '';
+    if (sqldevInput) sqldevInput.value = cfg?.sqldeveloper_stream_url || '';
+    return cfg;
+}
+
+async function saveAllConfigToEnv() {
+    const odiPath = (getToolPathInput('odi')?.value || '').trim();
+    const sqlDevPath = (getToolPathInput('sqldeveloper')?.value || '').trim();
+    const rawOdiUrl = (document.getElementById('odi-live-url')?.value || '').trim();
+    const rawSqldevUrl = (document.getElementById('sqldeveloper-live-url')?.value || '').trim();
+    const odiUrl = /^https?:\/\//i.test(rawOdiUrl) ? rawOdiUrl : '';
+    const sqldevUrl = /^https?:\/\//i.test(rawSqldevUrl) ? rawSqldevUrl : '';
+    savePath('odi');
+    savePath('sqldeveloper');
+    const res = await API.saveExternalToolsConfig(odiPath, sqlDevPath, odiUrl, sqldevUrl);
+    if (rawOdiUrl && !odiUrl) {
+        showToast('ODI stream URL was not saved because only absolute http(s) URLs are persisted in .env', 'warning');
+    }
+    if (rawSqldevUrl && !sqldevUrl) {
+        showToast('SQLDev stream URL was not saved because only absolute http(s) URLs are persisted in .env', 'warning');
+    }
+    await refreshStatus();
+    return res;
+}
+
+async function checkStreamHealth(tool) {
+    try {
+        const rawUrl = tool === 'odi'
+            ? (document.getElementById('odi-live-url')?.value || '').trim()
+            : (document.getElementById('sqldeveloper-live-url')?.value || '').trim();
+        const url = /^https?:\/\//i.test(rawUrl) ? rawUrl : '';
+        const res = await API.checkExternalToolStream(tool, url);
+        if (res.ok) {
+            const sourceLabel = res.source === 'builtin-mjpeg' ? 'built-in MJPEG' : 'configured stream';
+            showToast(`${tool} ${sourceLabel} reachable (HTTP ${res.status_code})`, 'success');
+        } else {
+            showToast(`${tool} stream not reachable (${res.status_code || 0})`, 'warning');
+        }
+    } catch (e) {
+        showToast(e.message || 'Stream check failed', 'error');
+    }
+}
+
+async function openLiveWindowPanel(tool) {
+    await openLiveWindowPanelAuto(tool);
+}
+
+async function resolveLivePanelTarget(tool) {
+    const manualUrl = tool === 'odi'
+        ? (document.getElementById('odi-live-url')?.value || '').trim()
+        : (document.getElementById('sqldeveloper-live-url')?.value || '').trim();
+
+    if (manualUrl) {
+        return { url: manualUrl, source: 'manual' };
+    }
+
+    const def = await API.getExternalToolDefaultStreamUrl(tool);
+    return { url: def?.url || '', source: def?.source || 'unknown' };
+}
+
+async function openLiveWindowPanelAuto(tool) {
+    let resolvedUrl = '';
+    let source = 'unknown';
+    try {
+        const resolved = await resolveLivePanelTarget(tool);
+        resolvedUrl = resolved.url;
+        source = resolved.source;
+    } catch (e) {
+        showToast(e.message || 'Unable to resolve stream URL', 'error');
+        return;
+    }
+
+    if (!resolvedUrl) return showToast('No stream URL resolved', 'warning');
+
+    const wrap = document.getElementById('live-window-wrap');
+    const iframe = document.getElementById('live-window-iframe');
+    const title = document.getElementById('live-window-title');
+    const urlEl = document.getElementById('live-window-url');
+    const modeNote = document.getElementById('live-window-mode-note');
+    if (!wrap || !iframe) return;
+    wrap.style.display = 'block';
+    iframe.src = resolvedUrl;
+    if (title) title.textContent = tool === 'odi' ? 'ODI Live Panel' : 'SQL Developer Live Panel';
+    if (urlEl) urlEl.textContent = resolvedUrl;
+    if (modeNote) {
+        modeNote.textContent = source === 'builtin-mjpeg'
+            ? 'Built-in stream mode (read-only): use a noVNC/Guacamole/WebRTC URL above for interactive keyboard and mouse control.'
+            : 'Interactive stream mode: keyboard/mouse control depends on your external stream gateway configuration.';
+    }
+    if (source === 'builtin-mjpeg') {
+        showToast('Built-in stream is read-only. Configure external noVNC/Guacamole URL for interaction.', 'warning');
+    }
+}
+
+async function openLiveWindowInNewWindow(tool) {
+    try {
+        const resolved = await resolveLivePanelTarget(tool);
+        if (!resolved.url) return showToast('No stream URL resolved', 'warning');
+        window.open(resolved.url, '_blank');
+    } catch (e) {
+        showToast(e.message || 'Unable to open live panel in new window', 'error');
+    }
+}
+
+async function launchAndOpen(tool) {
+    await launchTool(tool);
+    await openLiveWindowPanelAuto(tool);
+}
+
+function closeLiveWindowPanel() {
+    const wrap = document.getElementById('live-window-wrap');
+    const iframe = document.getElementById('live-window-iframe');
+    if (iframe) iframe.src = 'about:blank';
+    if (wrap) wrap.style.display = 'none';
+}
+
+async function launchTool(tool) {
+    try {
+        const path = (getToolPathInput(tool)?.value || '').trim();
+        const args = (getToolArgsInput(tool)?.value || '').trim();
+        savePath(tool);
+        const result = await API.launchExternalTool(tool, path, args);
+        if (result.already_running) {
+            showToast(`${result.label || tool} is already running`, 'warning');
+        } else {
+            showToast(`${result.label || tool} launched (PID ${result.pid})`, 'success');
+        }
+        await refreshStatus();
+    } catch (e) {
+        showToast(e.message || 'Launch failed', 'error');
+        await refreshStatus();
+    }
+}
+
+async function stopTool(tool) {
+    try {
+        const result = await API.stopExternalTool(tool);
+        if (result.was_running) {
+            showToast(`${tool} stopped`, 'warning');
+        } else {
+            showToast(`${tool} was not running`, 'info');
+        }
+        await refreshStatus();
+    } catch (e) {
+        showToast(e.message || 'Stop failed', 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    loadSavedPaths();
+    try {
+        const cfg = await loadLiveWindowConfigFromServer();
+        if (!getToolPathInput('odi')?.value && cfg?.odi_path) getToolPathInput('odi').value = cfg.odi_path;
+        if (!getToolPathInput('sqldeveloper')?.value && cfg?.sqldeveloper_path) getToolPathInput('sqldeveloper').value = cfg.sqldeveloper_path;
+    } catch (_) {
+        // non-blocking: localStorage/status fallback still works
+    }
+    await refreshStatus();
+    setInterval(refreshStatus, 7000);
+});
+</script>
+{% endblock %}

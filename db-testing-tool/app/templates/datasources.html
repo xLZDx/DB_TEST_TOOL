@@ -1,0 +1,3996 @@
+{% extends "base.html" %}
+{% block title %}SQL Terminal – DB Testing Tool{% endblock %}
+{% block page_title %}SQL Terminal{% endblock %}
+
+{% block content %}
+<div id="sql-workspace-frame" style="display:flex;flex-direction:column;gap:16px">
+<div class="card mt-16" id="ds-sql-terminal-card">
+    <div class="card-header ds-sect-hdr" onclick="toggleDsSection('ds-sql-terminal-body','ds-sql-terminal-toggle')">
+        <h2 style="margin:0">SQL Terminal</h2>
+        <button class="ds-sect-toggle" id="ds-sql-terminal-toggle" type="button">&#9660;</button>
+    </div>
+    <div id="ds-sql-terminal-body" class="ds-sect-body">
+    <div id="sql-workspace" style="display:flex;flex-direction:column;gap:12px;min-height:320px;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--bg-dark)">
+        <div id="sql-editor-tabs" style="display:flex;gap:6px;overflow-x:auto;max-width:100%"></div>
+        <div class="flex gap-8" id="sql-editor-actions" style="position:relative;top:-3px">
+            <button class="btn btn-outline btn-sm" onclick="newSqlWorksheet()" id="sql-editor-new-btn">New Worksheet</button>
+            <button class="btn btn-outline btn-sm" onclick="renameActiveSqlWorksheet()" id="sql-editor-rename-btn" disabled>Rename Worksheet</button>
+            <button class="btn btn-outline btn-sm" onclick="loadSqlWorksheetFromFile()" id="sql-editor-load-file-btn">Load File</button>
+            <button class="btn btn-outline btn-sm" onclick="saveActiveSqlWorksheetToFile()" id="sql-editor-save-file-btn" disabled>Save to File</button>
+            <button class="btn btn-outline btn-sm" onclick="togglePinSqlWorksheet()" id="sql-editor-pin-btn" disabled>Pin Worksheet</button>
+            <button class="btn btn-danger btn-sm" onclick="closeActiveSqlWorksheet()" id="sql-editor-close-btn" disabled>Close Worksheet</button>
+            <button class="btn btn-outline btn-sm" onclick="toggleSqlWorkspaceFullscreen()" id="sql-editor-fullscreen-btn">Full Screen</button>
+        </div>
+    </div>
+    <input id="sql-worksheet-file-input" type="file" accept=".sql,.txt,.ddl,.dml" style="display:none">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="runSqlQueryAtCursor()">Run Query</button>
+        <button class="btn btn-danger" onclick="stopSqlQuery()" id="sql-stop-query-btn" disabled>Stop Query</button>
+        <div class="form-group" style="margin:0;flex:0 0 auto">
+            <select class="form-control" id="sql-ds-select" style="min-width:120px;max-width:340px;width:auto"></select>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;margin-left:auto">
+            <input class="form-control" id="sql-table-inspector-input" placeholder="SCHEMA.TABLE" list="tbl-insp-suggestions"
+              autocomplete="off" style="width:220px;font-family:monospace;font-size:12px"
+              title="Enter SCHEMA.TABLE to inspect"
+              oninput="_tblInspSuggest(this)"
+              onkeydown="if(event.key==='Enter'){this.value=this.value.trim();openTableDetailWorksheet();event.preventDefault();}">
+            <datalist id="tbl-insp-suggestions"></datalist>
+            <button class="btn btn-outline btn-sm" onclick="openTableDetailWorksheet()" title="Open table details in new worksheet">&#128269; Table Details</button>
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Query</label>
+        <div class="sql-lined-wrap" id="sql-editor-wrap" style="height:220px;min-height:120px;max-height:70vh;overflow:hidden">
+            <div class="sql-line-gutter" id="sql-editor-gutter"></div>
+            <textarea class="form-control sql-editor sql-lined-ta" id="sql-editor" rows="8" style="height:100%;min-height:120px;line-height:18px;font-family:monospace;font-size:12px" placeholder="SELECT * FROM transactions_owner.avy_dtl_fact LIMIT 100"></textarea>
+        </div>
+        <div class="sql-pane-resizer" data-target="sql-editor-wrap" title="Drag to resize query editor"></div>
+        <p class="text-muted" id="sql-selection-match-info" style="font-size:12px;margin-top:6px">Select a token to highlight matching occurrences in this worksheet.</p>
+        <p class="text-muted" style="font-size:12px;margin-top:6px">Shortcuts: <b>Ctrl+Enter</b> — run statement at cursor (or selection), <b>Ctrl+Shift+Enter</b> — run full script, <b>Ctrl+S</b> — save to file, <b>Ctrl+/</b> — comment/uncomment, <b>Ctrl+Space</b> — autocomplete, <b>Ctrl+Q</b> — fold/unfold statement at cursor.</p>
+    </div>
+    </div>
+    </div>
+</div>
+
+<div class="card mt-16" id="sql-results-card">
+    <div id="sql-results-section" style="border:1px solid var(--border);border-radius:8px;background:var(--bg-dark)">
+        <div class="ds-sect-hdr" onclick="toggleDsSection('sql-results-body','sql-results-toggle')" style="padding:10px;border-bottom:1px solid var(--border)">
+            <strong style="font-size:20px">SQL Result Tabs</strong>
+            <button class="ds-sect-toggle" id="sql-results-toggle" type="button">&#9660;</button>
+        </div>
+        <div id="sql-results-body" class="ds-sect-body" style="padding:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                <div id="sql-result-tabs" style="display:flex;gap:6px;overflow-x:auto;max-width:100%"></div>
+                <div class="flex gap-8">
+                    <button class="btn btn-outline btn-sm" onclick="rerunActiveSqlTab()" id="sql-rerun-btn" disabled>Refresh Tab</button>
+                    <button class="btn btn-outline btn-sm" onclick="togglePinActiveTab()" id="sql-pin-btn" disabled>Pin</button>
+                    <button class="btn btn-outline btn-sm" onclick="openActiveTabInWindow()" id="sql-window-btn" disabled>Open Window</button>
+                    <button class="btn btn-outline btn-sm" onclick="exportActiveTabCsv()" id="sql-export-btn" disabled>Export CSV</button>
+                    <button class="btn btn-danger btn-sm" onclick="closeActiveTab()" id="sql-close-btn" disabled>Close Tab</button>
+                </div>
+            </div>
+            <div id="sql-result-content" class="table-wrap" style="height:260px;min-height:180px;max-height:70vh;border:1px solid var(--border);border-radius:8px;">
+                <div class="empty-state">Run a query to see results in tabs.</div>
+            </div>
+            <div class="sql-pane-resizer" data-target="sql-result-content" title="Drag to resize results"></div>
+            <div id="sql-result-status" style="display:none;margin-top:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-dark);padding:8px 10px;font-family:monospace;font-size:12px;min-height:32px"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════ TABLE INSPECTOR CARD ═══════════════════ -->
+<div class="card mt-16" id="tbl-inspector-card" style="display:none">
+    <div id="tbl-inspector-section" style="border:1px solid var(--border);border-radius:8px;background:var(--bg-dark)">
+        <div class="ds-sect-hdr" onclick="toggleDsSection('tbl-inspector-body','tbl-inspector-toggle')" style="padding:10px;border-bottom:1px solid var(--border)">
+            <span style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:16px">&#128196;</span>
+                <strong style="font-size:20px">Table Details</strong>
+            </span>
+            <button class="ds-sect-toggle" id="tbl-inspector-toggle" type="button">&#9660;</button>
+        </div>
+        <div id="tbl-inspector-body" class="ds-sect-body" style="padding:10px">
+            <!-- Main table tabs row -->
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                <div id="tbl-insp-tabs" style="display:flex;gap:5px;overflow-x:auto;flex:1;min-width:0"></div>
+                <div class="flex gap-8" style="flex-shrink:0">
+                    <button class="btn btn-outline btn-sm" onclick="refreshActiveTblInspTab()" id="tbl-insp-refresh-btn" disabled>&#8635; Refresh</button>
+                    <button class="btn btn-danger btn-sm" onclick="closeActiveTblInspTab()" id="tbl-insp-close-btn" disabled>&#10005; Close</button>
+                </div>
+            </div>
+            <!-- Sub-tab bar -->
+            <div id="tbl-insp-subtabs" style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:0;flex-wrap:wrap"></div>
+            <!-- Sub-tab toolbar (dynamic, shown for Data tab) -->
+            <div id="tbl-insp-toolbar" style="display:none;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+                <button class="btn btn-outline btn-sm" onclick="tblInspInsertRow()" id="tbl-insp-insert-btn" title="Add new empty row to grid">&#10010; Insert Row</button>
+                <button class="btn btn-outline btn-sm" onclick="tblInspCopySelected()" id="tbl-insp-copy-btn" title="Duplicate checked rows as editable new rows at top (paste tab-separated data also supported)">&#128203; Copy Row(s)</button>
+                <button class="btn btn-danger btn-sm" onclick="tblInspDeleteSelected()" id="tbl-insp-delete-btn" title="Delete checked rows">&#128465; Delete</button>
+                <button class="btn btn-success btn-sm" onclick="tblInspSaveChanges()" id="tbl-insp-save-btn" disabled title="Commit inserts and updates to database">&#128190; Save</button>
+                <button class="btn btn-outline btn-sm" onclick="refreshActiveTblInspTab()" id="tbl-insp-data-refresh-btn" title="Reload data">&#8635; Refresh</button>
+                <div style="width:1px;height:20px;background:var(--border);margin:0 2px"></div>
+                <input id="tbl-insp-filter" class="form-control" placeholder="WHERE clause: e.g.  AR_ID = 123  or  STATUS = 'A'" style="flex:1;min-width:200px;font-family:monospace;font-size:12px" onkeydown="if(event.key==='Enter')_tblInspApplyFilter()">
+                <select id="tbl-insp-limit" class="form-control" style="width:100px;font-size:12px">
+                    <option value="200">200 rows</option>
+                    <option value="500">500 rows</option>
+                    <option value="1000">1000 rows</option>
+                    <option value="50">50 rows</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="_tblInspApplyFilter()">Fetch</button>
+                <span id="tbl-insp-row-count" style="font-size:12px;color:var(--text-muted)"></span>
+            </div>
+            <!-- Content area -->
+            <div id="tbl-insp-content" class="table-wrap" style="height:300px;min-height:160px;max-height:70vh;overflow:auto;border:1px solid var(--border);border-radius:0 0 6px 6px;background:var(--bg-dark)">
+                <div class="empty-state">Enter a table name (SCHEMA.TABLE) in the toolbar and click &#128269; Table Details, or type it in the SCHEMA.TABLE input and press Enter.</div>
+            </div>
+            <div class="sql-pane-resizer" data-target="tbl-insp-content" title="Drag to resize"></div>
+        </div>
+    </div>
+</div>
+<!-- ═══════════════════ End TABLE INSPECTOR CARD ═══════════════════ -->
+
+<!-- Insert Row Modal -->
+<div class="modal-overlay" id="modal-tbl-insp-insert" style="display:none">
+    <div class="modal" style="max-width:600px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column">
+        <div class="modal-header">
+            <h2 id="modal-tbl-insp-insert-title">Insert Row</h2>
+            <button class="modal-close" onclick="closeModal('modal-tbl-insp-insert')">&times;</button>
+        </div>
+        <div style="overflow-y:auto;flex:1;padding:16px">
+            <div id="modal-tbl-insp-insert-fields"></div>
+            <pre id="modal-tbl-insp-sql-preview" style="display:none;margin-top:10px;padding:8px 10px;background:#0f172a;border:1px solid var(--border);border-radius:4px;font-size:11px;color:#94a3b8;white-space:pre-wrap;word-break:break-all"></pre>
+        </div>
+        <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+            <button class="btn btn-outline" onclick="closeModal('modal-tbl-insp-insert')">Cancel</button>
+            <button class="btn btn-primary" onclick="_tblInspCommitInsert()">&#10010; Insert</button>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-16" id="sql-assistant-card">
+    <div id="sql-assistant-section" style="border:1px solid var(--border);border-radius:8px;background:var(--bg-dark)">
+        <div class="ds-sect-hdr" onclick="toggleDsSection('sql-assistant-body','sql-assistant-toggle')" style="padding:10px;border-bottom:1px solid var(--border)">
+            <strong>SQL Assistant (GHC / Local Agent)</strong>
+            <button class="ds-sect-toggle" id="sql-assistant-toggle" type="button">&#9660;</button>
+        </div>
+        <div id="sql-assistant-body" class="ds-sect-body" style="padding:10px">
+        <div style="display:grid;grid-template-columns:150px 220px 1fr auto auto;gap:8px;align-items:end">
+            <div>
+                <label style="display:block;font-size:11px" class="text-muted">Mode</label>
+                <select class="form-control" id="ds-assist-mode">
+                    <option value="ghc">GHC</option>
+                    <option value="local">Local Agent</option>
+                </select>
+            </div>
+            <div>
+                <label style="display:block;font-size:11px" class="text-muted">Local Agent</label>
+                <select class="form-control" id="ds-assist-agent"></select>
+            </div>
+            <div>
+                <label style="display:block;font-size:11px" class="text-muted">Question</label>
+                <textarea class="form-control" id="ds-assist-question" rows="3" style="min-height:92px;resize:vertical" onkeydown="handleDsAssistQuestionKeydown(event)" placeholder="Optimize this query and explain the error at line 7"></textarea>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="askDatasourceAssistant()">Ask</button>
+            <button class="btn btn-outline btn-sm" onclick="applyDatasourceAssistantFix()">Apply Suggested Fix</button>
+        </div>
+        <textarea class="form-control" id="ds-assist-response" rows="8" readonly style="margin-top:8px;font-family:monospace;font-size:11px;min-height:150px;resize:vertical"></textarea>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal-overlay" id="modal-add">
+    <div class="modal">
+        <div class="modal-header"><h2 id="modal-add-title">Add Data Source</h2><button class="modal-close" onclick="resetDatasourceForm(); closeModal('modal-add')">&times;</button></div>
+        <form id="form-add" onsubmit="return addDs(event)">
+            <input type="hidden" id="ds-edit-id" value="">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 0;margin-bottom:8px;border-bottom:1px solid var(--border)">
+                <label style="font-size:12px;color:var(--text-muted);white-space:nowrap">&#128274; Load profile:</label>
+                <select class="form-control" id="ds-cred-profile-select" style="flex:1;font-size:12px;padding:4px 8px">
+                    <option value="">— select a saved credential profile —</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" onclick="applyCredentialProfileToForm()">Apply</button>
+            </div>
+            <div class="form-group"><label>Name</label><input class="form-control" id="ds-name" required></div>
+            <div class="form-group">
+                <label>Type</label>
+                <select class="form-control" id="ds-type" required>
+                    <option value="oracle">Oracle</option>
+                    <option value="redshift">Redshift</option>
+                    <option value="sqlserver">SQL Server (optional)</option>
+                </select>
+            </div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Host</label><input class="form-control" id="ds-host" required placeholder="hostname or IP"></div>
+                <div class="form-group"><label>Port</label><input class="form-control" id="ds-port" type="number" placeholder="auto"></div>
+            </div>
+            <div class="form-group"><label>Database / Service Name</label><input class="form-control" id="ds-db" placeholder="ORCL, mydb, etc."></div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Username</label><input class="form-control" id="ds-user"></div>
+                <div class="form-group"><label>Password</label><input class="form-control" id="ds-pass" type="password"></div>
+            </div>
+            <div class="form-group">
+                <label>Extra Params (JSON)</label>
+                <textarea class="form-control" id="ds-extra" rows="4" placeholder='{"ssl": true}'></textarea>
+                <p class="text-muted" style="font-size:12px;margin-top:6px">
+                    Redshift SSO (DBeaver-style) example:
+                    <code>{"auth_mode":"sso","credentials_provider":"BrowserSamlCredentialsProvider","login_url":"https://.../start/#/saml/...","region":"us-east-1","cluster_identifier":"db1-lighthouse"}</code>
+                </p>
+            </div>
+            <div class="flex gap-8 mt-16">
+                <button type="submit" class="btn btn-primary" id="ds-save-btn">Save</button>
+                <button type="button" class="btn btn-outline" onclick="resetDatasourceForm(); closeModal('modal-add')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Redshift SSO Connection Modal – DBeaver style -->
+<div class="modal-overlay" id="modal-rs-sso">
+    <div class="modal" style="max-width:660px">
+        <div class="modal-header">
+            <h2>&#128994; Amazon Redshift &#8211; IAM / SSO Connection</h2>
+            <button class="modal-close" onclick="closeModal('modal-rs-sso')">&times;</button>
+        </div>
+        <!-- DBeaver-style tab bar -->
+        <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:18px">
+            <button id="rs-tab-main" onclick="rsTab('main')"
+                style="padding:8px 20px;background:var(--primary);color:#fff;border:none;border-radius:4px 4px 0 0;cursor:pointer;font-size:13px;font-weight:600">Main</button>
+            <button id="rs-tab-drv" onclick="rsTab('drv')"
+                style="padding:8px 20px;background:var(--bg-dark);color:var(--text-muted);border:none;border-radius:4px 4px 0 0;cursor:pointer;font-size:13px">SSO / Driver Properties</button>
+        </div>
+        <!-- Main Tab -->
+        <div id="rs-panel-main">
+            <div style="background:var(--bg-dark);padding:10px 14px;border-radius:6px;margin-bottom:14px;border:1px solid var(--border)">
+                <span style="font-size:12px;color:var(--text-muted);margin-right:10px">Quick-fill environment:</span>
+                <button class="btn btn-outline btn-sm" onclick="rsFill('dev')">Dev</button>
+                <button class="btn btn-outline btn-sm" onclick="rsFill('qa')" style="margin-left:6px">QA</button>
+                <button class="btn btn-outline btn-sm" onclick="rsFill('prod')" style="margin-left:6px">Prod</button>
+            </div>
+            <div class="form-group"><label>Connection Name</label>
+                <input class="form-control" id="rs-name" placeholder="Lighthouse Dev (Redshift SSO)"></div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Host</label>
+                    <input class="form-control" id="rs-host" placeholder="db1.lighthouse.redshift.dev.aws.rjf.com"></div>
+                <div class="form-group"><label>Port</label>
+                    <input class="form-control" id="rs-port" type="number" value="5439"></div>
+            </div>
+            <div class="form-group"><label>Database</label>
+                <input class="form-control" id="rs-db" placeholder="ssdsdv"></div>
+            <div class="form-group"><label>Authentication</label>
+                <select class="form-control" id="rs-auth-type" onchange="rsToggleAuth()">
+                    <option value="sso">IAM / SSO (Browser SAML) &#8211; same as DBeaver Redshift SSO driver</option>
+                    <option value="password">Username / Password</option>
+                </select></div>
+            <div id="rs-pw-fields" style="display:none">
+                <div class="grid grid-2">
+                    <div class="form-group"><label>Username</label><input class="form-control" id="rs-user"></div>
+                    <div class="form-group"><label>Password</label><input class="form-control" id="rs-pass" type="password"></div>
+                </div>
+            </div>
+        </div>
+        <!-- SSO / Driver Properties Tab -->
+        <div id="rs-panel-drv" style="display:none">
+            <div style="background:var(--bg-dark);padding:10px 14px;border-radius:6px;margin-bottom:14px;border:1px solid var(--border);font-size:12px;line-height:1.7">
+                DBeaver URL template: <code>jdbc:redshift:iam://{host}:{port}/{database}?plugin_name=com.amazon.redshift.plugin.BrowserSamlCredentialsProvider</code><br>
+                The <strong>login_url</strong> below is the same property you add in DBeaver&#8217;s <em>Driver Properties</em> tab.
+            </div>
+            <div class="form-group"><label>Credentials Provider</label>
+                <input class="form-control" value="BrowserSamlCredentialsProvider" readonly style="opacity:0.7;cursor:default"
+                    title="Equivalent to plugin_name=...BrowserSamlCredentialsProvider in DBeaver"></div>
+            <div class="form-group">
+                <label>login_url <span class="text-muted" style="font-size:12px">(AWS Access Portal &#8211; same as login_url in DBeaver Driver Properties)</span></label>
+                <input class="form-control" id="rs-login-url"
+                    placeholder="https://d-9a672bc7ce.awsapps.com/start/#/saml/default/rjf-data-shared-dev/ins-...">
+                <p class="text-muted" style="font-size:11px;margin-top:4px">Each environment has its own login_url. Use the Quick-fill buttons or paste directly from the AWS Access Portal.</p>
+            </div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>Region</label>
+                    <input class="form-control" id="rs-region" value="us-east-2"></div>
+                <div class="form-group"><label>Cluster Identifier <span class="text-muted">(optional, provisioned only)</span></label>
+                    <input class="form-control" id="rs-cluster" placeholder="db1-lighthouse"></div>
+            </div>
+            <div class="form-group">
+                <label>Workgroup Name <span class="text-muted" style="font-size:12px">(required for Serverless with custom domain)</span></label>
+                <input class="form-control" id="rs-workgroup" placeholder="e.g. lighthouse-dev">
+                <p class="text-muted" style="font-size:11px;margin-top:4px">If your host is a custom domain (not *.redshift-serverless.amazonaws.com), you must specify the Redshift Serverless workgroup name.</p>
+            </div>
+            <div class="grid grid-2">
+                <div class="form-group"><label>IdP Response Timeout (s)</label>
+                    <input class="form-control" id="rs-idp-timeout" type="number" value="60"></div>
+                <div class="form-group" style="display:flex;align-items:center;gap:10px;padding-top:22px">
+                    <input type="checkbox" id="rs-serverless" checked style="width:16px;height:16px">
+                    <label for="rs-serverless" style="margin:0">isServerless
+                        <span class="text-muted" style="font-size:11px">(true per DBeaver setup guide)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>TLS CA Bundle Path <span class="text-muted" style="font-size:12px">(optional, recommended for corporate SSL interception)</span></label>
+                <input class="form-control" id="rs-ca-bundle" placeholder="C:\\certs\\corp-root-ca.pem">
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:10px">
+                <input type="checkbox" id="rs-ssl-insecure" style="width:16px;height:16px">
+                <label for="rs-ssl-insecure" style="margin:0">Skip TLS certificate verification (temporary workaround)</label>
+            </div>
+        </div>
+        <div class="flex gap-8 mt-16" style="border-top:1px solid var(--border);padding-top:16px">
+            <button class="btn btn-primary" onclick="rsSave()">Save Connection</button>
+            <button class="btn btn-warning" onclick="rsTestAndSave()">Test Connection</button>
+            <button class="btn btn-outline" onclick="closeModal('modal-rs-sso')">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+if (typeof API !== 'undefined' && typeof API.queryDatasource !== 'function' && typeof api === 'function') {
+    API.queryDatasource = (id, sql, options = null) => api('POST', `/api/datasources/${id}/query`, { sql }, options);
+}
+
+function _safeParseJson(raw, fallback) {
+    if (!raw) return fallback;
+    try { return JSON.parse(raw); } catch (_) { return fallback; }
+}
+
+function _setDsSectionCollapsed(bodyId, toggleId, collapsed) {
+    const body = document.getElementById(bodyId);
+    const toggle = document.getElementById(toggleId);
+    if (!body) return;
+    if (collapsed) body.classList.add('ds-sect-collapsed');
+    else body.classList.remove('ds-sect-collapsed');
+    if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
+}
+
+function toggleDsSection(bodyId, toggleId) {
+    const body = document.getElementById(bodyId);
+    if (!body) return;
+    const collapsed = body.classList.toggle('ds-sect-collapsed');
+    const toggle = document.getElementById(toggleId);
+    if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
+    persistDatasourceWorkspaceState();
+}
+
+function _getSqlEditorCm() {
+    const ta = document.getElementById('sql-editor');
+    if (!ta) return null;
+    if (ta.nextSibling && ta.nextSibling.CodeMirror) return ta.nextSibling.CodeMirror;
+    if (ta.previousSibling && ta.previousSibling.CodeMirror) return ta.previousSibling.CodeMirror;
+    const host = ta.parentElement;
+    if (host) {
+        const cmEl = host.querySelector('.CodeMirror');
+        if (cmEl && cmEl.CodeMirror) return cmEl.CodeMirror;
+    }
+    return null;
+}
+
+function _syncSqlEditorMode() {
+    const cm = _getSqlEditorCm();
+    const gutter = document.getElementById('sql-editor-gutter');
+    if (gutter) gutter.style.display = cm ? 'none' : '';
+    if (cm) {
+        cm.setOption('lineNumbers', true);
+        cm.setOption('lineWrapping', false);
+        cm.setOption('viewportMargin', 20);
+        // Register SQL statement fold helper (always re-register so live changes take effect)
+        if (typeof CodeMirror !== 'undefined' && CodeMirror.registerHelper) {
+            CodeMirror.registerHelper('fold', 'sqlstmt', function(cmInst, start) {
+                const line = cmInst.getLine(start.line) || '';
+                if (!/^\s*(SELECT|WITH|INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|TRUNCATE)\b/i.test(line)) return undefined;
+                for (let i = start.line + 1, total = cmInst.lineCount(); i < total; i++) {
+                    const t = cmInst.getLine(i) || '';
+                    const si = t.indexOf(';');
+                    if (si >= 0) {
+                        // fold to start of next line to fully hide the semicolon line
+                        const toPos = (i + 1 < total) ? CodeMirror.Pos(i + 1, 0) : CodeMirror.Pos(i, t.length);
+                        return { from: CodeMirror.Pos(start.line, line.length), to: toPos };
+                    }
+                }
+                return undefined;
+            });
+        }
+        const _makeWidget = (from, to) => {
+            const count = to.line - from.line;
+            const sp = document.createElement('span');
+            sp.textContent = ` ··· (${count} lines)`;
+            sp.title = 'Click to expand';
+            sp.style.cssText = 'color:#22c55e;cursor:pointer;font-size:inherit;padding:0 6px;background:rgba(34,197,94,.12);border-radius:3px;margin-left:6px;border:1px solid rgba(34,197,94,.3);font-weight:normal';
+            sp.onclick = function() { const _cm2 = _getSqlEditorCm(); if (_cm2) { _cm2.foldCode(from, null, 'unfold'); } };
+            return sp;
+        };
+        if (typeof cm.foldCode === 'function' && CodeMirror.fold && CodeMirror.fold.sqlstmt) {
+            cm.setOption('foldOptions', { rangeFinder: CodeMirror.fold.sqlstmt, widget: _makeWidget });
+        } else if (typeof cm.foldCode === 'function') {
+            cm.setOption('foldOptions', { widget: _makeWidget });
+        }
+        cm.refresh();
+    }
+}
+
+function initSqlPaneResizers() {
+    document.querySelectorAll('.sql-pane-resizer[data-target]').forEach((handle) => {
+        if (handle.dataset.bound === '1') return;
+        handle.dataset.bound = '1';
+        handle.addEventListener('mousedown', (event) => {
+            event.preventDefault();
+            const targetId = handle.dataset.target;
+            const target = targetId ? document.getElementById(targetId) : null;
+            if (!target) return;
+
+            const startY = event.clientY;
+            const rect = target.getBoundingClientRect();
+            const startHeight = rect.height;
+            const minH = parseInt((target.style.minHeight || '').replace('px', ''), 10) || 120;
+            const maxH = parseInt((target.style.maxHeight || '').replace('px', ''), 10) || Math.floor(window.innerHeight * 0.8);
+
+            const onMove = (moveEvent) => {
+                const next = Math.max(minH, Math.min(maxH, startHeight + (moveEvent.clientY - startY)));
+                target.style.height = `${next}px`;
+                if (targetId === 'sql-editor-wrap') {
+                    const cm = _getSqlEditorCm();
+                    if (cm) cm.refresh();
+                    updateLineNumbers('sql-editor');
+                }
+            };
+            const onUp = () => {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+            };
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    });
+}
+
+function initSqlNativePaneResizeObservers() {
+    const editorWrap = document.getElementById('sql-editor-wrap');
+    if (editorWrap && !editorWrap._resizeObserver) {
+        editorWrap._resizeObserver = new ResizeObserver(() => {
+            const cm = _getSqlEditorCm();
+            if (cm) cm.refresh();
+            updateLineNumbers('sql-editor');
+            highlightSqlSelectionMatches();
+        });
+        editorWrap._resizeObserver.observe(editorWrap);
+    }
+}
+
+function moveDatasourceCardToBottom() {
+    const listCard = document.getElementById('ds-list-card');
+    const workspace = document.getElementById('sql-workspace-frame');
+    if (!listCard || !workspace) return;
+    const parent = workspace.parentElement;
+    if (!parent) return;
+    parent.appendChild(listCard);
+}
+
+async function loadDs() {
+    const items = await API.getDatasources();
+    const tbody = document.getElementById('ds-tbody');
+    if (tbody) tbody.innerHTML = items.map((s, idx) => `
+        <tr>
+            <td>${idx + 1}</td>
+            <td><strong>${escapeHtml(s.name)}</strong></td>
+            <td><span class="badge badge-info">${s.db_type}</span></td>
+            <td>${escapeHtml(s.host)}</td>
+            <td>${s.port || 'auto'}</td>
+            <td>${escapeHtml(s.database_name || '-')}</td>
+            <td>${statusBadge(s.status)}</td>
+            <td class="flex gap-8">
+                <button class="btn btn-outline btn-sm" onclick="testDs(${s.id})">Test</button>
+                <button class="btn btn-info btn-sm" onclick="editDs(${s.id})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteDs(${s.id})">Delete</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="8" class="empty-state">No data sources yet. Click "+ Add Data Source" to begin.</td></tr>';
+    if (typeof refreshSqlDatasourceSelect === 'function') refreshSqlDatasourceSelect(items);
+    return items;
+}
+
+function _parseDatasourceQueryError(rawError) {
+    const text = String(rawError || '');
+    const out = {
+        message: text,
+        line: null,
+        column: null,
+        diagnostics: null,
+        suggestions: [],
+        statementIndex: null,
+        statementType: null,
+        statementStartLine: null,
+        statementPreview: '',
+        sql: '',
+    };
+
+    const jsonStart = text.indexOf('{');
+    if (jsonStart >= 0) {
+        try {
+            const parsed = JSON.parse(text.slice(jsonStart));
+            const detail = parsed && parsed.detail ? parsed.detail : null;
+            if (detail && typeof detail === 'object') {
+                out.message = detail.error || detail.message || out.message;
+                out.line = Number(detail.line || 0) || null;
+                out.column = Number(detail.column || 0) || null;
+                out.diagnostics = detail.diagnostics || null;
+                out.suggestions = Array.isArray(detail.suggestions) ? detail.suggestions : [];
+                out.statementIndex = Number(detail.statement_index || 0) || null;
+                out.statementType = detail.statement_type || null;
+                out.statementStartLine = Number(detail.statement_start_line || 0) || null;
+                out.statementPreview = detail.statement_preview || '';
+                out.sql = detail.sql || '';
+                return out;
+            }
+            if (typeof detail === 'string' && detail.trim()) {
+                out.message = detail;
+            }
+        } catch (_) {
+            // keep fallback text parsing
+        }
+    }
+
+    const lc =
+        text.match(/error\s+at\s+line\s*[:\s]+(\d+)(?:\s*[,:]?\s*column\s*[:\s]+(\d+))?/i) ||
+        text.match(/at\s+line\s*[:\s]+(\d+)(?:\s*[,:]?\s*column\s*[:\s]+(\d+))?/i) ||
+        text.match(/line\s*[:\s]+(\d+)(?:\s*[,:]?\s*column\s*[:\s]+(\d+))?/i) ||
+        text.match(/line\s*(\d+)\s*col\s*(\d+)/i);
+    if (lc) {
+        out.line = Number(lc[1] || 0) || null;
+        out.column = Number(lc[2] || 0) || null;
+    }
+    return out;
+}
+
+const sqlConsoleState = {
+    tabs: [],
+    activeTabId: null,
+    seq: 1,
+};
+const sqlEditorState = {
+    tabs: [],
+    activeTabId: null,
+    seq: 1,
+};
+const DS_WORKSPACE_STATE_KEY = 'datasources.sql.workspace.v3';
+const DS_SQL_HISTORY_KEY = 'datasources.sql.history.v1';
+const DS_SQL_SAVED_SCRIPTS_KEY = 'datasources.sql.savedScripts.v1';
+const DS_SQL_SNIPPETS_KEY = 'datasources.sql.snippets.v1';
+const UI_SQL_DEFAULT_ROW_LIMIT_KEY = 'ui.sql.defaultRowLimit.v1';
+
+const DEFAULT_SQL_SNIPPETS = [
+    {
+        name: 'Top 100 Rows',
+        sql: 'SELECT *\nFROM your_table\nFETCH FIRST 100 ROWS ONLY',
+    },
+    {
+        name: 'Count + Distinct',
+        sql: 'SELECT COUNT(*) AS total_rows, COUNT(DISTINCT your_key) AS distinct_keys\nFROM your_table',
+    },
+    {
+        name: 'Null Check Profile',
+        sql: 'SELECT\n  SUM(CASE WHEN your_column IS NULL THEN 1 ELSE 0 END) AS null_cnt,\n  COUNT(*) AS total_cnt\nFROM your_table',
+    },
+    {
+        name: 'Duplicate Keys',
+        sql: 'SELECT your_key, COUNT(*) AS dup_cnt\nFROM your_table\nGROUP BY your_key\nHAVING COUNT(*) > 1\nORDER BY dup_cnt DESC',
+    },
+    {
+        name: 'Date Range Summary',
+        sql: 'SELECT MIN(your_date_col) AS min_dt, MAX(your_date_col) AS max_dt, COUNT(*) AS total_cnt\nFROM your_table',
+    },
+];
+
+let sqlHistoryState = [];
+let sqlSavedScriptsState = [];
+let sqlSnippetsState = [];
+let sqlSelectionMarkers = [];
+let sqlWorkspacePseudoFullscreen = false;
+let sqlErrorLineHandle = null;
+let sqlQueryAbortController = null;
+
+function setSqlQueryRunningUi(running) {
+    const stopBtn = document.getElementById('sql-stop-query-btn');
+    if (stopBtn) stopBtn.disabled = !running;
+}
+
+function _safeJsonLocal(key, fallback) {
+    return _safeParseJson(localStorage.getItem(key), fallback);
+}
+
+function _persistSqlDevLikeState() {
+    localStorage.setItem(DS_SQL_HISTORY_KEY, JSON.stringify(sqlHistoryState.slice(0, 50)));
+    localStorage.setItem(DS_SQL_SAVED_SCRIPTS_KEY, JSON.stringify(sqlSavedScriptsState.slice(0, 100)));
+    localStorage.setItem(DS_SQL_SNIPPETS_KEY, JSON.stringify(sqlSnippetsState.slice(0, 100)));
+}
+
+function _shortSqlLine(sql, max = 80) {
+    const oneLine = String(sql || '').replace(/\s+/g, ' ').trim();
+    if (oneLine.length <= max) return oneLine;
+    return oneLine.slice(0, max - 3) + '...';
+}
+
+function _loadSqlDevLikeState() {
+    sqlHistoryState = Array.isArray(_safeJsonLocal(DS_SQL_HISTORY_KEY, [])) ? _safeJsonLocal(DS_SQL_HISTORY_KEY, []) : [];
+    sqlSavedScriptsState = Array.isArray(_safeJsonLocal(DS_SQL_SAVED_SCRIPTS_KEY, [])) ? _safeJsonLocal(DS_SQL_SAVED_SCRIPTS_KEY, []) : [];
+    const storedSnippets = _safeJsonLocal(DS_SQL_SNIPPETS_KEY, null);
+    if (Array.isArray(storedSnippets) && storedSnippets.length) {
+        sqlSnippetsState = storedSnippets;
+    } else {
+        sqlSnippetsState = [...DEFAULT_SQL_SNIPPETS];
+    }
+}
+
+function _renderSqlHistory() {
+    const sel = document.getElementById('sql-history-select');
+    if (!sel) return;
+    const opts = ['<option value="">- Select recent query -</option>'];
+    sqlHistoryState.forEach((h, idx) => {
+        const dsName = h.datasource_name ? ` [${h.datasource_name}]` : '';
+        opts.push(`<option value="${idx}">${escapeHtml((h.executed_at || '') + dsName + ' - ' + _shortSqlLine(h.sql || ''))}</option>`);
+    });
+    sel.innerHTML = opts.join('');
+}
+
+function _renderSqlSnippets() {
+    const sel = document.getElementById('sql-snippet-select');
+    if (!sel) return;
+    const opts = ['<option value="">- Select snippet -</option>'];
+    sqlSnippetsState.forEach((s, idx) => {
+        opts.push(`<option value="${idx}">${escapeHtml(s.name || `Snippet ${idx + 1}`)}</option>`);
+    });
+    sel.innerHTML = opts.join('');
+}
+
+function _renderSqlSavedScripts() {
+    const sel = document.getElementById('sql-saved-script-select');
+    if (!sel) return;
+    const opts = ['<option value="">- Select saved script -</option>'];
+    sqlSavedScriptsState.forEach((s, idx) => {
+        opts.push(`<option value="${idx}">${escapeHtml((s.name || `Script ${idx + 1}`) + ' - ' + _shortSqlLine(s.sql || ''))}</option>`);
+    });
+    sel.innerHTML = opts.join('');
+}
+
+function initSqlDevLikeTools() {
+    _loadSqlDevLikeState();
+    _renderSqlHistory();
+    _renderSqlSnippets();
+    _renderSqlSavedScripts();
+}
+
+function _captureSqlHistory(sqlText, dsId, dsName) {
+    const sql = String(sqlText || '').trim();
+    if (!sql) return;
+    const existingIdx = sqlHistoryState.findIndex((x) => String(x.sql || '').trim() === sql && String(x.datasource_id || '') === String(dsId || ''));
+    if (existingIdx >= 0) {
+        sqlHistoryState.splice(existingIdx, 1);
+    }
+    sqlHistoryState.unshift({
+        sql,
+        datasource_id: String(dsId || ''),
+        datasource_name: String(dsName || ''),
+        executed_at: new Date().toISOString(),
+    });
+    sqlHistoryState = sqlHistoryState.slice(0, 50);
+    _persistSqlDevLikeState();
+    _renderSqlHistory();
+}
+
+function applySelectedSqlHistory() {
+    const sel = document.getElementById('sql-history-select');
+    const idx = Number(sel?.value || -1);
+    if (idx < 0 || idx >= sqlHistoryState.length) return showToast('Select a history item', 'warning');
+    const h = sqlHistoryState[idx];
+    setSqlEditorValue('sql-editor', h.sql || '');
+    const dsSelect = document.getElementById('sql-ds-select');
+    if (dsSelect && h.datasource_id) {
+        const has = Array.from(dsSelect.options || []).some(o => String(o.value) === String(h.datasource_id));
+        if (has) dsSelect.value = String(h.datasource_id);
+    }
+    const ws = activeSqlWorksheet();
+    if (ws) {
+        ws.sql = getSqlEditorValue('sql-editor') || '';
+        ws.datasourceId = dsSelect?.value || ws.datasourceId;
+    }
+    updateLineNumbers('sql-editor');
+    persistDatasourceWorkspaceState();
+    showToast('History query loaded', 'success');
+}
+
+function clearSqlHistory() {
+    sqlHistoryState = [];
+    _persistSqlDevLikeState();
+    _renderSqlHistory();
+    showToast('Query history cleared', 'warning');
+}
+
+function insertSelectedSnippet() {
+    const sel = document.getElementById('sql-snippet-select');
+    const idx = Number(sel?.value || -1);
+    if (idx < 0 || idx >= sqlSnippetsState.length) return showToast('Select a snippet', 'warning');
+    const snippet = sqlSnippetsState[idx]?.sql || '';
+    const ta = document.getElementById('sql-editor');
+    if (!ta) return;
+    const start = ta.selectionStart || 0;
+    const end = ta.selectionEnd || 0;
+    const before = ta.value.slice(0, start);
+    const after = ta.value.slice(end);
+    const glueBefore = before && !before.endsWith('\n') ? '\n' : '';
+    const glueAfter = after && !after.startsWith('\n') ? '\n' : '';
+    ta.value = `${before}${glueBefore}${snippet}${glueAfter}${after}`;
+    ta.dispatchEvent(new Event('input'));
+    showToast('Snippet inserted', 'success');
+}
+
+function resetSqlSnippets() {
+    sqlSnippetsState = [...DEFAULT_SQL_SNIPPETS];
+    _persistSqlDevLikeState();
+    _renderSqlSnippets();
+    showToast('Snippets reset to defaults', 'success');
+}
+
+function saveCurrentSqlScript() {
+    const name = (document.getElementById('sql-script-name')?.value || '').trim() || `Script ${new Date().toLocaleString()}`;
+    const sql = (getSqlEditorValue('sql-editor') || '').trim();
+    const datasourceId = document.getElementById('sql-ds-select')?.value || '';
+    if (!sql) return showToast('Editor is empty', 'warning');
+
+    const idx = sqlSavedScriptsState.findIndex((x) => String(x.name || '').toLowerCase() === name.toLowerCase());
+    const record = {
+        name,
+        sql,
+        datasource_id: String(datasourceId || ''),
+        saved_at: new Date().toISOString(),
+    };
+    if (idx >= 0) sqlSavedScriptsState[idx] = record;
+    else sqlSavedScriptsState.unshift(record);
+    sqlSavedScriptsState = sqlSavedScriptsState.slice(0, 100);
+    _persistSqlDevLikeState();
+    _renderSqlSavedScripts();
+    showToast('Script saved', 'success');
+}
+
+function loadSelectedSqlScript() {
+    const sel = document.getElementById('sql-saved-script-select');
+    const idx = Number(sel?.value || -1);
+    if (idx < 0 || idx >= sqlSavedScriptsState.length) return showToast('Select a saved script', 'warning');
+    const script = sqlSavedScriptsState[idx];
+    setSqlEditorValue('sql-editor', script.sql || '');
+    if (document.getElementById('sql-script-name')) {
+        document.getElementById('sql-script-name').value = script.name || '';
+    }
+    const dsSelect = document.getElementById('sql-ds-select');
+    if (dsSelect && script.datasource_id) {
+        const has = Array.from(dsSelect.options || []).some(o => String(o.value) === String(script.datasource_id));
+        if (has) dsSelect.value = String(script.datasource_id);
+    }
+    const ws = activeSqlWorksheet();
+    if (ws) {
+        ws.sql = getSqlEditorValue('sql-editor') || '';
+        ws.datasourceId = dsSelect?.value || ws.datasourceId;
+    }
+    updateLineNumbers('sql-editor');
+    persistDatasourceWorkspaceState();
+    showToast('Saved script loaded', 'success');
+}
+
+function deleteSelectedSqlScript() {
+    const sel = document.getElementById('sql-saved-script-select');
+    const idx = Number(sel?.value || -1);
+    if (idx < 0 || idx >= sqlSavedScriptsState.length) return showToast('Select a saved script', 'warning');
+    const name = sqlSavedScriptsState[idx]?.name || 'script';
+    if (!confirm(`Delete saved script "${name}"?`)) return;
+    sqlSavedScriptsState.splice(idx, 1);
+    _persistSqlDevLikeState();
+    _renderSqlSavedScripts();
+    showToast('Saved script deleted', 'warning');
+}
+
+function getSqlDefaultRowLimit() {
+    const raw = Number(localStorage.getItem(UI_SQL_DEFAULT_ROW_LIMIT_KEY) || 50);
+    if (!Number.isFinite(raw)) return 50;
+    return Math.max(1, Math.min(1000, Math.floor(raw)));
+}
+
+const SQL_VISIBLE_STEP = getSqlDefaultRowLimit();
+
+function _cloneSqlResultsState(src) {
+    const safe = src || {};
+    return {
+        tabs: (safe.tabs || []).map(t => ({
+            ...t,
+            columns: Array.isArray(t.columns) ? [...t.columns] : [],
+            rows: Array.isArray(t.rows) ? [...t.rows] : [],
+            errorObj: t.errorObj ? { ...t.errorObj } : null,
+        })),
+        activeTabId: safe.activeTabId || null,
+        seq: Number(safe.seq || 1) || 1,
+    };
+}
+
+function createSqlWorksheet(insertAfterId = null) {
+    const id = 'sql-ws-' + Date.now() + '-' + (sqlEditorState.seq++);
+    const ws = {
+        id,
+        title: `Worksheet ${sqlEditorState.seq - 1}`,
+        pinned: false,
+        datasourceId: '',
+        sql: '',
+        results: { tabs: [], activeTabId: null, seq: 1 },
+    };
+    if (!insertAfterId) {
+        sqlEditorState.tabs.push(ws);
+    } else {
+        const idx = sqlEditorState.tabs.findIndex(t => t.id === insertAfterId);
+        if (idx >= 0) sqlEditorState.tabs.splice(idx + 1, 0, ws);
+        else sqlEditorState.tabs.push(ws);
+    }
+    sqlEditorState.activeTabId = id;
+    return ws;
+}
+
+function activeSqlWorksheet() {
+    return sqlEditorState.tabs.find(t => t.id === sqlEditorState.activeTabId) || null;
+}
+
+function _syncActiveWorksheetFromUi() {
+    const ws = activeSqlWorksheet();
+    if (!ws) return;
+    ws.datasourceId = document.getElementById('sql-ds-select')?.value || '';
+    ws.sql = getSqlEditorValue('sql-editor') || '';
+    ws.results = _cloneSqlResultsState(sqlConsoleState);
+}
+
+function _applyWorksheetToUi(ws) {
+    if (!ws) return;
+    const dsSelect = document.getElementById('sql-ds-select');
+    if (dsSelect) {
+        const hasOption = Array.from(dsSelect.options || []).some(o => String(o.value) === String(ws.datasourceId || ''));
+        if (hasOption) {
+            dsSelect.value = ws.datasourceId || '';
+        } else if (dsSelect.options.length) {
+            dsSelect.value = dsSelect.options[0].value;
+        }
+    }
+    setSqlEditorValue('sql-editor', ws.sql || '');
+    const rs = _cloneSqlResultsState(ws.results);
+    sqlConsoleState.tabs = rs.tabs;
+    sqlConsoleState.activeTabId = rs.activeTabId;
+    sqlConsoleState.seq = rs.seq;
+    renderSqlTabs();
+    _syncSqlEditorMode();
+    updateLineNumbers('sql-editor');
+    _clearSqlSelectionHighlights();
+}
+
+function renderSqlWorksheets() {
+    const tabsEl = document.getElementById('sql-editor-tabs');
+    if (!tabsEl) return;
+    tabsEl.innerHTML = (sqlEditorState.tabs || []).map(t => {
+        const active = t.id === sqlEditorState.activeTabId;
+        return `<button class="btn btn-sm ${active ? 'btn-primary' : 'btn-outline'}" onclick="activateSqlWorksheet('${t.id}')" ondblclick="renameSqlWorksheet('${t.id}')" title="Double-click to rename" style="white-space:nowrap">${t.pinned ? '&#128204; ' : ''}${escapeHtml(t.title)}</button>`;
+    }).join('');
+    const active = activeSqlWorksheet();
+    const renameBtn = document.getElementById('sql-editor-rename-btn');
+    const saveFileBtn = document.getElementById('sql-editor-save-file-btn');
+    const pinBtn = document.getElementById('sql-editor-pin-btn');
+    const closeBtn = document.getElementById('sql-editor-close-btn');
+    if (renameBtn) renameBtn.disabled = !active;
+    if (saveFileBtn) saveFileBtn.disabled = !active;
+    if (pinBtn) {
+        pinBtn.disabled = !active;
+        pinBtn.textContent = active?.pinned ? 'Unpin Worksheet' : 'Pin Worksheet';
+    }
+    if (closeBtn) closeBtn.disabled = !active;
+}
+
+function renameSqlWorksheet(id) {
+    const ws = sqlEditorState.tabs.find(t => t.id === id);
+    if (!ws) return;
+    const newTitle = prompt('Rename worksheet:', ws.title || '');
+    if (newTitle === null) return; // cancelled
+    const trimmed = newTitle.trim();
+    if (!trimmed) return;
+    ws.title = trimmed;
+    renderSqlWorksheets();
+    persistDatasourceWorkspaceState();
+}
+
+function renameActiveSqlWorksheet() {
+    _ensureAtLeastOneWorksheet();
+    const ws = activeSqlWorksheet();
+    if (!ws) return;
+    renameSqlWorksheet(ws.id);
+}
+
+function activateSqlWorksheet(id) {
+    _syncActiveWorksheetFromUi();
+    sqlEditorState.activeTabId = id;
+    renderSqlWorksheets();
+    _applyWorksheetToUi(activeSqlWorksheet());
+    persistDatasourceWorkspaceState();
+}
+
+function newSqlWorksheet() {
+    _syncActiveWorksheetFromUi();
+    const current = activeSqlWorksheet();
+    const ws = createSqlWorksheet(current?.id || null);
+    renderSqlWorksheets();
+    _applyWorksheetToUi(ws);
+    persistDatasourceWorkspaceState();
+}
+
+function closeSqlWorksheet(id) {
+    const idx = sqlEditorState.tabs.findIndex(t => t.id === id);
+    if (idx < 0) return;
+    sqlEditorState.tabs.splice(idx, 1);
+    if (!sqlEditorState.tabs.length) {
+        createSqlWorksheet();
+    }
+    if (sqlEditorState.activeTabId === id) {
+        const next = sqlEditorState.tabs[idx] || sqlEditorState.tabs[idx - 1] || sqlEditorState.tabs[0] || null;
+        sqlEditorState.activeTabId = next ? next.id : null;
+    }
+    renderSqlWorksheets();
+    _applyWorksheetToUi(activeSqlWorksheet());
+    persistDatasourceWorkspaceState();
+}
+
+function closeActiveSqlWorksheet() {
+    const ws = activeSqlWorksheet();
+    if (!ws) return;
+    closeSqlWorksheet(ws.id);
+}
+
+function togglePinSqlWorksheet() {
+    const ws = activeSqlWorksheet();
+    if (!ws) return;
+    ws.pinned = !ws.pinned;
+    renderSqlWorksheets();
+    persistDatasourceWorkspaceState();
+}
+
+function _worksheetFileName(ws) {
+    const safeBase = String(ws?.title || 'Worksheet').trim() || 'Worksheet';
+    return /\.[a-z0-9]+$/i.test(safeBase) ? safeBase : `${safeBase}.sql`;
+}
+
+function saveActiveSqlWorksheetToFile() {
+    const ws = activeSqlWorksheet();
+    if (!ws) return showToast('No active worksheet', 'warning');
+    const sql = getSqlEditorValue('sql-editor') || '';
+    const blob = new Blob([sql], { type: 'text/sql;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = _worksheetFileName(ws);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Worksheet saved to file', 'success');
+}
+
+function loadSqlWorksheetFromFile() {
+    const input = document.getElementById('sql-worksheet-file-input');
+    if (!input) return;
+    input.value = '';
+    input.click();
+}
+
+function _applyLoadedWorksheetFile(file, content) {
+    _ensureAtLeastOneWorksheet();
+    const ws = activeSqlWorksheet();
+    if (!ws) return;
+    const safeName = String(file?.name || ws.title || '').trim();
+    if (safeName) ws.title = safeName;
+    sqlEditorState.activeTabId = ws.id;
+
+    const normalized = String(content || '')
+        .replace(/^\uFEFF/, '')
+        .replace(/\u0000/g, '')
+        .replace(/\r\n?/g, '\n');
+
+    setSqlEditorValue('sql-editor', normalized);
+    ws.sql = getSqlEditorValue('sql-editor') || '';
+    renderSqlWorksheets();
+    updateLineNumbers('sql-editor');
+    _clearSqlSelectionHighlights();
+    _syncSqlWorkspaceFullscreenUi();
+    persistDatasourceWorkspaceState();
+    showToast(`Loaded ${file?.name || 'worksheet file'}`, 'success');
+}
+
+function _bindWorksheetFileInput() {
+    const input = document.getElementById('sql-worksheet-file-input');
+    if (!input || input.dataset.bound === '1') return;
+    input.dataset.bound = '1';
+    input.addEventListener('change', async (event) => {
+        const file = event.target?.files?.[0];
+        if (!file) return;
+        try {
+            if ((file.size || 0) > 5 * 1024 * 1024) {
+                showToast('Large SQL file detected; loading first 5 MB only for stability.', 'warning');
+            }
+            const text = await file.text();
+            _applyLoadedWorksheetFile(file, text);
+        } catch (e) {
+            showToast('Failed to load worksheet file: ' + (e.message || String(e)), 'error');
+        }
+    });
+}
+
+function _setSqlWorkspaceFullscreenUi(active) {
+    const workspace = document.getElementById('sql-workspace-frame');
+    const btn = document.getElementById('sql-editor-fullscreen-btn');
+    if (workspace) {
+        if (active) workspace.classList.add('sql-workspace-fullscreen');
+        else workspace.classList.remove('sql-workspace-fullscreen');
+        if (sqlWorkspacePseudoFullscreen) workspace.classList.add('sql-workspace-pseudo-fullscreen');
+        else workspace.classList.remove('sql-workspace-pseudo-fullscreen');
+    }
+    if (btn) btn.textContent = (active || sqlWorkspacePseudoFullscreen) ? 'Exit Full Screen' : 'Full Screen';
+}
+
+function _syncSqlWorkspaceFullscreenUi() {
+    const workspace = document.getElementById('sql-workspace-frame');
+    const fsEl = document.fullscreenElement;
+    const active = !!workspace && !!fsEl && (fsEl === workspace || workspace.contains(fsEl));
+    _setSqlWorkspaceFullscreenUi(active);
+}
+
+async function toggleSqlWorkspaceFullscreen() {
+    const workspace = document.getElementById('sql-workspace-frame');
+    if (!workspace) return;
+
+    const fsEl = document.fullscreenElement;
+    const nativeActive = !!fsEl && (fsEl === workspace || workspace.contains(fsEl));
+
+    try {
+        if (nativeActive) {
+            await document.exitFullscreen();
+            sqlWorkspacePseudoFullscreen = false;
+        } else if (sqlWorkspacePseudoFullscreen) {
+            sqlWorkspacePseudoFullscreen = false;
+        } else {
+            if (workspace.requestFullscreen) {
+                await workspace.requestFullscreen();
+                sqlWorkspacePseudoFullscreen = false;
+            } else {
+                sqlWorkspacePseudoFullscreen = true;
+            }
+        }
+    } catch (e) {
+        sqlWorkspacePseudoFullscreen = !sqlWorkspacePseudoFullscreen;
+        showToast('Using inline full-screen mode for this browser session.', 'info');
+    }
+    _syncSqlWorkspaceFullscreenUi();
+}
+
+function stopSqlQuery() {
+    if (sqlQueryAbortController) {
+        try { sqlQueryAbortController.abort(); } catch (_) {}
+    }
+}
+
+function _ensureAtLeastOneWorksheet() {
+    if (!sqlEditorState.tabs.length) {
+        createSqlWorksheet();
+    }
+    if (!sqlEditorState.activeTabId) {
+        sqlEditorState.activeTabId = sqlEditorState.tabs[0].id;
+    }
+}
+
+function refreshSqlDatasourceSelect(items) {
+    const select = document.getElementById('sql-ds-select');
+    if (!select) return;
+    const current = select.value;
+    const connected = (items || []).filter(x => x.status === 'ok');
+    select.innerHTML = connected.map(x => `<option value="${x.id}">${escapeHtml(x.name)} (${x.db_type})</option>`).join('');
+    if (!connected.length) {
+        select.innerHTML = '<option value="">No connected data sources</option>';
+        return;
+    }
+    const ws = activeSqlWorksheet();
+    const preferred = ws?.datasourceId || current;
+    const found = connected.find(x => String(x.id) === String(preferred));
+    select.value = found ? String(preferred) : String(connected[0].id);
+    if (ws) ws.datasourceId = select.value;
+}
+
+function createSqlTab(insertAfterId = null) {
+    const id = 'sql-tab-' + Date.now() + '-' + (sqlConsoleState.seq++);
+    const tab = {
+        id,
+        title: `Result ${sqlConsoleState.seq - 1}`,
+        pinned: false,
+        loading: true,
+        sql: '',
+        datasourceName: '',
+        columns: [],
+        rows: [],
+        error: '',
+        message: '',
+        executions: [],
+        totalRowsAffected: 0,
+    };
+    if (!insertAfterId) {
+        sqlConsoleState.tabs.push(tab);
+    } else {
+        const idx = sqlConsoleState.tabs.findIndex(t => t.id === insertAfterId);
+        if (idx >= 0) sqlConsoleState.tabs.splice(idx + 1, 0, tab);
+        else sqlConsoleState.tabs.push(tab);
+    }
+    sqlConsoleState.activeTabId = id;
+    renderSqlTabs();
+    persistDatasourceWorkspaceState();
+    return tab;
+}
+
+function activeSqlTab() {
+    return sqlConsoleState.tabs.find(t => t.id === sqlConsoleState.activeTabId) || null;
+}
+
+function renderSqlTabs() {
+    const tabsEl = document.getElementById('sql-result-tabs');
+    const contentEl = document.getElementById('sql-result-content');
+    const pinBtn = document.getElementById('sql-pin-btn');
+    const exportBtn = document.getElementById('sql-export-btn');
+    const windowBtn = document.getElementById('sql-window-btn');
+    const closeBtn = document.getElementById('sql-close-btn');
+    if (!tabsEl || !contentEl) return;
+
+    tabsEl.innerHTML = sqlConsoleState.tabs.map(t => {
+        const active = t.id === sqlConsoleState.activeTabId;
+        return `
+            <button class="btn btn-sm ${active ? 'btn-primary' : 'btn-outline'}" onclick="activateSqlTab('${t.id}')" style="white-space:nowrap">
+                ${t.pinned ? '&#128204; ' : ''}${escapeHtml(t.title)}
+            </button>
+        `;
+    }).join('');
+
+    const tab = activeSqlTab();
+    pinBtn.disabled = !tab;
+    if (windowBtn) windowBtn.disabled = !tab;
+    exportBtn.disabled = !tab || !tab.rows || !tab.rows.length;
+    closeBtn.disabled = !tab;
+    const rerunBtn = document.getElementById('sql-rerun-btn');
+    if (rerunBtn) rerunBtn.disabled = !tab || !tab.sql;
+    pinBtn.textContent = tab && tab.pinned ? 'Unpin' : 'Pin';
+
+    const _statusEl = document.getElementById('sql-result-status');
+    const _hideStatus = () => { if (_statusEl) { _statusEl.style.display = 'none'; _statusEl.innerHTML = ''; } };
+
+    if (!tab) {
+        contentEl.innerHTML = '<div class="empty-state">Run a query to see results in tabs.</div>';
+        _hideStatus();
+        return;
+    }
+
+    if (tab.loading) {
+        contentEl.innerHTML = '<span class="spinner"></span> Running query...';
+        _hideStatus();
+        return;
+    }
+    if (tab.error) {
+        const errObj = tab.errorObj || { message: tab.error, line: null, column: null, diagnostics: null, suggestions: [] };
+        const errText = String(errObj.message || tab.error || 'Unknown query error');
+        // Try to extract line number from error message (e.g., "at line 5")
+        let lineInfo = '';
+        let match = errText && errText.match(/line (\d+)/i);
+        const errorLine = errObj.line || (match ? Number(match[1]) : null);
+        if (errorLine) {
+            const colTxt = errObj.column ? `, column <b>${errObj.column}</b>` : '';
+            lineInfo = `<div class="text-danger" style="font-size:13px;margin-bottom:4px">Error at line <b>${errorLine}</b>${colTxt}</div>`;
+        }
+        const stmtInfo = (errObj.statementIndex || errObj.statementType)
+            ? `<div class="text-danger" style="font-size:12px;margin-bottom:4px">Statement ${errObj.statementIndex || '?'}${errObj.statementType ? ` (${escapeHtml(errObj.statementType)})` : ''}${errObj.statementStartLine ? ` starting at line ${errObj.statementStartLine}` : ''}</div>`
+            : '';
+        const stmtPreview = errObj.statementPreview
+            ? `<pre style="margin:6px 0;padding:6px;background:#fff6e6;border:1px solid #ffe2b3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">${escapeHtml(errObj.statementPreview)}</pre>`
+            : '';
+        // GHC-style suggestions: detailed explanations + examples for common Oracle errors
+        let suggestionsHtml = '';
+        if (errText) {
+            const parts = [];
+
+            const diagnostics = errObj.diagnostics || {};
+            const missingTables = diagnostics.missing_tables || [];
+            const missingColumns = diagnostics.missing_columns || [];
+            if (missingTables.length) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px"><b>Missing table/view references</b><br>${escapeHtml(missingTables.map(t => `${t.schema}.${t.table}${t.line ? ` (line ${t.line}${t.column ? `, col ${t.column}` : ''})` : ''}`).join('\n'))}</div>`);
+            }
+            if (missingColumns.length) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px"><b>Missing column references</b><br>${escapeHtml(missingColumns.map(c => `${c.schema}.${c.table}.${c.column}${c.line ? ` (line ${c.line}${c.column_pos ? `, col ${c.column_pos}` : ''})` : ''}`).join('\n'))}</div>`);
+            }
+            if ((errObj.suggestions || []).length) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px"><b>Suggested fix</b><br>${escapeHtml(errObj.suggestions.join('\n'))}</div>`);
+            }
+
+            if (errText.includes('ORA-00911')) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px">
+                    <b>ORA-00911: invalid character</b><br>
+                    Explanation: A disallowed character was found in the SQL (often a trailing semicolon or stray symbol).<br>
+                    Fix: Remove trailing semicolons or unexpected characters from the query.<br>
+                    Example (problem): <pre style="margin:6px;padding:6px;background:#fff6e6;border:1px solid #ffe2b3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT * FROM my_table;</pre>
+                    Example (fixed): <pre style="margin:6px;padding:6px;background:#f6fff6;border:1px solid #bfffb3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT * FROM my_table</pre>
+                </div>`);
+            }
+
+            if (errText.includes('ORA-00936')) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px">
+                    <b>ORA-00936: missing expression</b><br>
+                    Explanation: The SQL is missing a required expression (e.g., a column, value or operator).<br>
+                    Fix: Check SELECT/WHERE/VALUES clauses for incomplete expressions or stray commas.<br>
+                    Example (problem): <pre style="margin:6px;padding:6px;background:#fff6e6;border:1px solid #ffe2b3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT id, FROM my_table</pre>
+                    Example (fixed): <pre style="margin:6px;padding:6px;background:#f6fff6;border:1px solid #bfffb3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT id FROM my_table</pre>
+                </div>`);
+            }
+
+            if (errText.includes('ORA-00907')) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px">
+                    <b>ORA-00907: missing right parenthesis</b><br>
+                    Explanation: Parentheses in the statement are unbalanced or misplaced.<br>
+                    Fix: Verify matching parentheses in function calls, subqueries and expressions.<br>
+                    Example (problem): <pre style="margin:6px;padding:6px;background:#fff6e6;border:1px solid #ffe2b3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT (id, name FROM my_table</pre>
+                    Example (fixed): <pre style="margin:6px;padding:6px;background:#f6fff6;border:1px solid #bfffb3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT id, name FROM my_table</pre>
+                </div>`);
+            }
+
+            if (errText.includes('ORA-00904')) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px">
+                    <b>ORA-00904: invalid identifier</b><br>
+                    Explanation: A column or alias name is invalid or misspelled.<br>
+                    Fix: Check column names, aliases and quoting; ensure the column exists in the referenced table.<br>
+                    Example (problem): <pre style="margin:6px;padding:6px;background:#fff6e6;border:1px solid #ffe2b3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT wrong_col FROM my_table</pre>
+                    Example (fixed): <pre style="margin:6px;padding:6px;background:#f6fff6;border:1px solid #bfffb3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT correct_col FROM my_table</pre>
+                </div>`);
+            }
+
+            if (errText.includes('ORA-00923')) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px">
+                    <b>ORA-00923: FROM keyword not found where expected</b><br>
+                    Explanation: The SELECT-list or other clause is malformed (missing commas or stray tokens).<br>
+                    Fix: Verify SELECT expressions and commas before the FROM clause.<br>
+                    Example (problem): <pre style="margin:6px;padding:6px;background:#fff6e6;border:1px solid #ffe2b3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT id name FROM my_table</pre>
+                    Example (fixed): <pre style="margin:6px;padding:6px;background:#f6fff6;border:1px solid #bfffb3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">SELECT id, name FROM my_table</pre>
+                </div>`);
+            }
+
+            if (errText.includes('ORA-01722')) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px">
+                    <b>ORA-01722: invalid number</b><br>
+                    Explanation: Oracle attempted to convert a string to a number and failed (often in WHERE or JOIN predicates).<br>
+                    Fix: Ensure numeric columns are compared to numeric literals or CAST appropriately.<br>
+                    Example (problem): <pre style="margin:6px;padding:6px;background:#fff6e6;border:1px solid #ffe2b3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">WHERE id = 'ABC'</pre>
+                    Example (fixed): <pre style="margin:6px;padding:6px;background:#f6fff6;border:1px solid #bfffb3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">WHERE id = 123</pre>
+                </div>`);
+            }
+
+            if (errText.includes('ORA-00001')) {
+                parts.push(`<div class="text-warning" style="font-size:13px;margin-top:6px">
+                    <b>ORA-00001: unique constraint violated</b><br>
+                    Explanation: INSERT or UPDATE would create a duplicate value for a unique constraint.<br>
+                    Fix: Ensure values for unique columns are unique or handle duplicates before inserting (e.g., MERGE/ON CONFLICT pattern).<br>
+                    Example (problem): <pre style="margin:6px;padding:6px;background:#fff6e6;border:1px solid #ffe2b3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">INSERT INTO users(id, name) VALUES (1, 'Alice')</pre>
+                    Example (fixed): <pre style="margin:6px;padding:6px;background:#f6fff6;border:1px solid #bfffb3;color:#000;font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto">MERGE INTO users t USING (SELECT 1 id, 'Alice' name FROM dual) s ON (t.id = s.id) WHEN NOT MATCHED THEN INSERT (id,name) VALUES (s.id,s.name)</pre>
+                </div>`);
+            }
+
+            if (parts.length) {
+                suggestionsHtml = `<div style="margin-top:8px">${parts.join('\n')}</div>`;
+            }
+        }
+
+        const sourceContext = _buildSqlErrorContextHtml(tab.sql || '', errorLine);
+        contentEl.innerHTML = `${lineInfo}${stmtInfo}<div class="text-danger" style="font-size:14px;font-weight:500;margin:4px 0">${escapeHtml(errText)}</div>${sourceContext}${stmtPreview}${suggestionsHtml}<div class="sql-pdm-hint"></div>`;
+        _hideStatus();
+        const editorErrorLine = errorLine ? (errorLine + (tab.sqlLineOffset || 0)) : null;
+        if (editorErrorLine && typeof highlightSqlErrorLine === 'function') {
+            try { highlightSqlErrorLine('sql-editor', editorErrorLine); } catch (_) {}
+        }
+        // Async PDM column lookup for ORA-00904 invalid identifier
+        if (errText.includes('ORA-00904')) {
+            const _dsId = document.getElementById('sql-ds-select')?.value;
+            const _ph = contentEl.querySelector('.sql-pdm-hint');
+            if (_dsId && tab.sql && _ph) {
+                _suggestPdmColumns(_dsId, errText, tab.sql).then(html => {
+                    if (html && _ph.isConnected) _ph.outerHTML = html;
+                }).catch(() => {});
+            }
+        }
+        return;
+    }
+    const showing = Math.min(tab.visibleRows || tab.rows.length, tab.rows.length);
+    const capText = tab.capped ? ` (capped at ${tab.rowCap || 100})` : '';
+    const baseMeta = `${escapeHtml(tab.datasourceName)} | Showing ${showing} of ${tab.rows.length} row(s)${capText}`;
+    const messageMeta = tab.message ? `<div class="text-success" style="margin-bottom:2px">${escapeHtml(tab.message)}</div>` : '';
+    const statusEl = document.getElementById('sql-result-status');
+    if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.innerHTML = `${messageMeta}<div class="text-muted">${baseMeta}</div>`;
+    }
+    const displayColumns = ['RGID', ...(tab.columns || [])];
+    const sampleRows = tab.rows.slice(0, Math.min(tab.rows.length, 100));
+    const columnWidths = displayColumns.map(c => {
+        if (c === 'RGID') {
+            const rgidDigits = Math.max(2, String(tab.rows.length || showing || 0).length + 1);
+            return Math.min(8, Math.max(4, rgidDigits));
+        }
+        let maxLen = 0;
+        for (const row of sampleRows) {
+            const valueLen = String(row[c] ?? '').length;
+            if (valueLen > maxLen) maxLen = valueLen;
+        }
+        if (!sampleRows.length) return Math.min(32, Math.max(4, c.length + 2));
+        return Math.min(48, Math.max(6, c.length + 2, maxLen + 2));
+    });
+
+    const colgroup = `<colgroup>${columnWidths.map(w => `<col style="width:${w}ch">`).join('')}</colgroup>`;
+    const headers = displayColumns.map((c, i) => {
+        const label = c === 'RGID' ? '#' : c;
+        return `<th title="${escapeHtml(label)}" style="width:${columnWidths[i]}ch" data-col-idx="${i}">${escapeHtml(label)}<div class="col-resizer" data-col="${i}"></div></th>`;
+    }).join('');
+
+    if (!tab.rows.length) {
+        if (!tab.columns || !tab.columns.length) {
+            contentEl.innerHTML = `<div class="empty-state" style="padding:16px 8px">Statement executed successfully. No result set returned.</div>`;
+            return;
+        }
+        contentEl.innerHTML = `<div class="sql-result-grid"><div class="sql-result-thead-wrap"><table>${colgroup}<thead><tr>${headers}</tr></thead></table></div><div class="sql-result-tbody-wrap"><table>${colgroup}<tbody></tbody></table></div></div><div class="empty-state" style="padding:8px">Query returned 0 rows.</div>`;
+        _initSqlResultColResizers(contentEl);
+        return;
+    }
+
+    const rows = tab.rows.slice(0, showing).map((r, idx) => {
+        const rgid = idx + 1;
+        return `<tr>${displayColumns.map((c, i) => {
+            const raw = c === 'RGID' ? rgid : (r[c] ?? '');
+            const val = String(raw);
+            return `<td title="${escapeHtml(val)}" style="max-width:${columnWidths[i]}ch">${escapeHtml(val)}</td>`;
+        }).join('')}</tr>`;
+    }).join('');
+    contentEl.innerHTML = `<div class="sql-result-grid"><div class="sql-result-thead-wrap"><table>${colgroup}<thead><tr>${headers}</tr></thead></table></div><div class="sql-result-tbody-wrap"><table>${colgroup}<tbody>${rows}</tbody></table></div></div>`;
+    _initSqlResultColResizers(contentEl);
+
+    const tbodyWrap = contentEl.querySelector('.sql-result-tbody-wrap');
+    if (tbodyWrap) {
+        tbodyWrap.onscroll = () => {
+            const active = activeSqlTab();
+            if (!active || !active.rows || active.visibleRows >= active.rows.length) return;
+            const nearBottom = tbodyWrap.scrollTop + tbodyWrap.clientHeight >= tbodyWrap.scrollHeight - 16;
+            if (!nearBottom) return;
+            active.visibleRows = Math.min(active.visibleRows + SQL_VISIBLE_STEP, active.rows.length);
+            const prevTop = tbodyWrap.scrollTop;
+            renderSqlTabs();
+            const newWrap = document.querySelector('#sql-result-content .sql-result-tbody-wrap');
+            if (newWrap) newWrap.scrollTop = prevTop;
+        };
+    }
+}
+
+function activateSqlTab(id) {
+    sqlConsoleState.activeTabId = id;
+    renderSqlTabs();
+    persistDatasourceWorkspaceState();
+}
+
+function closeActiveTab() {
+    const tab = activeSqlTab();
+    if (!tab) return;
+    closeSqlTab(tab.id);
+}
+
+function closeSqlTab(id) {
+    const idx = sqlConsoleState.tabs.findIndex(t => t.id === id);
+    if (idx < 0) return;
+    sqlConsoleState.tabs.splice(idx, 1);
+    if (sqlConsoleState.activeTabId === id) {
+        const next = sqlConsoleState.tabs[idx] || sqlConsoleState.tabs[idx - 1] || null;
+        sqlConsoleState.activeTabId = next ? next.id : null;
+    }
+    renderSqlTabs();
+    persistDatasourceWorkspaceState();
+}
+
+function togglePinActiveTab() {
+    const tab = activeSqlTab();
+    if (!tab) return;
+    tab.pinned = !tab.pinned;
+    renderSqlTabs();
+    persistDatasourceWorkspaceState();
+}
+
+async function rerunActiveSqlTab() {
+    const tab = activeSqlTab();
+    if (!tab || !tab.sql) return showToast('No SQL in active tab to refresh', 'warning');
+    setSqlEditorValue('sql-editor', tab.sql);
+    await runSqlQuery();
+}
+
+function _extractSelectedSqlText() {
+    const ta = document.getElementById('sql-editor');
+    if (!ta) return '';
+    const cm = _getSqlEditorCm();
+    if (cm) {
+        const picked = String(cm.getSelection() || '').trim();
+        if (picked) return picked;
+    }
+    const start = ta.selectionStart || 0;
+    const end = ta.selectionEnd || 0;
+    if (end <= start) return '';
+    return String(ta.value || '').slice(start, end).trim();
+}
+
+async function runSelectedSqlText() {
+    const selected = _extractSelectedSqlText();
+    if (!selected) return showToast('Select SQL text in editor first', 'warning');
+    await runSqlQuery(selected);
+}
+
+function _serializeSqlTabsForState() {
+    return (sqlConsoleState.tabs || []).slice(-8).map((t) => ({
+        id: t.id,
+        title: t.title,
+        pinned: !!t.pinned,
+        loading: false,
+        sql: t.sql || '',
+        datasourceName: t.datasourceName || '',
+        columns: Array.isArray(t.columns) ? t.columns : [],
+        rows: Array.isArray(t.rows) ? t.rows.slice(0, 200) : [],
+        error: t.error || '',
+        message: t.message || '',
+        executions: Array.isArray(t.executions) ? t.executions : [],
+        totalRowsAffected: Number(t.totalRowsAffected || 0) || 0,
+        rowCap: t.rowCap || 100,
+        capped: !!t.capped,
+        visibleRows: t.visibleRows || SQL_VISIBLE_STEP,
+    }));
+}
+
+function _serializeWorksheetsForState() {
+    return (sqlEditorState.tabs || []).slice(-12).map((w) => ({
+        id: w.id,
+        title: w.title || 'Worksheet',
+        pinned: !!w.pinned,
+        datasourceId: String(w.datasourceId || ''),
+        sql: String(w.sql || ''),
+        results: {
+            tabs: ((w.results?.tabs) || []).slice(-8).map((t) => ({
+                id: t.id,
+                title: t.title,
+                pinned: !!t.pinned,
+                loading: false,
+                sql: t.sql || '',
+                datasourceName: t.datasourceName || '',
+                columns: Array.isArray(t.columns) ? t.columns : [],
+                rows: Array.isArray(t.rows) ? t.rows.slice(0, 200) : [],
+                error: t.error || '',
+                errorObj: t.errorObj || null,
+                message: t.message || '',
+                executions: Array.isArray(t.executions) ? t.executions : [],
+                totalRowsAffected: Number(t.totalRowsAffected || 0) || 0,
+                rowCap: t.rowCap || 100,
+                capped: !!t.capped,
+                visibleRows: t.visibleRows || SQL_VISIBLE_STEP,
+            })),
+            activeTabId: w.results?.activeTabId || '',
+            seq: Number(w.results?.seq || 1) || 1,
+        },
+    }));
+}
+
+function persistDatasourceWorkspaceState() {
+    _syncActiveWorksheetFromUi();
+    const state = {
+        worksheets: _serializeWorksheetsForState(),
+        active_worksheet_id: sqlEditorState.activeTabId || '',
+        worksheet_seq: Number(sqlEditorState.seq || 1) || 1,
+        assist_mode: document.getElementById('ds-assist-mode')?.value || 'ghc',
+        assist_agent: document.getElementById('ds-assist-agent')?.value || '',
+        assist_question: document.getElementById('ds-assist-question')?.value || '',
+        assist_response: document.getElementById('ds-assist-response')?.value || '',
+        details_results_open: !document.getElementById('sql-results-body')?.classList.contains('ds-sect-collapsed'),
+        details_assistant_open: !document.getElementById('sql-assistant-body')?.classList.contains('ds-sect-collapsed'),
+        ds_list_open: !document.getElementById('ds-list-body')?.classList.contains('ds-sect-collapsed'),
+        ds_sql_terminal_open: !document.getElementById('ds-sql-terminal-body')?.classList.contains('ds-sect-collapsed'),
+    };
+    localStorage.setItem(DS_WORKSPACE_STATE_KEY, JSON.stringify(state));
+}
+
+function restoreDatasourceWorkspaceState() {
+    const state = _safeParseJson(localStorage.getItem(DS_WORKSPACE_STATE_KEY), null);
+    if (!state) {
+        _ensureAtLeastOneWorksheet();
+        renderSqlWorksheets();
+        _applyWorksheetToUi(activeSqlWorksheet());
+        return;
+    }
+    if (state.assist_mode) document.getElementById('ds-assist-mode').value = state.assist_mode;
+    if (state.assist_question) document.getElementById('ds-assist-question').value = state.assist_question;
+    if (state.assist_response) document.getElementById('ds-assist-response').value = state.assist_response;
+    if (state.details_results_open === false) _setDsSectionCollapsed('sql-results-body', 'sql-results-toggle', true);
+    if (state.details_assistant_open === false) _setDsSectionCollapsed('sql-assistant-body', 'sql-assistant-toggle', true);
+    if (state.ds_list_open === false) _setDsSectionCollapsed('ds-list-body', 'ds-list-toggle', true);
+    if (state.ds_sql_terminal_open === false) _setDsSectionCollapsed('ds-sql-terminal-body', 'ds-sql-terminal-toggle', true);
+
+    if (Array.isArray(state.worksheets) && state.worksheets.length) {
+        sqlEditorState.tabs = state.worksheets.map((w) => ({
+            id: w.id || ('sql-ws-' + Date.now() + '-' + Math.random()),
+            title: w.title || 'Worksheet',
+            pinned: !!w.pinned,
+            datasourceId: String(w.datasourceId || ''),
+            sql: String(w.sql || ''),
+            results: _cloneSqlResultsState(w.results || { tabs: [], activeTabId: null, seq: 1 }),
+        }));
+        sqlEditorState.activeTabId = state.active_worksheet_id || sqlEditorState.tabs[0]?.id || null;
+        sqlEditorState.seq = Number(state.worksheet_seq || sqlEditorState.tabs.length + 1 || 1) || 1;
+    } else {
+        // Backward compatibility from v2 state format.
+        sqlEditorState.tabs = [];
+        const ws = createSqlWorksheet();
+        ws.datasourceId = String(state.sql_ds_select || '');
+        ws.sql = String(state.sql_editor || '');
+        ws.results = {
+            tabs: Array.isArray(state.tabs) ? state.tabs : [],
+            activeTabId: state.active_tab_id || null,
+            seq: Number(state.seq || 1) || 1,
+        };
+        sqlEditorState.activeTabId = ws.id;
+    }
+
+    _ensureAtLeastOneWorksheet();
+    const activeExists = sqlEditorState.tabs.some(t => t.id === sqlEditorState.activeTabId);
+    if (!activeExists) sqlEditorState.activeTabId = sqlEditorState.tabs[0].id;
+    renderSqlWorksheets();
+    _applyWorksheetToUi(activeSqlWorksheet());
+
+    const assistAgent = document.getElementById('ds-assist-agent');
+    if (assistAgent && state.assist_agent) {
+        const option = Array.from(assistAgent.options).find((o) => String(o.value) === String(state.assist_agent));
+        if (option) assistAgent.value = state.assist_agent;
+    }
+}
+
+function toCsv(rows, columns) {
+    const esc = (v) => {
+        const s = String(v ?? '');
+        if (s.includes('"') || s.includes(',') || s.includes('\n')) return '"' + s.replaceAll('"', '""') + '"';
+        return s;
+    };
+    const head = columns.map(esc).join(',');
+    const body = rows.map(r => columns.map(c => esc(r[c])).join(',')).join('\n');
+    return head + '\n' + body;
+}
+
+function exportActiveTabCsv() {
+    const tab = activeSqlTab();
+    if (!tab || !tab.rows || !tab.rows.length) return;
+    const rowsWithRgid = tab.rows.map((r, i) => ({ RGID: i + 1, ...r }));
+    const csv = toCsv(rowsWithRgid, ['RGID', ...(tab.columns || [])]);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${tab.title.replace(/\s+/g, '_')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function openActiveTabInWindow() {
+    const tab = activeSqlTab();
+    if (!tab) return showToast('Select a result tab first', 'error');
+
+    const popup = window.open('about:blank', '_blank', 'width=1600,height=900');
+    if (!popup) return showToast('Popup blocked. Please allow popups for this site.', 'error');
+
+    const title = escapeHtml(tab.title || 'Query Result');
+    const dsName = escapeHtml(tab.datasourceName || 'Data Source');
+    const capText = tab.capped ? ` (capped at ${tab.rowCap || 100})` : '';
+    const rows = tab.rows || [];
+    const displayColumns = ['RGID', ...(tab.columns || [])];
+    const sampleRows = rows.slice(0, Math.min(rows.length, 100));
+    const columnWidths = displayColumns.map(c => {
+        if (c === 'RGID') {
+            const rgidDigits = Math.max(2, String(rows.length || 0).length + 1);
+            return Math.min(8, Math.max(4, rgidDigits));
+        }
+        let maxLen = 0;
+        for (const row of sampleRows) {
+            const valueLen = String(row[c] ?? '').length;
+            if (valueLen > maxLen) maxLen = valueLen;
+        }
+        if (!sampleRows.length) return Math.min(16, Math.max(4, Math.ceil(c.length * 0.7)));
+        return Math.min(48, Math.max(6, maxLen + 2));
+    });
+
+    const colgroup = `<colgroup>${columnWidths.map(w => `<col style="width:${w}ch">`).join('')}</colgroup>`;
+    const headers = displayColumns.map((c, i) => `<th title="${escapeHtml(c)}" style="width:${columnWidths[i]}ch">${escapeHtml(c)}</th>`).join('');
+    const bodyRows = rows.map((r, idx) => `<tr>${displayColumns.map((c, i) => {
+        const raw = c === 'RGID' ? (idx + 1) : (r[c] ?? '');
+        const val = String(raw);
+        return `<td title="${escapeHtml(val)}" style="max-width:${columnWidths[i]}ch">${escapeHtml(val)}</td>`;
+    }).join('')}</tr>`).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>${title}</title>
+<style>
+    :root { --bg:#0f172a; --card:#1e293b; --border:#334155; --text:#e2e8f0; --muted:#94a3b8; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:'Segoe UI', system-ui, -apple-system, sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { padding:12px; height:100vh; display:flex; flex-direction:column; }
+    .bar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+    .meta { color:var(--muted); font-size:12px; }
+    .btn { border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:6px; padding:6px 10px; cursor:pointer; }
+    .panel { border:1px solid var(--border); border-radius:8px; overflow:auto; flex:1; background:var(--card); }
+    table { width:auto; min-width:100%; border-collapse:collapse; table-layout:fixed; font-size:12px; }
+    th, td { padding:6px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; border-bottom:1px solid var(--border); line-height:1.2; text-align:left; }
+    th { color:var(--muted); font-size:11px; font-weight:600; position:sticky; top:0; background:var(--card); z-index:2; }
+    .empty { padding:16px 8px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="bar">
+        <div>
+            <div><strong>${title}</strong></div>
+            <div class="meta">${dsName} | ${rows.length} row(s)${capText}</div>
+        </div>
+        <button class="btn" onclick="document.documentElement.requestFullscreen?.()">Fullscreen</button>
+    </div>
+    <div class="panel">
+        <table>${colgroup}<thead><tr>${headers}</tr></thead><tbody>${bodyRows}</tbody></table>
+        ${rows.length ? '' : '<div class="empty">Query returned 0 rows.</div>'}
+    </div>
+</div>
+</body>
+</html>`;
+
+    popup.document.open();
+    popup.document.write(html);
+    popup.document.close();
+}
+
+async function runSqlQuery(sqlOverride = '', lineOffsetOverride = 0) {
+    _syncActiveWorksheetFromUi();
+    const dsId = document.getElementById('sql-ds-select').value;
+    const selectedSql = _extractSelectedSqlText();
+    let sql = (sqlOverride || selectedSql || getSqlEditorValue('sql-editor') || '').trim();
+    let lineOffset = lineOffsetOverride;
+
+    if (!dsId) return showToast('Select a connected data source first', 'error');
+    if (!sql) return showToast('Enter a query first', 'error');
+
+    if (sqlQueryAbortController) {
+        try { sqlQueryAbortController.abort(); } catch (_) {}
+    }
+    sqlQueryAbortController = new AbortController();
+    setSqlQueryRunningUi(true);
+
+    if (!sqlOverride && selectedSql) {
+        showToast('Running selected SQL text', 'info');
+    }
+    const dsName = document.getElementById('sql-ds-select')?.selectedOptions?.[0]?.textContent || `DS ${dsId}`;
+    _captureSqlHistory(sql, dsId, dsName);
+
+    let tab = activeSqlTab();
+    if (!tab) {
+        tab = createSqlTab();
+    } else if (tab.loading) {
+        tab = createSqlTab(tab.id);
+    } else if (tab.pinned) {
+        tab = createSqlTab(tab.id);
+    }
+
+    tab.loading = true;
+    tab.error = '';
+    tab.errorObj = null;
+    tab.message = '';
+    tab.executions = [];
+    tab.totalRowsAffected = 0;
+    tab.sql = sql;
+    tab.sqlLineOffset = lineOffset;
+    renderSqlTabs();
+
+    try {
+        const rowLimit = getSqlDefaultRowLimit();
+        const res = await API.queryDatasource(parseInt(dsId), { sql, row_limit: rowLimit }, { signal: sqlQueryAbortController.signal });
+        tab.loading = false;
+        tab.datasourceName = res.datasource_name || `DS ${dsId}`;
+        tab.columns = res.columns || [];
+        tab.rows = res.rows || [];
+        tab.rowCap = res.row_cap || rowLimit;
+        tab.capped = !!res.capped;
+        tab.visibleRows = Math.min(SQL_VISIBLE_STEP, tab.rows.length);
+        tab.message = res.message || '';
+        tab.executions = Array.isArray(res.executions) ? res.executions : [];
+        tab.totalRowsAffected = Number(res.total_rows_affected || 0) || 0;
+        renderSqlTabs();
+        persistDatasourceWorkspaceState();
+        showToast(tab.message || `Query completed (${tab.rows.length} row(s))`, 'success');
+    } catch (e) {
+        tab.loading = false;
+        const msg = String(e?.message || e || '');
+        const aborted = /abort/i.test(msg) || /cancell/i.test(msg);
+        if (aborted) {
+            tab.error = 'Query canceled by user';
+            tab.errorObj = { message: tab.error, line: null, column: null, diagnostics: null, suggestions: [] };
+            renderSqlTabs();
+            persistDatasourceWorkspaceState();
+            showToast('Query canceled', 'warning');
+        } else {
+            tab.error = msg;
+            tab.errorObj = _parseDatasourceQueryError(msg);
+            renderSqlTabs();
+            persistDatasourceWorkspaceState();
+            showToast('Query failed', 'error');
+        }
+    } finally {
+        sqlQueryAbortController = null;
+        setSqlQueryRunningUi(false);
+    }
+}
+
+function _toggleSqlLineComment() {
+    const cm = _getSqlEditorCm();
+    if (cm) {
+        const ranges = cm.listSelections();
+        cm.operation(() => {
+            const affectedLines = new Set();
+            ranges.forEach(r => {
+                const from = Math.min(r.anchor.line, r.head.line);
+                const to = Math.max(r.anchor.line, r.head.line);
+                for (let l = from; l <= to; l++) affectedLines.add(l);
+            });
+            const lines = [...affectedLines].sort((a, b) => a - b);
+            const allCommented = lines.every(l => /^\s*--/.test(cm.getLine(l)));
+            lines.forEach(l => {
+                const text = cm.getLine(l);
+                if (allCommented) {
+                    cm.replaceRange(text.replace(/^(\s*)--\s?/, '$1'), { line: l, ch: 0 }, { line: l, ch: text.length });
+                } else {
+                    cm.replaceRange('-- ' + text, { line: l, ch: 0 }, { line: l, ch: text.length });
+                }
+            });
+        });
+        return;
+    }
+    const ta = document.getElementById('sql-editor');
+    if (!ta) return;
+    const val = ta.value;
+    const selStart = ta.selectionStart;
+    const selEnd = ta.selectionEnd;
+    const lineStart = val.lastIndexOf('\n', selStart - 1) + 1;
+    const lineEndIdx = val.indexOf('\n', selEnd);
+    const blockEnd = lineEndIdx === -1 ? val.length : lineEndIdx;
+    const block = val.substring(lineStart, blockEnd);
+    const lines = block.split('\n');
+    const allCommented = lines.every(l => /^\s*--/.test(l));
+    const newLines = lines.map(l => allCommented ? l.replace(/^(\s*)--\s?/, '$1') : '-- ' + l);
+    const newBlock = newLines.join('\n');
+    const delta = newBlock.length - block.length;
+    ta.value = val.substring(0, lineStart) + newBlock + val.substring(blockEnd);
+    ta.selectionStart = selStart + (newLines[0].length - lines[0].length);
+    ta.selectionEnd = selEnd + delta;
+    ta.dispatchEvent(new Event('input'));
+}
+
+function _initSqlResultColResizers(contentEl) {
+    const theadWrap = contentEl.querySelector('.sql-result-thead-wrap');
+    const tbodyWrap = contentEl.querySelector('.sql-result-tbody-wrap');
+    if (!theadWrap) return;
+    const theadTable = theadWrap.querySelector('table');
+    const tbodyTable = tbodyWrap ? tbodyWrap.querySelector('table') : null;
+    theadWrap.querySelectorAll('.col-resizer').forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const colIdx = parseInt(handle.dataset.col, 10);
+            const startX = e.clientX;
+            const theadCols = theadTable ? [...theadTable.querySelectorAll('col')] : [];
+            const tbodyCols = tbodyTable ? [...tbodyTable.querySelectorAll('col')] : [];
+            const startWidthPx = theadCols[colIdx] ? theadCols[colIdx].getBoundingClientRect().width : 80;
+            const onMove = (me) => {
+                const dx = me.clientX - startX;
+                const newWidth = Math.max(30, startWidthPx + dx);
+                if (theadCols[colIdx]) theadCols[colIdx].style.width = `${newWidth}px`;
+                if (tbodyCols[colIdx]) tbodyCols[colIdx].style.width = `${newWidth}px`;
+            };
+            const onUp = () => {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            };
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+    });
+}
+
+// ── SQL statement parsing + cursor-based execution ───────────────────────
+function _splitSqlStatements(sql) {
+    const result = [];
+    let i = 0, s = 0, n = sql.length;
+    while (i < n) {
+        const ch = sql[i];
+        if (ch === "'") {
+            i++;
+            while (i < n) {
+                if (sql[i] === "'" && sql[i + 1] === "'") { i += 2; continue; }
+                if (sql[i] === "'") { i++; break; }
+                i++;
+            }
+        } else if (ch === '"') {
+            i++; while (i < n && sql[i] !== '"') i++; i++;
+        } else if (sql.slice(i, i + 2) === '--') {
+            while (i < n && sql[i] !== '\n') i++;
+        } else if (sql.slice(i, i + 2) === '/*') {
+            i += 2; while (i < n && sql.slice(i, i + 2) !== '*/') i++; i += 2;
+        } else if (ch === ';') {
+            const t = sql.slice(s, i).trim();
+            if (t) result.push({ sql: t, start: s, end: i + 1 });
+            s = i + 1; i++;
+        } else { i++; }
+    }
+    const last = sql.slice(s).trim();
+    if (last) result.push({ sql: last, start: s, end: n });
+    return result;
+}
+
+function _extractQueryAtCursor() {
+    const ta = document.getElementById('sql-editor');
+    if (!ta) return null;
+    const cm = _getSqlEditorCm();
+    let text, pos;
+    if (cm) { text = cm.getValue(); pos = cm.indexFromPos(cm.getCursor()); }
+    else { text = ta.value || ''; pos = ta.selectionStart || 0; }
+    const stmts = _splitSqlStatements(text);
+    if (!stmts.length) return null;
+    for (const st of stmts) {
+        if (pos >= st.start && pos <= st.end) {
+            const linesBeforeStart = text.slice(0, st.start).split('\n').length - 1;
+            return { sql: st.sql, lineOffset: linesBeforeStart };
+        }
+    }
+    // cursor is after all statements — use last
+    let best = stmts[stmts.length - 1];
+    // or before first — use first
+    if (pos < stmts[0].start) best = stmts[0];
+    const linesBeforeStart = text.slice(0, best.start).split('\n').length - 1;
+    return { sql: best.sql, lineOffset: linesBeforeStart };
+}
+
+async function runSqlQueryAtCursor() {
+    const selected = _extractSelectedSqlText();
+    if (selected) {
+        showToast('Running selected SQL', 'info');
+        await runSqlQuery(selected, 0);
+        return;
+    }
+    const result = _extractQueryAtCursor();
+    if (result && result.sql) {
+        showToast('Running statement at cursor', 'info');
+        await runSqlQuery(result.sql, result.lineOffset);
+    } else {
+        await runSqlQuery('', 0);
+    }
+}
+
+// ── Error display helpers ──────────────────────────────────────────────────
+function _buildSqlErrorContextHtml(sqlText, lineNum) {
+    if (!sqlText || !lineNum) return '';
+    const lines = String(sqlText).split(/\r?\n/);
+    const zl = Math.max(0, Number(lineNum) - 1);
+    const from = Math.max(0, zl - 2);
+    const to = Math.min(lines.length - 1, zl + 2);
+    let rows = '';
+    for (let i = from; i <= to; i++) {
+        const isErr = i === zl;
+        rows += `<div style="display:flex;align-items:stretch${isErr ? ';background:rgba(239,68,68,.18)' : ''}">` +
+            `<span style="min-width:38px;padding:2px 6px;text-align:right;font-size:11px;color:${isErr ? '#f87171' : '#475569'};user-select:none;border-right:1px solid #334155;flex-shrink:0">${i + 1}</span>` +
+            `<span style="padding:2px 10px;font-family:monospace;font-size:13px;white-space:pre;color:${isErr ? '#fca5a5' : '#e2e8f0'};flex:1;overflow:auto">${escapeHtml(lines[i] || '')}</span>` +
+            (isErr ? `<span style="padding:2px 8px;color:#f87171;font-size:12px;align-self:center">&#9668; error</span>` : '') +
+            `</div>`;
+    }
+    return `<div style="margin:8px 0;border:1px solid #334155;border-radius:6px;overflow:hidden;font-size:13px;line-height:1.5">${rows}</div>`;
+}
+
+async function _suggestPdmColumns(dsId, errText, sqlText) {
+    // Extract invalid identifier from ORA-00904 message
+    // Patterns: "ALIAS"."COL": or "COL": or "SCH"."TBL"."COL":
+    const m = errText.match(/ORA-00904:\s*(?:"[^"]*"\.)(?:"[^"]*"\.)??"([^"]+)":|ORA-00904:\s*"([^"]+)":/);
+    const badName = (m && (m[1] || m[2])) || null;
+    if (!badName || badName.length < 2) return '';
+
+    const refs = _extractSqlTableRefs(sqlText);
+    const owners = [...new Set(refs.map(r => r.schema).filter(Boolean).map(s => s.toUpperCase()))];
+    const tables = [...new Set(refs.map(r => r.table).filter(Boolean).map(t => t.toUpperCase()))];
+
+    const frag = badName.toUpperCase().replace(/'/g, "''");
+    const shortFrag = frag.slice(0, Math.max(3, Math.floor(frag.length * 0.65)));
+    let where = `UPPER(COLUMN_NAME) LIKE '%${shortFrag}%'`;
+    if (owners.length && owners.length <= 6) where += ` AND OWNER IN (${owners.map(o => `'${o}'`).join(',')})` ;
+    if (tables.length && tables.length <= 6) where += ` AND TABLE_NAME IN (${tables.map(t => `'${t}'`).join(',')})` ;
+
+    const q = `SELECT OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM ALL_COLUMNS WHERE ${where} ORDER BY 1,2,3 FETCH FIRST 25 ROWS ONLY`;
+    try {
+        const res = await API.queryDatasource(parseInt(dsId), { sql: q, row_limit: 25 });
+        const rows = res.rows || [];
+        if (!rows.length) return `<div style="margin-top:8px;font-size:12px;color:#94a3b8">No similar columns found in PDM for <b>${escapeHtml(badName)}</b>.</div>`;
+        const items = rows.map(r => {
+            const col = escapeHtml(r.COLUMN_NAME || '');
+            return `<div style="padding:1px 0"><span style="color:#475569">${escapeHtml(r.OWNER || '')}.${escapeHtml(r.TABLE_NAME || '')}.</span><b style="color:#7dd3fc">${col}</b> <span style="color:#475569;font-size:11px">${escapeHtml(r.DATA_TYPE || '')}</span></div>`;
+        }).join('');
+        return `<div style="margin-top:10px;border:1px solid #1d4ed8;border-radius:6px;padding:10px;background:#0f1f3d">` +
+            `<div style="font-size:12px;font-weight:600;color:#7dd3fc;margin-bottom:6px">&#128269; PDM &ndash; columns similar to <b>&ldquo;${escapeHtml(badName)}&rdquo;</b></div>` +
+            `<div style="font-size:12px;font-family:monospace;line-height:1.9">${items}</div></div>`;
+    } catch (_e) { return ''; }
+}
+
+function _extractSqlTableRefs(sqlText) {
+    const results = [];
+    const re1 = /(?:FROM|JOIN)\s+([A-Z0-9_$#]+)\.([A-Z0-9_$#]+)/gi;
+    let m;
+    while ((m = re1.exec(sqlText)) !== null) results.push({ schema: m[1], table: m[2] });
+    const re2 = /(?:FROM|JOIN)\s+([A-Z0-9_$#]+)(?!\s*\.)/gi;
+    const skip = /^(SELECT|WHERE|AND|OR|ON|SET|INTO|VALUES|FROM|JOIN|LEFT|RIGHT|INNER|OUTER|CROSS|FULL|NATURAL|UNION|INTERSECT|MINUS|ORDER|GROUP|HAVING|FETCH|ROWS|ONLY|CONNECT|START|WITH)$/i;
+    while ((m = re2.exec(sqlText)) !== null) { if (!skip.test(m[1])) results.push({ schema: null, table: m[1] }); }
+    return results;
+}
+
+// ── Live SQL hint cache ────────────────────────────────────────────────────
+const _sqlHintCache = {}; // dsId → {tables: {}, loaded: bool, loading: bool}
+
+async function _loadSqlHintData(dsId) {
+    if (!dsId) return;
+    const key = String(dsId);
+    if (_sqlHintCache[key]?.loaded || _sqlHintCache[key]?.loading) return;
+    _sqlHintCache[key] = { tables: {}, loaded: false, loading: true, callbacks: [] };
+
+    function _fireCallbacks(tables) {
+        const cbs = _sqlHintCache[key]?.callbacks || [];
+        _sqlHintCache[key] = { tables, loaded: true, loading: false, callbacks: [] };
+        for (const cb of cbs) { try { cb(tables); } catch(_) {} }
+    }
+
+    async function _fetchHintTables(retryMs) {
+        try {
+            const res = await fetch(`/api/schemas/hint-tables/${dsId}`);
+            if (!res.ok) return false;
+            const data = await res.json();
+            if (data.loading) {
+                // Server is building the index — retry after retryMs
+                await new Promise(r => setTimeout(r, retryMs));
+                return await _fetchHintTables(Math.min(retryMs * 2, 8000));
+            }
+            const tables = data.tables || {};
+            if (Object.keys(tables).length > 0) {
+                _fireCallbacks(tables);
+                return true;
+            }
+            return false;
+        } catch (_) { return false; }
+    }
+
+    // ── Step 1: try PDM hint index (fast file read) ──
+    const ok = await _fetchHintTables(1500);
+    if (ok) return;
+
+    // ── Step 2: fallback – lightweight DB query (table names only) ──
+    try {
+        const tblRes = await API.queryDatasource(parseInt(dsId), {
+            sql: `SELECT OWNER, TABLE_NAME FROM ALL_TABLES ORDER BY 1,2 FETCH FIRST 5000 ROWS ONLY`,
+            row_limit: 5000
+        });
+        const tables = {};
+        for (const r of (tblRes.rows || [])) {
+            tables[`${r.OWNER}.${r.TABLE_NAME}`] = [];
+        }
+        _fireCallbacks(tables);
+    } catch (_e) {
+        const cbs = _sqlHintCache[key]?.callbacks || [];
+        _sqlHintCache[key] = { tables: {}, loaded: false, loading: false, callbacks: [] };
+        for (const cb of cbs) { try { cb({}); } catch(_) {} }
+    }
+}
+
+// Returns a Promise<HintResult> — CodeMirror show-hint supports async hints
+function _sqlDynamicHint(cm) {
+    const cur = cm.getCursor();
+    const lineStr = cm.getLine(cur.line) || '';
+    const prefix = lineStr.slice(0, cur.ch);
+    const dsId = document.getElementById('sql-ds-select')?.value;
+    const cacheKey = String(dsId);
+
+    function _buildResult(tables) {
+        const list = [];
+
+        // ── SQL keywords ──────────────────────────────────────────────────
+        const SQL_KW = [
+            'SELECT','FROM','WHERE','AND','OR','NOT','IN','EXISTS','BETWEEN',
+            'LIKE','IS NULL','IS NOT NULL','ORDER BY','GROUP BY','HAVING',
+            'DISTINCT','ALL','AS','ON','JOIN','INNER JOIN','LEFT JOIN',
+            'RIGHT JOIN','FULL JOIN','CROSS JOIN','LEFT OUTER JOIN',
+            'RIGHT OUTER JOIN','UNION','UNION ALL','MINUS','INTERSECT',
+            'INSERT INTO','UPDATE','DELETE FROM','SET','VALUES',
+            'CREATE TABLE','ALTER TABLE','DROP TABLE','TRUNCATE TABLE',
+            'CASE','WHEN','THEN','ELSE','END',
+            'WITH','FETCH FIRST','ROWS ONLY','ROWNUM','ROWID',
+            'COMMIT','ROLLBACK','CONNECT BY','START WITH','PRIOR',
+            'NVL','NVL2','COALESCE','DECODE','NULLIF','GREATEST','LEAST',
+            'TO_CHAR','TO_DATE','TO_NUMBER','TRUNC','ROUND','SYSDATE','SYSTIMESTAMP',
+            'COUNT','SUM','AVG','MIN','MAX','LISTAGG','WITHIN GROUP',
+            'OVER','PARTITION BY','RANK','ROW_NUMBER','DENSE_RANK','LAG','LEAD',
+        ];
+
+        // ── Case 1: OWNER.TABLE.partial — suggest columns ─────────────────
+        const twoDotsMatch = prefix.match(/([A-Za-z0-9_$#]+)\.([A-Za-z0-9_$#]+)\.([A-Za-z0-9_$#]*)$/);
+        if (twoDotsMatch) {
+            const owner   = twoDotsMatch[1].toUpperCase();
+            const tname   = twoDotsMatch[2].toUpperCase();
+            const partial = twoDotsMatch[3].toUpperCase();
+            const cols = tables[`${owner}.${tname}`] || [];
+            for (const col of cols) {
+                if (col.startsWith(partial)) {
+                    list.push({ text: col, displayText: col, className: 'cm-hint-column' });
+                }
+            }
+            list.sort((a, b) => a.text.localeCompare(b.text));
+            if (!list.length) return null;
+            return {
+                list,
+                from: CodeMirror.Pos(cur.line, cur.ch - twoDotsMatch[3].length),
+                to:   CodeMirror.Pos(cur.line, cur.ch)
+            };
+        }
+
+        // ── Case 2: OWNER.partial — suggest tables for that owner ──────────
+        const dotMatch = prefix.match(/([A-Za-z0-9_$#]+)\.([A-Za-z0-9_$#]*)$/);
+        if (dotMatch) {
+            const owner   = dotMatch[1].toUpperCase();
+            const partial = dotMatch[2].toUpperCase();
+
+            // Might be TABLE.partial for columns (alias or unqualified table)
+            const unqualCols = tables[owner] || [];
+            if (unqualCols.length) {
+                for (const col of unqualCols) {
+                    if (col.startsWith(partial)) {
+                        list.push({ text: col, displayText: col, className: 'cm-hint-column' });
+                    }
+                }
+                if (list.length) {
+                    list.sort((a, b) => a.text.localeCompare(b.text));
+                    return {
+                        list,
+                        from: CodeMirror.Pos(cur.line, cur.ch - dotMatch[2].length),
+                        to:   CodeMirror.Pos(cur.line, cur.ch)
+                    };
+                }
+            }
+
+            // OWNER.TABLE — show tables for this owner
+            for (const key of Object.keys(tables)) {
+                if (!key.includes('.')) continue;
+                const dotIdx = key.indexOf('.');
+                const kOwner = key.slice(0, dotIdx);
+                const kTable = key.slice(dotIdx + 1);
+                if (kOwner === owner && kTable.startsWith(partial)) {
+                    list.push({ text: kTable, displayText: kTable, className: 'cm-hint-table' });
+                }
+            }
+            list.sort((a, b) => a.text.localeCompare(b.text));
+            if (!list.length) return null;
+            return {
+                list,
+                from: CodeMirror.Pos(cur.line, cur.ch - dotMatch[2].length),
+                to:   CodeMirror.Pos(cur.line, cur.ch)
+            };
+        }
+
+        // ── Case 3: plain word — columns from context tables + keywords + schemas ─
+        const wordMatch = prefix.match(/([A-Za-z0-9_$#]+)$/);
+        const partial = (wordMatch ? wordMatch[1] : '').toUpperCase();
+        if (partial.length < 1) return null;
+
+        // Extract tables referenced in the whole editor text (up to cursor)
+        const fullText = cm.getValue().slice(0, cm.indexFromPos(cur));
+        const refs = _extractSqlTableRefs(fullText);
+
+        // Collect columns from referenced tables
+        const seenCols = new Set();
+        const colItems = [];
+        for (const ref of refs) {
+            const key = ref.schema
+                ? `${ref.schema.toUpperCase()}.${ref.table.toUpperCase()}`
+                : ref.table.toUpperCase();
+            const cols = tables[key] || [];
+            for (const col of cols) {
+                if (col.startsWith(partial) && !seenCols.has(col)) {
+                    seenCols.add(col);
+                    colItems.push({ text: col, displayText: col, className: 'cm-hint-column' });
+                }
+            }
+        }
+        colItems.sort((a, b) => a.text.localeCompare(b.text));
+
+        // Keywords
+        const kwItems = [];
+        for (const kw of SQL_KW) {
+            if (kw.startsWith(partial)) {
+                kwItems.push({ text: kw, displayText: kw, className: 'cm-hint-keyword' });
+            }
+        }
+
+        // Schema names (only if no column matches, to avoid pollution)
+        const schemaItems = [];
+        const tableItems = [];
+        if (colItems.length === 0) {
+            const seenOwners = new Set();
+            const seenTables = new Set();
+            for (const key of Object.keys(tables)) {
+                if (key.includes('.')) {
+                    const kOwner = key.slice(0, key.indexOf('.'));
+                    if (kOwner.startsWith(partial) && !seenOwners.has(kOwner)) {
+                        seenOwners.add(kOwner);
+                        schemaItems.push({
+                            text: kOwner + '.', displayText: kOwner, className: 'cm-hint-schema',
+                            hint: (cmInst, data, completion) => {
+                                cmInst.replaceRange(completion.text, data.from, data.to, 'complete');
+                                setTimeout(() => { if (!cmInst.state.completionActive) cmInst.showHint({ hint: _sqlDynamicHint, completeSingle: false }); }, 10);
+                            }
+                        });
+                    }
+                } else {
+                    if (key.startsWith(partial) && !seenTables.has(key)) {
+                        seenTables.add(key);
+                        tableItems.push({ text: key, displayText: key, className: 'cm-hint-table' });
+                    }
+                }
+            }
+            schemaItems.sort((a, b) => a.displayText.localeCompare(b.displayText));
+            tableItems.sort((a, b) => a.displayText.localeCompare(b.displayText));
+        }
+
+        const combined = [...colItems, ...kwItems, ...schemaItems, ...tableItems];
+        if (!combined.length) return null;
+        return {
+            list: combined,
+            from: CodeMirror.Pos(cur.line, cur.ch - partial.length),
+            to:   CodeMirror.Pos(cur.line, cur.ch)
+        };
+    }  // end _buildResult
+
+    const cache = _sqlHintCache[cacheKey];
+
+    // Data already loaded — return synchronously
+    if (cache?.loaded) {
+        return _buildResult(cache.tables);
+    }
+
+    // Data not loaded yet — return a Promise; CodeMirror show-hint supports async
+    // Kick off loading (no-op if already in progress)
+    if (dsId) _loadSqlHintData(dsId);
+
+    return new Promise((resolve) => {
+        const entry = _sqlHintCache[cacheKey];
+        if (!entry) { resolve(null); return; }
+        // Register callback to be called when load finishes
+        entry.callbacks = entry.callbacks || [];
+        entry.callbacks.push((tables) => {
+            resolve(_buildResult(tables));
+        });
+        // Safety timeout — don't hang the hint forever
+        setTimeout(() => resolve(null), 15000);
+    });
+}
+
+// ── Table Detail Worksheet ────────────────────────────────────────────────
+function openTableDetailWorksheet() {
+    const dsId = document.getElementById('sql-ds-select')?.value;
+    const raw  = (document.getElementById('sql-table-inspector-input')?.value || '').trim().toUpperCase();
+    if (!dsId) return showToast('Select a data source first', 'warning');
+    if (!raw)  return showToast('Enter SCHEMA.TABLE name', 'warning');
+    // Extract the last SCHEMA.TABLE token — handles pasted SQL like "SELECT * FROM OWNER.TABLE"
+    const m = raw.match(/\b([A-Z][A-Z0-9_$#]*)\s*\.\s*([A-Z][A-Z0-9_$#]*)\b/g);
+    if (!m) { showToast('Use SCHEMA.TABLE format', 'warning'); return; }
+    const last = m[m.length - 1].replace(/\s+/g, '');
+    const [owner, tname] = last.split('.');
+    if (!owner || !tname) return showToast('Use SCHEMA.TABLE format', 'warning');
+    openTableInspector(dsId, owner, tname);
+}
+
+function _handleSqlEditorHotkeys(event) {
+    const key = (event.key || '').toLowerCase();
+    const ctrlOrMeta = !!(event.ctrlKey || event.metaKey);
+    if (!ctrlOrMeta) return;
+
+    if (key === 'enter' && event.shiftKey) {
+        event.preventDefault();
+        runSqlQuery();
+        return;
+    }
+    if (key === 'enter') {
+        event.preventDefault();
+        runSqlQueryAtCursor();
+        return;
+    }
+    if (key === 's') {
+        event.preventDefault();
+        saveActiveSqlWorksheetToFile();
+        return;
+    }
+    if (key === '/') {
+        event.preventDefault();
+        _toggleSqlLineComment();
+    }
+}
+
+async function addDs(e) {
+    e.preventDefault();
+    try {
+        const payload = {
+            name: document.getElementById('ds-name').value,
+            db_type: document.getElementById('ds-type').value,
+            host: document.getElementById('ds-host').value,
+            port: parseInt(document.getElementById('ds-port').value) || null,
+            database_name: document.getElementById('ds-db').value || null,
+            username: document.getElementById('ds-user').value || null,
+            password: document.getElementById('ds-pass').value || null,
+            extra_params: document.getElementById('ds-extra').value || null,
+        };
+        const editId = parseInt(document.getElementById('ds-edit-id').value || '0', 10);
+        if (editId) {
+            await API.updateDatasource(editId, payload);
+            showToast('Data source updated', 'success');
+        } else {
+            await API.createDatasource(payload);
+            showToast('Data source created', 'success');
+        }
+        closeModal('modal-add');
+        resetDatasourceForm();
+        loadDs();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+function resetDatasourceForm() {
+    document.getElementById('form-add')?.reset();
+    document.getElementById('ds-edit-id').value = '';
+    document.getElementById('modal-add-title').textContent = 'Add Data Source';
+    document.getElementById('ds-save-btn').textContent = 'Save';
+}
+
+async function _loadCredentialProfilesIntoSelect() {
+    const sel = document.getElementById('ds-cred-profile-select');
+    if (!sel) return;
+    try {
+        const profiles = await API.listCredentials();
+        sel.innerHTML = '<option value="">— select a saved credential profile —</option>' +
+            (profiles || []).map(p => `<option value="${p.id}">[${escapeHtml(p.db_type || 'any')}] ${escapeHtml(p.name)}</option>`).join('');
+    } catch (_) {
+        sel.innerHTML = '<option value="">— credential profiles unavailable —</option>';
+    }
+}
+
+async function applyCredentialProfileToForm() {
+    const sel = document.getElementById('ds-cred-profile-select');
+    const id = parseInt(sel?.value || '0');
+    if (!id) return showToast('Select a credential profile first', 'warning');
+    try {
+        const cred = await API.injectCredential(id);
+        if (cred.username) document.getElementById('ds-user').value = cred.username;
+        if (cred.password) document.getElementById('ds-pass').value = cred.password;
+        if (cred.host_hint) {
+            const hostEl = document.getElementById('ds-host');
+            if (hostEl && !hostEl.value) hostEl.value = cred.host_hint;
+        }
+        if (cred.db_type && cred.db_type !== 'any') {
+            const typeEl = document.getElementById('ds-type');
+            if (typeEl) {
+                const hasOpt = Array.from(typeEl.options).some(o => o.value === cred.db_type);
+                if (hasOpt) typeEl.value = cred.db_type;
+            }
+        }
+        showToast(`Loaded profile: ${cred.name}`, 'success');
+    } catch (e) {
+        showToast('Failed to load profile: ' + e.message, 'error');
+    }
+}
+
+function openAddDatasourceModal() {
+    resetDatasourceForm();
+    _loadCredentialProfilesIntoSelect();
+    openModal('modal-add');
+}
+
+async function editDs(id) {
+    try {
+        const ds = await API.getDatasource(id);
+        document.getElementById('ds-edit-id').value = String(ds.id);
+        document.getElementById('ds-name').value = ds.name || '';
+        document.getElementById('ds-type').value = ds.db_type || 'oracle';
+        document.getElementById('ds-host').value = ds.host || '';
+        document.getElementById('ds-port').value = ds.port || '';
+        document.getElementById('ds-db').value = ds.database_name || '';
+        document.getElementById('ds-user').value = ds.username || '';
+        document.getElementById('ds-pass').value = ds.password || '';
+        document.getElementById('ds-extra').value = ds.extra_params || '';
+        document.getElementById('modal-add-title').textContent = 'Edit Data Source';
+        document.getElementById('ds-save-btn').textContent = 'Update';
+        _loadCredentialProfilesIntoSelect();
+        openModal('modal-add');
+    } catch (e) {
+        showToast('Failed to load connection details: ' + e.message, 'error');
+    }
+}
+
+async function testDs(id) {
+    showToast('Testing connection...', 'info');
+    try {
+        const res = await API.testConnection(id);
+        showToast(res.success ? `Connected! ${res.version || ''}` : `Failed: ${res.message}`, res.success ? 'success' : 'error');
+        loadDs();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function deleteDs(id) {
+    if (!confirm('Delete this data source?')) return;
+    try {
+        await API.deleteDatasource(id);
+        showToast('Deleted', 'success');
+        loadDs();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function copyDatasourceEnvBackup() {
+    try {
+        const res = await API.exportDatasourcesEnv();
+        const text = res.env_line || '';
+        if (!text) {
+            showToast('No data sources to export', 'warning');
+            return;
+        }
+        await navigator.clipboard.writeText(text);
+        showToast(`Copied DATASOURCES_JSON backup (${res.count || 0} connection(s))`, 'success');
+    } catch (e) {
+        showToast('Failed to copy backup: ' + e.message, 'error');
+    }
+}
+
+async function loadDatasourceAssistantAgents() {
+    const select = document.getElementById('ds-assist-agent');
+    if (!select) return;
+    try {
+        const agents = await API.getAgents();
+        select.innerHTML = (agents || []).map(a => `<option value="${a.id}">${escapeHtml(a.name || `Agent ${a.id}`)}</option>`).join('');
+        if (!(agents || []).length) select.innerHTML = '<option value="">No local agents</option>';
+    } catch (_) {
+        select.innerHTML = '<option value="">Load failed</option>';
+    }
+}
+
+function handleDsAssistQuestionKeydown(event) {
+    if (event.key !== 'Enter') return;
+    if (event.shiftKey) return;
+    event.preventDefault();
+    askDatasourceAssistant();
+}
+
+async function askDatasourceAssistant() {
+    const mode = (document.getElementById('ds-assist-mode')?.value || 'ghc').toLowerCase();
+    const agentId = parseInt(document.getElementById('ds-assist-agent')?.value || '0');
+    const question = (document.getElementById('ds-assist-question')?.value || '').trim();
+    const sql = getSqlEditorValue('sql-editor') || '';
+    const output = document.getElementById('ds-assist-response');
+    if (!question) return showToast('Enter a question first', 'warning');
+    output.value = 'Thinking...';
+    try {
+        const tab = activeSqlTab();
+        const context = JSON.stringify({
+            datasource: document.getElementById('sql-ds-select')?.selectedOptions?.[0]?.textContent || '',
+            current_sql: sql,
+            last_error: tab?.error || '',
+            result_columns: tab?.columns || [],
+        }, null, 2);
+        const provider = mode === 'ghc' ? 'githubcopilot' : '';
+        const agentIds = mode === 'local' && agentId ? [agentId] : [];
+        const res = await API.aiChat([{ role: 'user', content: question }], context, provider, agentIds, 'datasource sql assistant');
+        output.value = res.reply || '(no response)';
+    } catch (e) {
+        output.value = 'Failed: ' + (e.message || String(e));
+        showToast('Assistant call failed: ' + e.message, 'error');
+    }
+}
+
+function _extractSqlFromAssistantText(text) {
+    const src = String(text || '');
+    const blocks = src.match(/```[\s\S]*?```/g) || [];
+    for (const block of blocks) {
+        const body = block.replace(/```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+        if (/\b(SELECT|WITH|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i.test(body)) return body;
+    }
+    if (/\b(SELECT|WITH|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i.test(src)) return src.trim();
+    return '';
+}
+
+function applyDatasourceAssistantFix() {
+    const response = (document.getElementById('ds-assist-response')?.value || '').trim();
+    if (!response) return showToast('No assistant response to apply', 'warning');
+    const sql = _extractSqlFromAssistantText(response);
+    if (!sql) return showToast('No SQL found in assistant response', 'warning');
+    setSqlEditorValue('sql-editor', sql);
+    const tab = activeSqlTab();
+    if (tab) tab.sql = sql;
+    persistDatasourceWorkspaceState();
+    showToast('Applied suggested SQL to editor', 'success');
+}
+
+document.getElementById('sql-ds-select')?.addEventListener('change', () => {
+    const ws = activeSqlWorksheet();
+    if (ws) ws.datasourceId = document.getElementById('sql-ds-select')?.value || '';
+    persistDatasourceWorkspaceState();
+    // Eagerly load schema hints for newly selected DS
+    const dsId = document.getElementById('sql-ds-select')?.value;
+    if (dsId) _loadSqlHintData(dsId);
+});
+document.getElementById('ds-assist-mode')?.addEventListener('change', persistDatasourceWorkspaceState);
+document.getElementById('ds-assist-agent')?.addEventListener('change', persistDatasourceWorkspaceState);
+document.getElementById('ds-assist-question')?.addEventListener('input', persistDatasourceWorkspaceState);
+
+async function initDatasourceWorkspace() {
+    if (typeof initAllSqlEditors === 'function') {
+        initAllSqlEditors();
+    }
+    setSqlQueryRunningUi(false);
+    await Promise.all([loadDs(), loadDatasourceAssistantAgents()]);
+    _bindWorksheetFileInput();
+    restoreDatasourceWorkspaceState();
+    renderSqlWorksheets();
+    _applyWorksheetToUi(activeSqlWorksheet());
+    _syncSqlEditorMode();
+    initSqlNativePaneResizeObservers();
+    _syncSqlWorkspaceFullscreenUi();
+    // Pre-load hint data for current DS as soon as workspace is ready
+    const _initDsId = document.getElementById('sql-ds-select')?.value;
+    if (_initDsId) _loadSqlHintData(_initDsId);
+}
+
+initDatasourceWorkspace();
+
+// ── Redshift SSO – DBeaver-style connection ────────────────────────
+const RS_PRESETS = {
+    dev: {
+        name: 'Lighthouse Dev (Redshift SSO)',
+        host: 'db1.lighthouse.redshift.dev.aws.rjf.com',
+        db: 'ssdsdv',
+        login_url: 'https://d-9a672bc7ce.awsapps.com/start/#/saml/default/rjf-data-shared-dev/ins-1cd5e5bc5fe4b80b',
+        cluster: 'rjf-use2-lighthouse-d-tf-redshift',
+        region: 'us-east-2',
+        serverless: false
+    },
+    qa: {
+        name: 'Lighthouse QA (Redshift SSO)',
+        host: 'db1.lighthouse.redshift.qa.aws.rjf.com',
+        db: 'lighthouse',
+        login_url: 'https://d-9a672bc7ce.awsapps.com/start/#/saml/default/rjf-data-shared-qa/ins-ae9e9fa11b18ca63',
+        cluster: 'rjf-use2-lighthouse-q-tf-redshift',
+        region: 'us-east-2',
+        serverless: false
+    },
+    prod: {
+        name: 'Lighthouse Prod (Redshift SSO)',
+        host: 'db1.lighthouse.redshift.aws.rjf.com',
+        db: 'ssdspd',
+        login_url: '',
+        cluster: 'rjf-use2-lighthouse-p-tf-redshift',
+        region: 'us-east-2',
+        serverless: false
+    }
+};
+
+function rsTab(tab) {
+    ['main', 'drv'].forEach(t => {
+        const btn = document.getElementById(`rs-tab-${t}`);
+        const panel = document.getElementById(`rs-panel-${t}`);
+        const active = t === tab;
+        btn.style.background = active ? 'var(--primary)' : 'var(--bg-dark)';
+        btn.style.color = active ? '#fff' : 'var(--text-muted)';
+        btn.style.fontWeight = active ? '600' : 'normal';
+        panel.style.display = active ? 'block' : 'none';
+    });
+}
+
+function rsFill(env) {
+    const p = RS_PRESETS[env];
+    if (!p) return;
+    document.getElementById('rs-name').value = p.name;
+    document.getElementById('rs-host').value = p.host;
+    document.getElementById('rs-db').value = p.db;
+    document.getElementById('rs-port').value = '5439';
+    document.getElementById('rs-login-url').value = p.login_url;
+    document.getElementById('rs-workgroup').value = '';
+    document.getElementById('rs-cluster').value = p.cluster || '';
+    document.getElementById('rs-region').value = p.region || 'us-east-2';
+    document.getElementById('rs-serverless').checked = !!p.serverless;
+    document.getElementById('rs-auth-type').value = 'sso';
+    rsToggleAuth();
+    if (!p.login_url) {
+        rsTab('drv');
+        showToast(`${env.toUpperCase()} settings filled – paste the login_url in the SSO tab from the AWS Access Portal`, 'warning');
+    } else {
+        showToast(`${env.toUpperCase()} environment settings filled`, 'success');
+    }
+}
+
+function rsToggleAuth() {
+    const mode = document.getElementById('rs-auth-type').value;
+    document.getElementById('rs-pw-fields').style.display = mode === 'password' ? 'block' : 'none';
+}
+
+function rsGetPayload() {
+    const authMode = document.getElementById('rs-auth-type').value;
+    const extra = { auth_mode: authMode };
+    if (authMode === 'sso') {
+        extra.credentials_provider = 'BrowserSamlCredentialsProvider';
+        extra.login_url = document.getElementById('rs-login-url').value.trim();
+        extra.region = document.getElementById('rs-region').value.trim() || 'us-east-1';
+        extra.is_serverless = document.getElementById('rs-serverless').checked;
+        extra.ssl_insecure = document.getElementById('rs-ssl-insecure').checked;
+        const caBundle = document.getElementById('rs-ca-bundle').value.trim();
+        if (caBundle) extra.ca_bundle = caBundle;
+        const cluster = document.getElementById('rs-cluster').value.trim();
+        if (cluster) extra.cluster_identifier = cluster;
+        const workgroup = document.getElementById('rs-workgroup').value.trim();
+        if (workgroup) extra.serverless_work_group = workgroup;
+        const idpT = parseInt(document.getElementById('rs-idp-timeout').value || '60');
+        if (idpT) extra.idp_response_timeout = idpT;
+    }
+    return {
+        name: document.getElementById('rs-name').value.trim(),
+        db_type: 'redshift',
+        host: document.getElementById('rs-host').value.trim(),
+        port: parseInt(document.getElementById('rs-port').value) || 5439,
+        database_name: document.getElementById('rs-db').value.trim() || null,
+        username: document.getElementById('rs-user').value || null,
+        password: document.getElementById('rs-pass').value || null,
+        extra_params: JSON.stringify(extra),
+    };
+}
+
+async function rsSave() {
+    const payload = rsGetPayload();
+    if (!payload.name) return showToast('Connection name is required', 'error');
+    if (!payload.host) return showToast('Host is required', 'error');
+    try {
+        await API.createDatasource(payload);
+        closeModal('modal-rs-sso');
+        showToast('Redshift SSO connection saved', 'success');
+        loadDs();
+    } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function rsTestAndSave() {
+    const payload = rsGetPayload();
+    if (!payload.host) return showToast('Host is required', 'error');
+    if (!payload.name) payload.name = 'rs-test-' + Date.now();
+    let savedId = null;
+    try {
+        showToast('Saving and testing... (browser auth window may open for SSO)', 'info');
+        const r = await API.createDatasource(payload);
+        savedId = r.id;
+        const t = await API.testConnection(savedId);
+        if (t.success) {
+            showToast('Connected! ' + (t.version || ''), 'success');
+            closeModal('modal-rs-sso');
+        } else {
+            showToast('Failed: ' + t.message, 'error');
+            if (savedId) await API.deleteDatasource(savedId).catch(() => {});
+        }
+    } catch(e) {
+        showToast(e.message, 'error');
+        if (savedId) await API.deleteDatasource(savedId).catch(() => {});
+    }
+    loadDs();
+}
+
+// ── Lined SQL editor (shared utilities) ─────────────────────────────
+function updateLineNumbers(id) {
+    const ta = document.getElementById(id);
+    const gutter = document.getElementById(id + '-gutter');
+    if (!ta || !gutter) return;
+    const cm = _getSqlEditorCm();
+    if (cm) {
+        gutter.innerHTML = '';
+        gutter.scrollTop = 0;
+        return;
+    }
+
+    const lineHeight = 18;
+    const totalLines = Math.max(1, (ta.value || '').split('\n').length);
+    const visibleLines = Math.max(1, Math.ceil((ta.clientHeight || 180) / lineHeight));
+    const overscan = 80;
+    const firstVisible = Math.max(1, Math.floor((ta.scrollTop || 0) / lineHeight) + 1);
+    const start = Math.max(1, firstVisible - overscan);
+    const end = Math.min(totalLines, firstVisible + visibleLines + overscan);
+
+    const topPad = (start - 1) * lineHeight;
+    const bottomPad = Math.max(0, (totalLines - end) * lineHeight);
+    let html = `<div style="height:${topPad}px"></div>`;
+    for (let n = start; n <= end; n += 1) {
+        html += `<span class="gln" id="${id}-gln-${n}">${n}</span>\n`;
+    }
+    html += `<div style="height:${bottomPad}px"></div>`;
+    gutter.innerHTML = html;
+    gutter.scrollTop = ta.scrollTop;
+}
+
+function highlightSqlErrorLine(id, lineNum) {
+    if (!lineNum) return;
+    const cm = _getSqlEditorCm();
+    if (cm) {
+        if (sqlErrorLineHandle !== null) {
+            try { cm.removeLineClass(sqlErrorLineHandle, 'wrap', 'cm-error-line'); } catch (_) {}
+            sqlErrorLineHandle = null;
+        }
+        const lineZero = Math.max(0, Number(lineNum) - 1);
+        sqlErrorLineHandle = cm.addLineClass(lineZero, 'wrap', 'cm-error-line');
+        cm.scrollIntoView({ line: lineZero, ch: 0 }, 120);
+        return;
+    }
+    document.querySelectorAll(`#${id}-gutter .gln.sql-err-line`).forEach(el => el.classList.remove('sql-err-line'));
+    const lineEl = document.getElementById(`${id}-gln-${lineNum}`);
+    if (lineEl) {
+        lineEl.classList.add('sql-err-line');
+        const ta = document.getElementById(id);
+        if (ta) {
+            ta.scrollTop = Math.max(0, (lineNum - 3) * 18);
+            const gutter = document.getElementById(id + '-gutter');
+            if (gutter) gutter.scrollTop = ta.scrollTop;
+        }
+    }
+}
+
+function _clearSqlSelectionHighlights() {
+    sqlSelectionMarkers.forEach(m => {
+        try { m.clear(); } catch (_) {}
+    });
+    sqlSelectionMarkers = [];
+    document.querySelectorAll('#sql-editor-gutter .gln.sql-same-line').forEach(el => el.classList.remove('sql-same-line'));
+    const info = document.getElementById('sql-selection-match-info');
+    if (info) info.textContent = 'Select a token to highlight matching occurrences in this worksheet.';
+}
+
+function _updateSelectionMatchInfo(selectedToken, count) {
+    const info = document.getElementById('sql-selection-match-info');
+    if (!info) return;
+    if (!selectedToken || count <= 0) {
+        info.textContent = 'Select a token to highlight matching occurrences in this worksheet.';
+        return;
+    }
+    info.textContent = `Highlighted ${count} occurrence(s) of "${selectedToken}" in this worksheet.`;
+}
+
+function _escapeRegExp(s) {
+    return String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function highlightSqlSelectionMatches() {
+    const ta = document.getElementById('sql-editor');
+    if (!ta) return;
+
+    let selected = '';
+    const cm = _getSqlEditorCm();
+    if (cm) {
+        selected = String(cm.getSelection() || '').trim();
+    } else {
+        const start = ta.selectionStart || 0;
+        const end = ta.selectionEnd || 0;
+        if (end > start) selected = String(ta.value || '').slice(start, end).trim();
+    }
+
+    _clearSqlSelectionHighlights();
+    if (!selected || selected.length < 2 || selected.length > 120) return;
+
+    const wholeWord = /^[A-Za-z_][A-Za-z0-9_]*$/.test(selected);
+    const regex = new RegExp(wholeWord ? `\\b${_escapeRegExp(selected)}\\b` : _escapeRegExp(selected), 'g');
+
+    if (cm) {
+        const source = cm.getValue();
+        let count = 0;
+        let match;
+        while ((match = regex.exec(source)) !== null) {
+            const from = cm.posFromIndex(match.index);
+            const to = cm.posFromIndex(match.index + match[0].length);
+            sqlSelectionMarkers.push(cm.markText(from, to, { className: 'cm-same-token' }));
+            count += 1;
+            if (match.index === regex.lastIndex) regex.lastIndex += 1;
+        }
+        _updateSelectionMatchInfo(selected, count);
+        return;
+    }
+
+    const lines = String(ta.value || '').split('\n');
+    let count = 0;
+    lines.forEach((line, idx) => {
+        const matches = line.match(regex);
+        if (matches && matches.length) {
+            count += matches.length;
+            const lineEl = document.getElementById(`sql-editor-gln-${idx + 1}`);
+            if (lineEl) lineEl.classList.add('sql-same-line');
+        }
+    });
+    _updateSelectionMatchInfo(selected, count);
+}
+
+// Init lined editor for sql-editor
+(function() {
+    const ta = document.getElementById('sql-editor');
+    const gutter = document.getElementById('sql-editor-gutter');
+    if (ta && gutter) {
+        ta.addEventListener('keydown', _handleSqlEditorHotkeys);
+        ta.addEventListener('input', () => {
+            updateLineNumbers('sql-editor');
+            const ws = activeSqlWorksheet();
+            if (ws) ws.sql = getSqlEditorValue('sql-editor') || '';
+            persistDatasourceWorkspaceState();
+            highlightSqlSelectionMatches();
+        });
+        ta.addEventListener('keyup', () => {
+            updateLineNumbers('sql-editor');
+            highlightSqlSelectionMatches();
+        });
+        ta.addEventListener('mouseup', highlightSqlSelectionMatches);
+        ta.addEventListener('scroll', () => { gutter.scrollTop = ta.scrollTop; });
+        document.addEventListener('selectionchange', () => {
+            const cm = _getSqlEditorCm();
+            if (document.activeElement === ta || (cm && cm.hasFocus && cm.hasFocus())) {
+                highlightSqlSelectionMatches();
+            }
+        });
+        window.addEventListener('resize', () => updateLineNumbers('sql-editor'));
+        updateLineNumbers('sql-editor');
+
+        const cm = _getSqlEditorCm();
+        if (cm && !cm.state._sqlMatchBound) {
+            cm.state._sqlMatchBound = true;
+            cm.on('cursorActivity', highlightSqlSelectionMatches);
+            cm.on('change', () => {
+                const ws = activeSqlWorksheet();
+                if (ws) ws.sql = getSqlEditorValue('sql-editor') || '';
+                persistDatasourceWorkspaceState();
+                updateLineNumbers('sql-editor');
+                highlightSqlSelectionMatches();
+            });
+            cm.on('scroll', () => updateLineNumbers('sql-editor'));
+        }
+        if (cm && !cm.state._sqlHotkeyBound) {
+            cm.state._sqlHotkeyBound = true;
+            cm.addKeyMap({
+                'Ctrl-Enter':       () => { runSqlQueryAtCursor(); return true; },
+                'Shift-Ctrl-Enter': () => { runSqlQuery(); return true; },
+                'Ctrl-S':           () => { saveActiveSqlWorksheetToFile(); return true; },
+                'Ctrl-/':           () => { _toggleSqlLineComment(); return true; },
+                'Ctrl-Space':       () => { const _c = _getSqlEditorCm(); if (_c) _c.showHint({ hint: _sqlDynamicHint, completeSingle: false }); return true; },
+                'Ctrl-Q':           () => { const _c = _getSqlEditorCm(); if (_c && typeof _c.foldCode === 'function') _c.foldCode(_c.getCursor()); return true; },
+                'Cmd-Enter':        () => { runSqlQueryAtCursor(); return true; },
+                'Shift-Cmd-Enter':  () => { runSqlQuery(); return true; },
+                'Cmd-S':            () => { saveActiveSqlWorksheetToFile(); return true; },
+                'Cmd-/':            () => { _toggleSqlLineComment(); return true; },
+            });
+        }
+        if (cm && !cm.state._sqlHintBound) {
+            cm.state._sqlHintBound = true;
+            let _hintTimer = null;
+            cm.on('inputRead', (cmInst, change) => {
+                if (change.origin === '+input' || change.origin === 'paste') {
+                    clearTimeout(_hintTimer);
+                    _hintTimer = setTimeout(() => {
+                        if (cmInst.state.completionActive) return;
+                        const cur = cmInst.getCursor();
+                        const lineStr = cmInst.getLine(cur.line) || '';
+                        const prefix = lineStr.slice(0, cur.ch);
+                        if (/[A-Za-z0-9_$#.]$/.test(prefix)) {
+                            cmInst.showHint({ hint: _sqlDynamicHint, completeSingle: false });
+                        }
+                        // Eagerly load schema data on first keypress
+                        const dsId = document.getElementById('sql-ds-select')?.value;
+                        if (dsId) _loadSqlHintData(dsId);
+                    }, 120);
+                }
+            });
+        }
+        _syncSqlEditorMode();
+    }
+})();
+
+// ════════════════════════ TABLE INSPECTOR ════════════════════════
+const TBL_SUBTABS = [
+    { id: 'columns',      label: 'Columns' },
+    { id: 'data',         label: 'Data' },
+    { id: 'constraints',  label: 'Constraints' },
+    { id: 'statistics',   label: 'Statistics' },
+    { id: 'triggers',     label: 'Triggers' },
+    { id: 'dependencies', label: 'Dependencies' },
+    { id: 'partitions',   label: 'Partitions' },
+    { id: 'indexes',      label: 'Indexes' },
+    { id: 'sql',          label: 'SQL' },
+];
+
+const tblInspState = { tabs: [], activeTabId: null, seq: 1 };
+
+function _tblInspQ(subtab, schema, table, filter, limit) {
+    const s = (schema || '').replace(/'/g, "''");
+    const t = (table  || '').replace(/'/g, "''");
+    const lim = parseInt(limit) || 200;
+    switch (subtab) {
+        case 'columns':
+            return `SELECT c.COLUMN_ID, c.COLUMN_NAME, c.DATA_TYPE,
+  CASE WHEN c.DATA_TYPE IN ('VARCHAR2','NVARCHAR2','CHAR') THEN TO_CHAR(c.CHAR_LENGTH)||' BYTE'
+       WHEN c.DATA_TYPE = 'NUMBER' AND c.DATA_PRECISION IS NOT NULL THEN '('||c.DATA_PRECISION||','||c.DATA_SCALE||')'
+       ELSE TO_CHAR(c.DATA_LENGTH) END AS DATA_LENGTH,
+  c.NULLABLE, c.DATA_DEFAULT, cc.COMMENTS
+FROM ALL_TAB_COLUMNS c
+LEFT JOIN ALL_COL_COMMENTS cc ON cc.OWNER=c.OWNER AND cc.TABLE_NAME=c.TABLE_NAME AND cc.COLUMN_NAME=c.COLUMN_NAME
+WHERE c.OWNER='${s}' AND c.TABLE_NAME='${t}' ORDER BY c.COLUMN_ID`;
+        case 'data': {
+            const where = (filter || '').trim() ? `WHERE ${filter}` : '';
+            return `SELECT * FROM ${s}.${t} ${where} FETCH FIRST ${lim} ROWS ONLY`;
+        }
+        case 'constraints':
+            return `SELECT c.CONSTRAINT_NAME, c.CONSTRAINT_TYPE, c.SEARCH_CONDITION,
+  c.R_OWNER, rc.TABLE_NAME AS R_TABLE_NAME, c.R_CONSTRAINT_NAME, c.DELETE_RULE,
+  c.STATUS, c.DEFERRABLE, c.DEFERRED, c.VALIDATED, c.GENERATED,
+  c.BAD, c.RELY, c.LAST_CHANGE, c.INDEX_OWNER, c.INDEX_NAME, c.INVALID, c.VIEW_RELATED
+FROM ALL_CONSTRAINTS c
+LEFT JOIN ALL_CONSTRAINTS rc ON rc.OWNER=c.R_OWNER AND rc.CONSTRAINT_NAME=c.R_CONSTRAINT_NAME
+WHERE c.OWNER='${s}' AND c.TABLE_NAME='${t}'
+ORDER BY c.CONSTRAINT_TYPE, c.CONSTRAINT_NAME`;
+        case 'statistics':
+            // Works for both TABLEs (has stats) and VIEWs (has object meta only)
+            return `SELECT p.NAME, p.VALUE FROM (
+  SELECT 1 AS RN, 'OBJECT_TYPE'   AS NAME, o.OBJECT_TYPE            AS VALUE FROM ALL_OBJECTS o WHERE o.OWNER='${s}' AND o.OBJECT_NAME='${t}' AND o.OBJECT_TYPE NOT IN ('TABLE PARTITION','TABLE SUBPARTITION') AND ROWNUM=1
+  UNION ALL SELECT 2,'STATUS',     o.STATUS                         FROM ALL_OBJECTS o WHERE o.OWNER='${s}' AND o.OBJECT_NAME='${t}' AND o.OBJECT_TYPE NOT IN ('TABLE PARTITION','TABLE SUBPARTITION') AND ROWNUM=1
+  UNION ALL SELECT 3,'CREATED',    TO_CHAR(o.CREATED,'DD-MON-YYYY HH24:MI:SS') FROM ALL_OBJECTS o WHERE o.OWNER='${s}' AND o.OBJECT_NAME='${t}' AND o.OBJECT_TYPE NOT IN ('TABLE PARTITION','TABLE SUBPARTITION') AND ROWNUM=1
+  UNION ALL SELECT 4,'LAST_DDL',   TO_CHAR(o.LAST_DDL_TIME,'DD-MON-YYYY HH24:MI:SS') FROM ALL_OBJECTS o WHERE o.OWNER='${s}' AND o.OBJECT_NAME='${t}' AND o.OBJECT_TYPE NOT IN ('TABLE PARTITION','TABLE SUBPARTITION') AND ROWNUM=1
+  UNION ALL SELECT 5,'NUM_ROWS',   TO_CHAR(t.NUM_ROWS)    FROM ALL_TABLES t WHERE t.OWNER='${s}' AND t.TABLE_NAME='${t}'
+  UNION ALL SELECT 6,'BLOCKS',     TO_CHAR(t.BLOCKS)      FROM ALL_TABLES t WHERE t.OWNER='${s}' AND t.TABLE_NAME='${t}'
+  UNION ALL SELECT 7,'AVG_ROW_LEN',TO_CHAR(t.AVG_ROW_LEN) FROM ALL_TABLES t WHERE t.OWNER='${s}' AND t.TABLE_NAME='${t}'
+  UNION ALL SELECT 8,'LAST_ANALYZED',TO_CHAR(t.LAST_ANALYZED,'DD-MON-YYYY HH24:MI:SS') FROM ALL_TABLES t WHERE t.OWNER='${s}' AND t.TABLE_NAME='${t}'
+  UNION ALL SELECT 9,'SAMPLE_SIZE',TO_CHAR(t.SAMPLE_SIZE) FROM ALL_TABLES t WHERE t.OWNER='${s}' AND t.TABLE_NAME='${t}'
+) p WHERE p.VALUE IS NOT NULL ORDER BY p.RN`;
+        case 'triggers':
+            return `SELECT TRIGGER_NAME, TRIGGER_TYPE, TRIGGERING_EVENT, OWNER, ACTION_TYPE, STATUS, TABLE_NAME
+FROM ALL_TRIGGERS WHERE OWNER='${s}' AND TABLE_NAME='${t}' ORDER BY TRIGGER_NAME`;
+        case 'dependencies':
+            return `SELECT OWNER, NAME, TYPE, REFERENCED_OWNER, REFERENCED_NAME, REFERENCED_TYPE
+FROM ALL_DEPENDENCIES WHERE REFERENCED_OWNER='${s}' AND REFERENCED_NAME='${t}' ORDER BY TYPE, NAME`;
+        case 'partitions':
+            return `SELECT PARTITION_NAME, TO_CHAR(LAST_ANALYZED,'DD-MON-YY') AS LAST_ANALYZED,
+  NUM_ROWS, BLOCKS, SAMPLE_SIZE, HIGH_VALUE
+FROM ALL_TAB_PARTITIONS WHERE TABLE_OWNER='${s}' AND TABLE_NAME='${t}' ORDER BY PARTITION_POSITION`;
+        case 'indexes':
+            return `SELECT i.OWNER AS INDEX_OWNER, i.INDEX_NAME, i.UNIQUENESS, i.STATUS, i.INDEX_TYPE,
+  i.TEMPORARY, i.PARTITIONED,
+  LISTAGG(ic.COLUMN_NAME,', ') WITHIN GROUP (ORDER BY ic.COLUMN_POSITION) AS COLUMNS
+FROM ALL_INDEXES i
+JOIN ALL_IND_COLUMNS ic ON ic.INDEX_NAME=i.INDEX_NAME AND ic.INDEX_OWNER=i.OWNER
+WHERE i.TABLE_OWNER='${s}' AND i.TABLE_NAME='${t}'
+GROUP BY i.OWNER,i.INDEX_NAME,i.UNIQUENESS,i.STATUS,i.INDEX_TYPE,i.TEMPORARY,i.PARTITIONED
+ORDER BY i.INDEX_NAME`;
+        case 'sql': return null; // handled by _loadTblInspDdl()
+        default: return null;
+    }
+}
+
+async function openTableInspector(dsId, schema, table) {
+    if (!dsId || !schema || !table) return showToast('Specify SCHEMA.TABLE', 'warning');
+    const s = schema.toUpperCase(), t = table.toUpperCase();
+
+    // ── Auto-correct schema: look up real OWNER in ALL_OBJECTS ──
+    let realSchema = s, realTable = t;
+    try {
+        const chkRes = await API.queryDatasource(parseInt(dsId), { row_limit: 5, sql:
+            `SELECT OWNER, OBJECT_NAME FROM ALL_OBJECTS`
+            + ` WHERE OBJECT_NAME='${t.replace(/'/g,"''")}' AND OBJECT_TYPE NOT IN ('TABLE PARTITION','TABLE SUBPARTITION','INDEX PARTITION')`
+            + ` ORDER BY CASE WHEN OWNER='${s.replace(/'/g,"''")}' THEN 0 ELSE 1 END, OWNER`
+        });
+        const rows = chkRes.rows || [];
+        if (rows.length) {
+            const exact = rows.find(r => (r.OWNER||'').toUpperCase() === s);
+            const best  = exact || rows[0];
+            realSchema  = (best.OWNER || s).toUpperCase();
+            realTable   = (best.OBJECT_NAME || t).toUpperCase();
+            if (realSchema !== s) {
+                showToast(`Schema auto-corrected: ${s} → ${realSchema}`, 'info');
+            }
+        }
+    } catch (_) { /* non-Oracle or network issue — proceed with what was typed */ }
+
+    const key = `${String(dsId)}|${realSchema}|${realTable}`;
+    // Reuse existing tab if open
+    let tab = tblInspState.tabs.find(t => t.key === key);
+    if (!tab) {
+        tab = {
+            id: 'tbl-insp-' + Date.now() + '-' + (tblInspState.seq++),
+            key,
+            dsId: String(dsId),
+            schema: realSchema,
+            table: realTable,
+            activeSubtab: 'columns',
+            loaded: {},
+            data: {},
+            dataFilter: '',
+            dataLimit: '200',
+        };
+        tblInspState.tabs.push(tab);
+    }
+    tblInspState.activeTabId = tab.id;
+    const card = document.getElementById('tbl-inspector-card');
+    if (card) card.style.display = '';
+    card?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    initSqlPaneResizers(); // rebind resizers now that card is visible
+    renderTblInspTabs();
+    _loadTblInspSubtab(tab, tab.activeSubtab);
+}
+
+function activeTblInspTab() {
+    return tblInspState.tabs.find(t => t.id === tblInspState.activeTabId) || null;
+}
+
+function renderTblInspTabs() {
+    const tabsEl   = document.getElementById('tbl-insp-tabs');
+    const subEl    = document.getElementById('tbl-insp-subtabs');
+    const closeBtn = document.getElementById('tbl-insp-close-btn');
+    const refreshBtn = document.getElementById('tbl-insp-refresh-btn');
+    if (!tabsEl) return;
+
+    tabsEl.innerHTML = tblInspState.tabs.map(t => {
+        const active = t.id === tblInspState.activeTabId;
+        return `<button class="btn btn-sm ${active ? 'btn-primary' : 'btn-outline'} tbl-insp-main-tab"
+            onclick="activateTblInspTab('${t.id}')" title="${escapeHtml(t.schema+'.'+t.table)}"
+            style="white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis">
+            &#128196; ${escapeHtml(t.table)}
+            <span onclick="event.stopPropagation();closeTblInspTab('${t.id}')" style="margin-left:6px;opacity:.6;font-size:11px" title="Close">&#10005;</span>
+        </button>`;
+    }).join('');
+
+    const tab = activeTblInspTab();
+    if (closeBtn) closeBtn.disabled = !tab;
+    if (refreshBtn) refreshBtn.disabled = !tab;
+
+    if (!tab) {
+        if (subEl) subEl.innerHTML = '';
+        _tblInspSetContent('<div class="empty-state">No table selected.</div>');
+        return;
+    }
+
+    // Sub-tabs
+    if (subEl) {
+        subEl.innerHTML = TBL_SUBTABS.map(st => {
+            const active = st.id === tab.activeSubtab;
+            return `<button class="tbl-subtab-btn ${active ? 'tbl-subtab-active' : ''}"
+                onclick="activateTblInspSubtab('${st.id}')">${escapeHtml(st.label)}</button>`;
+        }).join('');
+    }
+
+    // Toolbar visibility (only Data tab)
+    const toolbar = document.getElementById('tbl-insp-toolbar');
+    if (toolbar) {
+        toolbar.style.display = tab.activeSubtab === 'data' ? 'flex' : 'none';
+        if (tab.activeSubtab === 'data') {
+            const filterEl = document.getElementById('tbl-insp-filter');
+            const limitEl  = document.getElementById('tbl-insp-limit');
+            if (filterEl) filterEl.value = tab.dataFilter || '';
+            if (limitEl)  limitEl.value  = tab.dataLimit  || '200';
+        }
+    }
+
+    // Render cached content or loading
+    if (tab.data[tab.activeSubtab]) {
+        _renderTblInspData(tab, tab.activeSubtab);
+    } else {
+        _tblInspSetContent('<div style="padding:20px;color:var(--text-muted)"><span class="spinner"></span> Loading…</div>');
+    }
+}
+
+function activateTblInspTab(id) {
+    tblInspState.activeTabId = id;
+    renderTblInspTabs();
+    const tab = activeTblInspTab();
+    if (tab && !tab.data[tab.activeSubtab]) _loadTblInspSubtab(tab, tab.activeSubtab);
+}
+
+function activateTblInspSubtab(subtabId) {
+    const tab = activeTblInspTab();
+    if (!tab) return;
+    tab.activeSubtab = subtabId;
+    tab.loaded[subtabId] = false; // allow re-render
+    renderTblInspTabs();
+    if (!tab.data[subtabId]) _loadTblInspSubtab(tab, subtabId);
+}
+
+function closeTblInspTab(id) {
+    const idx = tblInspState.tabs.findIndex(t => t.id === id);
+    if (idx < 0) return;
+    tblInspState.tabs.splice(idx, 1);
+    if (tblInspState.activeTabId === id) {
+        const next = tblInspState.tabs[idx] || tblInspState.tabs[idx - 1] || null;
+        tblInspState.activeTabId = next ? next.id : null;
+    }
+    if (!tblInspState.tabs.length) {
+        document.getElementById('tbl-inspector-card').style.display = 'none';
+        return;
+    }
+    renderTblInspTabs();
+    const tab = activeTblInspTab();
+    if (tab && !tab.data[tab.activeSubtab]) _loadTblInspSubtab(tab, tab.activeSubtab);
+}
+
+function closeActiveTblInspTab() {
+    const tab = activeTblInspTab();
+    if (tab) closeTblInspTab(tab.id);
+}
+
+function refreshActiveTblInspTab() {
+    const tab = activeTblInspTab();
+    if (!tab) return;
+    delete tab.data[tab.activeSubtab];
+    tab.loaded[tab.activeSubtab] = false;
+    renderTblInspTabs();
+    _loadTblInspSubtab(tab, tab.activeSubtab);
+}
+
+function toggleTblInspActions() {
+    const m = document.getElementById('tbl-insp-actions-menu');
+    if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+
+function _tblInspSetContent(html) {
+    const el = document.getElementById('tbl-insp-content');
+    if (el) el.innerHTML = html;
+}
+
+async function _loadTblInspSubtab(tab, subtab) {
+    if (subtab === 'sql') { await _loadTblInspDdl(tab); return; }
+    const sql = _tblInspQ(subtab, tab.schema, tab.table,
+        subtab === 'data' ? tab.dataFilter : null,
+        subtab === 'data' ? tab.dataLimit  : null);
+    if (!sql) { _tblInspSetContent('<div class="empty-state">Not available.</div>'); return; }
+    _tblInspSetContent('<div style="padding:20px;color:var(--text-muted)"><span class="spinner"></span> Loading…</div>');
+    try {
+        const res = await API.queryDatasource(parseInt(tab.dsId), { sql, row_limit: parseInt(tab.dataLimit) || 1000 });
+        tab.data[subtab] = res;
+        if (tblInspState.activeTabId === tab.id && tab.activeSubtab === subtab) {
+            _renderTblInspData(tab, subtab);
+        }
+    } catch (e) {
+        if (tblInspState.activeTabId === tab.id && tab.activeSubtab === subtab) {
+            _tblInspSetContent(`<div class="text-danger" style="padding:16px;font-size:13px">&#9888; ${escapeHtml(String(e?.message||e))}</div>`);
+        }
+    }
+}
+
+async function _loadTblInspDdl(tab) {
+    const s = tab.schema.replace(/'/g, "''");
+    const t = tab.table.replace(/'/g, "''");
+    const dsId = parseInt(tab.dsId);
+    _tblInspSetContent('<div style="padding:20px;color:var(--text-muted)"><span class="spinner"></span> Loading DDL…</div>');
+
+    // Step 1 — resolve object type
+    let objType = 'TABLE';
+    try {
+        const typeRes = await API.queryDatasource(dsId, { row_limit: 1, sql:
+            `SELECT OBJECT_TYPE FROM ALL_OBJECTS WHERE OWNER='${s}' AND OBJECT_NAME='${t}'`
+            + ` AND OBJECT_TYPE NOT IN ('TABLE PARTITION','TABLE SUBPARTITION','INDEX PARTITION')`
+            + ` ORDER BY DECODE(OBJECT_TYPE,'MATERIALIZED VIEW',1,'VIEW',2,'TABLE',3,4)`
+            + ` FETCH FIRST 1 ROW ONLY` });
+        objType = typeRes.rows?.[0]?.OBJECT_TYPE || 'TABLE';
+    } catch (_) {}
+
+    // Step 2 — build query list in priority order
+    let queries = [];
+    if (objType === 'VIEW') {
+        // TEXT_VC is VARCHAR2(4000); prepend header for readability
+        queries.push({ sql: `SELECT 'CREATE OR REPLACE VIEW ${s}.${t} AS' || CHR(10) || TEXT_VC AS DDL_TEXT FROM ALL_VIEWS WHERE OWNER='${s}' AND VIEW_NAME='${t}'`, note: '' });
+        // Fallback: full DDL via DBMS_METADATA (requires SELECT_CATALOG_ROLE)
+        queries.push({ sql: `SELECT DBMS_METADATA.GET_DDL('VIEW','${t}','${s}') AS DDL_TEXT FROM DUAL`, note: '' });
+    } else if (objType === 'MATERIALIZED VIEW') {
+        queries.push({ sql: `SELECT DBMS_METADATA.GET_DDL('MATERIALIZED_VIEW','${t}','${s}') AS DDL_TEXT FROM DUAL`, note: '' });
+        queries.push({ sql: `SELECT 'CREATE MATERIALIZED VIEW ${s}.${t} AS' || CHR(10) || QUERY AS DDL_TEXT FROM ALL_MVIEWS WHERE OWNER='${s}' AND MVIEW_NAME='${t}'`, note: '(QUERY text from ALL_MVIEWS)' });
+    } else {
+        // TABLE / SEQUENCE / SYNONYM / etc. — try DBMS_METADATA first
+        const dbmsType = objType.replace(/ /g, '_');
+        queries.push({ sql: `SELECT DBMS_METADATA.GET_DDL('${dbmsType}','${t}','${s}') AS DDL_TEXT FROM DUAL`, note: '' });
+        // Cross-check: maybe type detection returned TABLE but it's actually a VIEW
+        queries.push({ sql: `SELECT 'CREATE OR REPLACE VIEW ${s}.${t} AS' || CHR(10) || TEXT_VC AS DDL_TEXT FROM ALL_VIEWS WHERE OWNER='${s}' AND VIEW_NAME='${t}'`, note: '(view text from ALL_VIEWS)' });
+    }
+    // Universal last resort: reconstruct from column definitions (no DBMS_METADATA needed)
+    queries.push({
+        sql: `SELECT COLUMN_ID, COLUMN_NAME, DATA_TYPE, DATA_LENGTH, DATA_PRECISION, DATA_SCALE,
+  CHAR_USED, NULLABLE, DATA_DEFAULT
+FROM ALL_TAB_COLUMNS WHERE OWNER='${s}' AND TABLE_NAME='${t}' ORDER BY COLUMN_ID`,
+        note: '(reconstructed — DBMS_METADATA privilege denied)',
+        _ddlSource: 'columns',
+        rowLimit: 1000
+    });
+
+    // Step 3 — try queries in order, use first success
+    let lastErr = null;
+    for (const { sql, note, _ddlSource, rowLimit } of queries) {
+        try {
+            const res = await API.queryDatasource(dsId, { sql, row_limit: rowLimit || 1 });
+            if (res.rows?.length) {
+                tab.data['sql'] = res;
+                tab.data['sql']._ddlNote = note;
+                tab.data['sql']._ddlSource = _ddlSource || null;
+                tab.data['sql']._ddlSchema = tab.schema;
+                tab.data['sql']._ddlTable  = tab.table;
+                if (tblInspState.activeTabId === tab.id && tab.activeSubtab === 'sql')
+                    _renderTblInspData(tab, 'sql');
+                return;
+            }
+        } catch (e) { lastErr = e; }
+    }
+    _tblInspSetContent(`<div class="text-danger" style="padding:16px;font-size:13px">&#9888; ${escapeHtml(String(lastErr?.message||lastErr||'No DDL available'))}</div>`);
+}
+
+function _renderTblInspData(tab, subtab) {
+    const res = tab.data[subtab];
+    if (!res) return;
+    const rows = res.rows || [];
+    const cols = res.columns || (rows.length ? Object.keys(rows[0]) : []);
+    if (!rows.length) { _tblInspSetContent('<div class="empty-state">No rows returned.</div>'); _tblInspUpdateRowCount(0); return; }
+
+    if (subtab === 'sql') {
+        // Column-reconstruction fallback: build CREATE TABLE DDL from column rows
+        if (res._ddlSource === 'columns') {
+            const owner = res._ddlSchema || '', tbl = res._ddlTable || '';
+            const colLines = rows.map((r, i) => {
+                const nm   = r.COLUMN_NAME || '';
+                const dt   = r.DATA_TYPE   || '';
+                const prec = r.DATA_PRECISION != null ? r.DATA_PRECISION : null;
+                const scl  = r.DATA_SCALE   != null ? r.DATA_SCALE   : null;
+                const len  = r.DATA_LENGTH  != null ? r.DATA_LENGTH  : null;
+                const cu   = r.CHAR_USED === 'C' ? 'CHAR' : 'BYTE';
+                const nn   = r.NULLABLE === 'N' ? ' NOT NULL' : '';
+                const def  = r.DATA_DEFAULT != null ? ` DEFAULT ${String(r.DATA_DEFAULT).trim()}` : '';
+                let typeStr = dt;
+                if (prec != null) {
+                    typeStr += scl != null && scl > 0 ? `(${prec}, ${scl})` : `(${prec})`;
+                } else if (['VARCHAR2','CHAR','NVARCHAR2','NCHAR'].includes(dt) && len != null) {
+                    typeStr += `(${len} ${cu})`;
+                } else if (dt === 'RAW' && len != null) {
+                    typeStr += `(${len})`;
+                }
+                const prefix = i === 0 ? '  ' : ', ';
+                return `${prefix}${nm} ${typeStr}${def}${nn}`;
+            });
+            const note = res._ddlNote ? `\n-- ${res._ddlNote}` : '';
+            const ddl = `-- Unable to retrieve DDL via DBMS_METADATA (privilege denied). Column definitions:${note}\nCREATE TABLE ${owner}.${tbl}\n(\n${colLines.join('\n')}\n);`;
+            const noteHtml = res._ddlNote ? `<div style="padding:4px 12px 0;font-size:11px;color:#f59e0b">&#9888; ${escapeHtml(res._ddlNote)}</div>` : '';
+            _tblInspSetContent(`${noteHtml}<pre style="padding:12px;font-family:monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;color:#e2e8f0;margin:0">${escapeHtml(ddl)}</pre>`);
+            return;
+        }
+        const ddl  = rows[0]?.DDL_TEXT || rows[0]?.[Object.keys(rows[0])[0]] || '';
+        const note = res._ddlNote ? `<div style="padding:4px 12px 0;font-size:11px;color:var(--text-muted)">${escapeHtml(res._ddlNote)}</div>` : '';
+        _tblInspSetContent(`${note}<pre style="padding:12px;font-family:monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;color:#e2e8f0;margin:0">${escapeHtml(String(ddl))}</pre>`);
+        return;
+    }
+    if (subtab === 'statistics') {
+        const items = rows.map(r => `<tr><td style="color:var(--text-muted);font-weight:600;padding:5px 12px">${escapeHtml(String(r.NAME||''))}</td><td style="padding:5px 16px;font-family:monospace">${escapeHtml(String(r.VALUE||''))}</td></tr>`).join('');
+        _tblInspSetContent(`<table class="sql-result-table"><tbody>${items}</tbody></table>`);
+        return;
+    }
+
+    // Generic grid with checkboxes (Data tab) or plain grid
+    // ── Editable data grid (Data subtab) ──────────────────────────
+    const hasCheck = subtab === 'data';
+    if (!hasCheck) {
+        // Plain read-only grid for non-data subtabs
+        const hdr = cols.map(c => `<th class="sql-result-th" style="white-space:nowrap">${escapeHtml(c)}</th>`).join('');
+        const body = rows.map((r, ri) => {
+            const cells = cols.map(c => {
+                const v = r[c];
+                const disp = v === null || v === undefined ? '<span style="color:#475569;font-style:italic">null</span>' : escapeHtml(String(v));
+                return `<td class="sql-result-td">${disp}</td>`;
+            }).join('');
+            return `<tr class="tbl-insp-row" data-ri="${ri}">${cells}</tr>`;
+        }).join('');
+        _tblInspSetContent(`<table class="sql-result-table tbl-insp-grid"><thead><tr>${hdr}</tr></thead><tbody>${body}</tbody></table>`);
+        _tblInspUpdateRowCount(rows.length);
+        return;
+    }
+
+    // Editable grid: init state objects
+    if (!tab._edits)   tab._edits   = {};
+    if (!tab._newRows) tab._newRows = [];
+    _tblInspRenderEditGrid(tab, cols, rows);
+}
+
+function _tblInspRenderEditGrid(tab, cols, rows) {
+    // Status column + checkbox column
+    const chkHdr = `<th style="width:22px;padding:2px 4px"></th><th style="width:22px;padding:2px 4px" title="Status"></th>`;
+    const hdr    = cols.map(c => `<th class="sql-result-th" style="white-space:nowrap">${escapeHtml(c)}</th>`).join('');
+
+    // New (unsaved) rows at the top
+    const newBodyRows = (tab._newRows || []).map((nr, nri) => {
+        const inputs = cols.map(c => {
+            const v = nr[c] != null ? escapeHtml(String(nr[c])) : '';
+            return `<td class="sql-result-td" style="padding:1px 2px">
+                <input class="tbl-insp-cell-inp" data-nri="${nri}" data-col="${escapeHtml(c)}"
+                  value="${v}" placeholder="NULL"
+                  style="width:100%;box-sizing:border-box;background:#0c3028;border:1px solid #22c55e;color:#e2e8f0;font-family:monospace;font-size:11px;padding:2px 4px;border-radius:2px">
+            </td>`;
+        }).join('');
+        return `<tr class="tbl-insp-row tbl-insp-row-new" data-nri="${nri}">
+            <td style="padding:2px 4px"><input type="checkbox" class="tbl-insp-row-chk" data-nri="${nri}"></td>
+            <td style="padding:2px 4px;color:#22c55e;font-weight:700;font-size:13px" title="New row">+</td>
+            ${inputs}
+        </tr>`;
+    }).join('');
+
+    // Existing rows
+    const bodyRows = rows.map((r, ri) => {
+        const isEdited = tab._edits && tab._edits[ri] && Object.keys(tab._edits[ri]).length > 0;
+        const statusCell = isEdited
+            ? `<td style="padding:2px 4px;color:#60a5fa;font-size:11px" title="Modified">&#9998;</td>`
+            : `<td style="padding:2px 4px"></td>`;
+        const cells = cols.map(c => {
+            const orig  = r[c];
+            const edited = tab._edits?.[ri]?.[c];
+            const v = edited !== undefined ? edited : orig;
+            let disp;
+            if (edited !== undefined) {
+                disp = `<span style="color:#93c5fd;font-style:italic">${v === null ? 'null' : escapeHtml(String(v))}</span>`;
+            } else {
+                disp = v === null || v === undefined ? '<span style="color:#475569;font-style:italic">null</span>' : escapeHtml(String(v));
+            }
+            return `<td class="sql-result-td tbl-insp-cell" data-ri="${ri}" data-col="${escapeHtml(c)}" style="cursor:text">${disp}</td>`;
+        }).join('');
+        return `<tr class="tbl-insp-row${isEdited ? ' tbl-insp-row-dirty' : ''}" data-ri="${ri}">
+            <td style="padding:2px 4px"><input type="checkbox" class="tbl-insp-row-chk" data-ri="${ri}"></td>
+            ${statusCell}${cells}
+        </tr>`;
+    }).join('');
+
+    const table = `<table class="sql-result-table tbl-insp-grid" id="tbl-insp-grid-table">
+        <thead><tr>${chkHdr}${hdr}</tr></thead>
+        <tbody id="tbl-insp-new-body">${newBodyRows}</tbody>
+        <tbody id="tbl-insp-data-body">${bodyRows}</tbody>
+    </table>`;
+    _tblInspSetContent(table);
+    _tblInspUpdateRowCount(rows.length);
+
+    // Bind cell-click handler for editable existing rows (event delegation)
+    const content = document.getElementById('tbl-insp-content');
+    if (content && !content._editBound) {
+        content._editBound = true;
+        content.addEventListener('click', _tblInspCellClick);
+        content.addEventListener('change', _tblInspNewRowChange);
+        content.addEventListener('paste', _tblInspNewRowPaste);
+    }
+}
+
+function _tblInspUpdateRowCount(n) {
+    const el = document.getElementById('tbl-insp-row-count');
+    if (el) el.textContent = n ? `${n} row${n !== 1 ? 's' : ''}` : '';
+}
+
+function _tblInspApplyFilter() {
+    const tab = activeTblInspTab();
+    if (!tab) return;
+    if ((tab._newRows?.length || Object.keys(tab._edits||{}).length) &&
+        !confirm('Unsaved changes will be lost. Reload?')) return;
+    tab._edits = {}; tab._newRows = [];
+    tab.dataFilter = (document.getElementById('tbl-insp-filter')?.value || '').trim();
+    tab.dataLimit  = document.getElementById('tbl-insp-limit')?.value || '200';
+    delete tab.data['data'];
+    _tblInspClearDirty(tab);
+    _loadTblInspSubtab(tab, 'data');
+}
+
+// ── Cell click → inline edit ─────────────────────────────────────
+function _tblInspCellClick(e) {
+    const td = e.target.closest('td.tbl-insp-cell');
+    if (!td || td.querySelector('input.tbl-insp-inline-inp')) return; // already editing
+    const tab = activeTblInspTab();
+    if (!tab) return;
+
+    const ri  = parseInt(td.dataset.ri);
+    const col = td.dataset.col;
+    const rows = tab.data['data']?.rows || [];
+    const orig = tab._edits?.[ri]?.[col] !== undefined ? tab._edits[ri][col] : rows[ri]?.[col];
+    const curVal = orig === null || orig === undefined ? '' : String(orig);
+
+    const inp = document.createElement('input');
+    inp.className = 'tbl-insp-inline-inp';
+    inp.style.cssText = 'width:100%;box-sizing:border-box;background:#1e3a5f;border:1px solid #3b82f6;color:#e2e8f0;font-family:monospace;font-size:11px;padding:2px 4px;border-radius:2px;outline:none';
+    inp.value = curVal;
+    inp.placeholder = 'NULL';
+    td.innerHTML = '';
+    td.appendChild(inp);
+    inp.focus();
+    inp.select();
+
+    const commit = () => {
+        const newVal = inp.value.trim() === '' ? null : inp.value;
+        if (!tab._edits) tab._edits = {};
+        if (!tab._edits[ri]) tab._edits[ri] = {};
+        tab._edits[ri][col] = newVal;
+        // Re-render this cell
+        if (newVal === null) {
+            td.innerHTML = '<span style="color:#475569;font-style:italic">null</span>';
+        } else {
+            td.innerHTML = `<span style="color:#93c5fd">${escapeHtml(String(newVal))}</span>`;
+        }
+        // Mark row dirty
+        const tr = td.closest('tr');
+        if (tr) tr.classList.add('tbl-insp-row-dirty');
+        const statusTd = tr?.querySelector('td:nth-child(2)');
+        if (statusTd) { statusTd.innerHTML = '&#9998;'; statusTd.style.color = '#60a5fa'; statusTd.title = 'Modified'; }
+        _tblInspMarkDirty(tab);
+    };
+
+    inp.addEventListener('blur', commit);
+    inp.addEventListener('keydown', ke => {
+        if (ke.key === 'Enter' || ke.key === 'Tab') { ke.preventDefault(); commit(); (ke.key === 'Tab' ? _tblInspMoveEditFocus(td, ke.shiftKey) : null); }
+        if (ke.key === 'Escape') { tab._edits && delete tab._edits[ri]?.[col]; _tblInspRenderEditGrid(tab, tab.data['data']?.columns || Object.keys(rows[0]||{}), rows); }
+    });
+}
+
+function _tblInspMoveEditFocus(currentTd, backwards) {
+    const allCells = [...document.querySelectorAll('#tbl-insp-content td.tbl-insp-cell')];
+    const idx = allCells.indexOf(currentTd);
+    const nextTd = allCells[backwards ? idx - 1 : idx + 1];
+    if (nextTd) nextTd.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+}
+
+// ── Track changes in new-row inputs ──────────────────────────────
+function _tblInspNewRowChange(e) {
+    const inp = e.target.closest('input.tbl-insp-cell-inp');
+    if (!inp) return;
+    const tab = activeTblInspTab();
+    if (!tab) return;
+    const nri = parseInt(inp.dataset.nri);
+    const col = inp.dataset.col;
+    if (!tab._newRows[nri]) tab._newRows[nri] = {};
+    tab._newRows[nri][col] = inp.value;
+    _tblInspMarkDirty(tab);
+}
+
+// ── Paste tab-separated data across new-row columns ───────────────
+// When user pastes tab-delimited text (e.g. copied from Excel / a data grid) into
+// any new-row input, we split across columns and/or add additional new rows.
+function _tblInspNewRowPaste(e) {
+    const inp = e.target.closest('input.tbl-insp-cell-inp');
+    if (!inp) return;
+    const tab = activeTblInspTab();
+    if (!tab) return;
+    if (!tab._newRows) tab._newRows = [];
+    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    if (!pastedText.includes('\t') && !pastedText.includes('\n')) return; // single value — let browser handle
+    e.preventDefault();
+
+    const res  = tab.data['data'];
+    const cols = res?.columns || Object.keys(res?.rows?.[0] || {});
+    const colRows = tab.data['columns']?.rows || [];
+
+    // Normalise line endings, strip trailing newline, split into rows then cells
+    const pastedRows = pastedText.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+        .replace(/\n$/, '').split('\n').map(r => r.split('\t'));
+
+    const startNri  = parseInt(inp.dataset.nri);
+    const startColI = Math.max(0, cols.indexOf(inp.dataset.col));
+
+    pastedRows.forEach((pastedCols, rowOffset) => {
+        const nri = startNri + rowOffset;
+        // Ensure enough new-row slots exist
+        while (tab._newRows.length <= nri) {
+            const empty = {};
+            if (colRows.length) {
+                colRows.forEach(c => { empty[c.COLUMN_NAME || c.column_name || ''] = null; });
+            } else {
+                cols.forEach(c => { empty[c] = null; });
+            }
+            tab._newRows.push(empty);
+        }
+        pastedCols.forEach((val, colOffset) => {
+            const colIdx = startColI + colOffset;
+            if (colIdx >= cols.length) return;
+            const trimmed = val.trim();
+            tab._newRows[nri][cols[colIdx]] = (trimmed === 'null' || trimmed === '') ? null : trimmed;
+        });
+    });
+
+    _tblInspRenderEditGrid(tab, cols, res?.rows || []);
+    _tblInspMarkDirty(tab);
+    // Re-focus first affected input after re-render
+    setTimeout(() => {
+        const target = document.querySelector(
+            `#tbl-insp-new-body input[data-nri="${startNri}"][data-col="${CSS.escape(inp.dataset.col)}"]`);
+        if (target) target.focus();
+    }, 20);
+}
+
+// ── Copy selected existing rows as new (editable) rows at top ─────
+function tblInspCopySelected() {
+    const tab = activeTblInspTab();
+    if (!tab) return;
+    if (tab.activeSubtab !== 'data') return showToast('Switch to the Data tab first', 'warning');
+    // Only pick checkboxes belonging to existing rows (carry data-ri, not data-nri)
+    const checked = [...document.querySelectorAll('.tbl-insp-row-chk[data-ri]:checked')];
+    if (!checked.length) return showToast('Check at least one row to copy', 'warning');
+
+    const res  = tab.data['data'];
+    const rows = res?.rows || [];
+    const cols = res?.columns || (rows.length ? Object.keys(rows[0]) : []);
+    if (!tab._newRows) tab._newRows = [];
+
+    checked.forEach(cb => {
+        const ri  = parseInt(cb.dataset.ri);
+        const row = rows[ri];
+        if (!row) return;
+        const clone = {};
+        cols.forEach(c => {
+            clone[c] = (tab._edits?.[ri]?.[c] !== undefined) ? tab._edits[ri][c] : (row[c] !== undefined ? row[c] : null);
+        });
+        tab._newRows.push(clone);
+    });
+
+    _tblInspRenderEditGrid(tab, cols, rows);
+    _tblInspMarkDirty(tab);
+
+    const content = document.getElementById('tbl-insp-content');
+    if (content) content.scrollTop = 0;
+    showToast(`${checked.length} row(s) copied as new rows at top — modify and Save`, 'info');
+    setTimeout(() => {
+        const firstInp = document.querySelector('#tbl-insp-new-body input.tbl-insp-cell-inp');
+        if (firstInp) firstInp.focus();
+    }, 30);
+}
+
+function _tblInspMarkDirty(tab) {
+    const btn = document.getElementById('tbl-insp-save-btn');
+    if (btn) btn.disabled = false;
+}
+function _tblInspClearDirty(tab) {
+    if (tab) { tab._edits = {}; tab._newRows = []; }
+    const btn = document.getElementById('tbl-insp-save-btn');
+    if (btn) btn.disabled = true;
+}
+
+// ── Insert Row — adds empty row to top of grid ────────────────────
+async function tblInspInsertRow() {
+    const tab = activeTblInspTab();
+    if (!tab) return;
+    // Need column list for empty new row structure
+    if (!tab.data['columns']) {
+        try {
+            const s = tab.schema.replace(/'/g,"''"), t = tab.table.replace(/'/g,"''");
+            const colSql = `SELECT c.COLUMN_ID, c.COLUMN_NAME, c.DATA_TYPE, c.NULLABLE, c.DATA_DEFAULT
+FROM ALL_TAB_COLUMNS c WHERE c.OWNER='${s}' AND c.TABLE_NAME='${t}' ORDER BY c.COLUMN_ID`;
+            tab.data['columns'] = await API.queryDatasource(parseInt(tab.dsId), { sql: colSql, row_limit: 1000 });
+        } catch(e) { showToast('Could not load column info: ' + _tblInspParseErr(e), 'danger'); return; }
+    }
+    // Need data to be loaded to have the grid
+    if (!tab.data['data']) {
+        showToast('Load Data tab first, then add rows', 'info');
+        tab.activeSubtab = 'data';
+        renderTblInspTabs();
+        await _loadTblInspSubtab(tab, 'data');
+        return;
+    }
+    if (!tab._newRows) tab._newRows = [];
+    // Build empty new row using columns list
+    const colRows = tab.data['columns']?.rows || [];
+    const empty = {};
+    colRows.forEach(c => {
+        empty[c.COLUMN_NAME || c.column_name || ''] = c.DATA_DEFAULT || null;
+    });
+    tab._newRows.push(empty);
+
+    // Re-render the editable grid preserving existing edits
+    const res = tab.data['data'];
+    const rows = res?.rows || [];
+    const cols = res?.columns || (rows.length ? Object.keys(rows[0]) : colRows.map(c => c.COLUMN_NAME));
+    _tblInspRenderEditGrid(tab, cols, rows);
+    _tblInspMarkDirty(tab);
+
+    // Scroll to top of content and focus first input of the new row
+    const content = document.getElementById('tbl-insp-content');
+    if (content) { content.scrollTop = 0; }
+    setTimeout(() => {
+        const firstInp = document.querySelector('#tbl-insp-new-body input.tbl-insp-cell-inp');
+        if (firstInp) firstInp.focus();
+    }, 30);
+}
+
+// ── Save all changes (INSERT new rows + UPDATE edited rows) ───────
+async function tblInspSaveChanges() {
+    const tab = activeTblInspTab();
+    if (!tab) return;
+
+    const dataRes  = tab.data['data'];
+    const rows     = dataRes?.rows || [];
+    const allCols  = dataRes?.columns || (rows.length ? Object.keys(rows[0]) : []);
+
+    // column type lookup
+    const colTypes = {};
+    (tab.data['columns']?.rows || []).forEach(r => {
+        colTypes[(r.COLUMN_NAME||'').toUpperCase()] = (r.DATA_TYPE||'').toUpperCase();
+    });
+
+    const q = (col, val) => _tblInspSqlVal(val, colTypes[col.toUpperCase()] || '');
+
+    // ── INSERT new rows ──────────────────────────────────────────
+    let insOk = 0, insFail = 0, updOk = 0, updFail = 0, lastErr = '';
+
+    for (const [nri, newRow] of (tab._newRows || []).entries()) {
+        // Sync ALL DOM inputs into newRow (empty input = null, overrides copied values)
+        const domInputs = document.querySelectorAll(`#tbl-insp-new-body input.tbl-insp-cell-inp[data-nri="${nri}"]`);
+        domInputs.forEach(inp => {
+            const v = inp.value.trim();
+            newRow[inp.dataset.col] = (v === '' || v.toLowerCase() === 'null') ? null : inp.value;
+        });
+
+        const cols = [], vals = [];
+        for (const [col, val] of Object.entries(newRow)) {
+            if (val === null || val === undefined) continue;
+            cols.push(col);
+            vals.push(q(col, val));
+        }
+        if (!cols.length) { showToast(`New row ${nri+1} has no values — skipped`, 'warning'); continue; }
+        const sql = `INSERT INTO ${tab.schema}.${tab.table} (${cols.join(',')}) VALUES (${vals.join(',')})`;
+        try {
+            await API.queryDatasource(parseInt(tab.dsId), { sql, row_limit: 1 });
+            insOk++;
+        } catch(e) { insFail++; lastErr = _tblInspParseErr(e); }
+    }
+
+    // ── UPDATE edited rows ───────────────────────────────────────
+    // Resolve PK once
+    let pkCols = tab._pkCols || [];
+    if (!pkCols.length) {
+        try {
+            const s = tab.schema.replace(/'/g,"''"), t = tab.table.replace(/'/g,"''");
+            const pkRes = await API.queryDatasource(parseInt(tab.dsId), { row_limit: 20, sql:
+                `SELECT cc.COLUMN_NAME FROM ALL_CONSTRAINTS c
+JOIN ALL_CONS_COLUMNS cc ON cc.OWNER=c.OWNER AND cc.CONSTRAINT_NAME=c.CONSTRAINT_NAME
+WHERE c.OWNER='${s}' AND c.TABLE_NAME='${t}' AND c.CONSTRAINT_TYPE='P' ORDER BY cc.POSITION` });
+            pkCols = (pkRes.rows||[]).map(r => (r.COLUMN_NAME||'').toUpperCase());
+            tab._pkCols = pkCols;
+        } catch(_) {}
+    }
+    const LOB_TYPES = new Set(['CLOB','BLOB','NCLOB','XMLTYPE','LONG','LONG RAW','BFILE']);
+    const keyCols = pkCols.length
+        ? pkCols
+        : allCols.filter(c => !LOB_TYPES.has(colTypes[c.toUpperCase()]||'')).slice(0,8);
+
+    for (const [riStr, edits] of Object.entries(tab._edits || {})) {
+        const ri  = parseInt(riStr);
+        const row = rows[ri];
+        if (!row || !Object.keys(edits).length) continue;
+
+        const setClauses = Object.entries(edits).map(([col, val]) => `${col} = ${q(col, val)}`);
+        const whereParts = keyCols.map(col => {
+            const v = row[col] ?? row[col.toUpperCase()] ?? row[col.toLowerCase()];
+            if (v === null || v === undefined) return `${col} IS NULL`;
+            return `${col} = ${q(col, v)}`;
+        });
+        if (!whereParts.length) { updFail++; lastErr = 'No key columns for UPDATE'; continue; }
+        const sql = `UPDATE ${tab.schema}.${tab.table} SET ${setClauses.join(', ')} WHERE ${whereParts.join(' AND ')}`;
+        try {
+            await API.queryDatasource(parseInt(tab.dsId), { sql, row_limit: 1 });
+            updOk++;
+        } catch(e) { updFail++; lastErr = _tblInspParseErr(e); }
+    }
+
+    const total = insOk + insFail + updOk + updFail;
+    if (total === 0) return showToast('Nothing to save', 'info');
+    const msg = [
+        insOk  ? `${insOk} inserted`  : '',
+        updOk  ? `${updOk} updated`   : '',
+        insFail+updFail ? `${insFail+updFail} failed: ${lastErr.substring(0,80)}` : '',
+    ].filter(Boolean).join(', ');
+    showToast(msg, insFail+updFail ? 'warning' : 'success');
+
+    // Reload fresh data
+    _tblInspClearDirty(tab);
+    delete tab.data['data'];
+    _loadTblInspSubtab(tab, 'data');
+}
+
+// ── Value quoting helper ──────────────────────────────────────────
+function _tblInspSqlVal(val, dt) {
+    if (val === null || val === undefined || String(val).toUpperCase() === 'NULL') return 'NULL';
+    dt = (dt || '').toUpperCase();
+    if (['NUMBER','INTEGER','FLOAT','BINARY_FLOAT','BINARY_DOUBLE'].includes(dt) || dt.startsWith('NUMBER') || dt.startsWith('FLOAT')) {
+        return isNaN(Number(String(val))) ? `'${String(val).replace(/'/g,"''")}' ` : String(val);
+    }
+    if (dt.startsWith('DATE') || dt.startsWith('TIMESTAMP')) {
+        const s = String(val);
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return `TO_DATE('${s.substring(0,19)}','YYYY-MM-DD"T"HH24:MI:SS')`;
+        return `TO_DATE('${s.replace(/'/g,"''")}','DD-MON-YYYY')`;
+    }
+    return `'${String(val).replace(/'/g,"''")}' `;
+}
+
+function _tblInspParseErr(e) {
+    try {
+        const msg = e?.message || String(e);
+        const jsonStr = msg.replace(/^\d{3}: /, '');
+        const detail = JSON.parse(jsonStr);
+        return (detail?.detail?.error || msg).split('\n')[0].substring(0, 300);
+    } catch (_) {
+        return String(e?.message || e).substring(0, 300);
+    }
+}
+
+// ── SCHEMA.TABLE autocomplete for inspector input ─────────────────
+function _tblInspSuggest(input) {
+    const raw = String(input.value || '').trim();
+    const v   = raw.toUpperCase();
+    const dsId = document.getElementById('sql-ds-select')?.value;
+    const dl  = document.getElementById('tbl-insp-suggestions');
+    if (!dl || !dsId) return;
+    const cache = _sqlHintCache?.[dsId];
+    if (!cache?.loaded) return;
+    const tables = cache.tables || {};
+    const dotIdx = v.lastIndexOf('.');
+    const matches = [];
+    const seen = new Set();
+    const pushMatch = (m) => {
+        const txt = String(m || '').trim();
+        if (!txt) return;
+        for (const vv of [txt, txt.toLowerCase()]) {
+            if (!seen.has(vv)) {
+                seen.add(vv);
+                matches.push(vv);
+            }
+        }
+    };
+    if (dotIdx < 0) {
+        // prefix matches SCHEMA or SCHEMA.TABLE
+        for (const key of Object.keys(tables)) {
+            const keyU = String(key || '').toUpperCase();
+            if (keyU.startsWith(v)) pushMatch(key);
+            if (matches.length >= 50) break;
+        }
+    } else {
+        // SCHEMA. typed — complete TABLE part
+        const schema = v.substring(0, dotIdx);
+        const tPart  = v.substring(dotIdx + 1);
+        for (const key of Object.keys(tables)) {
+            const keyU = String(key || '').toUpperCase();
+            if (keyU.startsWith(schema + '.') && (tPart === '' || keyU.includes('.' + tPart))) pushMatch(key);
+            if (matches.length >= 50) break;
+        }
+    }
+    dl.innerHTML = matches.map(m => `<option value="${escapeHtml(m)}">`).join('');
+}
+
+async function tblInspDeleteSelected() {
+    const tab = activeTblInspTab();
+    if (!tab) return;
+    if (tab.activeSubtab !== 'data') return showToast('Switch to the Data tab first', 'warning');
+    const checked = [...document.querySelectorAll('.tbl-insp-row-chk:checked')];
+    if (!checked.length) return showToast('Select at least one row to delete', 'warning');
+
+    // Separate new-row deletes (no DB call needed) from existing row deletes
+    const newChecked      = checked.filter(cb => cb.dataset.nri !== undefined && cb.dataset.nri !== '');
+    const existingChecked = checked.filter(cb => cb.dataset.ri  !== undefined && cb.dataset.ri  !== '' && !cb.dataset.nri);
+
+    // Remove new rows from tab._newRows
+    if (newChecked.length) {
+        const nrisToRemove = new Set(newChecked.map(cb => parseInt(cb.dataset.nri)));
+        tab._newRows = (tab._newRows||[]).filter((_, i) => !nrisToRemove.has(i));
+    }
+
+    if (!existingChecked.length) {
+        // Only new rows removed — re-render
+        const res  = tab.data['data'];
+        const rows = res?.rows || [];
+        const cols = res?.columns || (rows.length ? Object.keys(rows[0]) : []);
+        _tblInspRenderEditGrid(tab, cols, rows);
+        if (!tab._newRows.length && !Object.keys(tab._edits||{}).length) _tblInspClearDirty(tab);
+        return;
+    }
+
+    const dataResult = tab.data['data'];
+    const rows    = dataResult?.rows   || [];
+    const allCols = dataResult?.columns || (rows.length ? Object.keys(rows[0]) : []);
+    if (!rows.length) return showToast('No data loaded', 'warning');
+
+    const colTypes = {};
+    (tab.data['columns']?.rows || []).forEach(r => {
+        colTypes[(r.COLUMN_NAME||'').toUpperCase()] = (r.DATA_TYPE||'').toUpperCase();
+    });
+
+    let pkCols = tab._pkCols || [];
+    if (!pkCols.length) {
+        try {
+            const s = tab.schema.replace(/'/g,"''"), t = tab.table.replace(/'/g,"''");
+            const pkRes = await API.queryDatasource(parseInt(tab.dsId), { row_limit: 20, sql:
+                `SELECT cc.COLUMN_NAME FROM ALL_CONSTRAINTS c
+JOIN ALL_CONS_COLUMNS cc ON cc.OWNER=c.OWNER AND cc.CONSTRAINT_NAME=c.CONSTRAINT_NAME
+WHERE c.OWNER='${s}' AND c.TABLE_NAME='${t}' AND c.CONSTRAINT_TYPE='P' ORDER BY cc.POSITION` });
+            pkCols = (pkRes.rows||[]).map(r => (r.COLUMN_NAME||'').toUpperCase());
+            tab._pkCols = pkCols;
+        } catch(_) {}
+    }
+    const LOB_TYPES = new Set(['CLOB','BLOB','NCLOB','XMLTYPE','LONG','LONG RAW','BFILE']);
+    const keyCols = pkCols.length
+        ? pkCols
+        : allCols.filter(c => !LOB_TYPES.has(colTypes[c.toUpperCase()]||'')).slice(0,8);
+    if (!keyCols.length) return showToast('Cannot determine key columns for DELETE', 'warning');
+
+    const keyDesc = pkCols.length ? `PK: ${pkCols.join(', ')}` : `all-column match (${keyCols.length} cols)`;
+    if (!confirm(`Delete ${existingChecked.length} row(s) using ${keyDesc}?\n\nThis cannot be undone.`)) return;
+
+    let deleted = 0, failed = 0, lastErr = '';
+    for (const cb of existingChecked) {
+        const ri = parseInt(cb.dataset.ri);
+        const row = rows[ri];
+        if (!row) continue;
+        const whereParts = keyCols.map(col => {
+            const v = row[col] ?? row[col.toUpperCase()] ?? row[col.toLowerCase()];
+            if (v === null || v === undefined) return `${col} IS NULL`;
+            return `${col} = ${_tblInspSqlVal(v, colTypes[col.toUpperCase()]||'')}`;
+        });
+        const sql = `DELETE FROM ${tab.schema}.${tab.table} WHERE ${whereParts.join(' AND ')}`;
+        try {
+            await API.queryDatasource(parseInt(tab.dsId), { sql, row_limit: 1 });
+            deleted++;
+        } catch (e) { failed++; lastErr = _tblInspParseErr(e); }
+    }
+    showToast(failed === 0 ? `Deleted ${deleted} row(s) ✓` : `Deleted ${deleted}, failed ${failed}: ${lastErr.substring(0,80)}`,
+              failed === 0 ? 'success' : 'warning');
+    _tblInspClearDirty(tab);
+    delete tab.data['data'];
+    _loadTblInspSubtab(tab, 'data');
+}
+
+document.addEventListener('fullscreenchange', _syncSqlWorkspaceFullscreenUi);
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && sqlWorkspacePseudoFullscreen) {
+        sqlWorkspacePseudoFullscreen = false;
+        _syncSqlWorkspaceFullscreenUi();
+    }
+});
+</script>
+
+<style>
+/* ── Section toggles (Test Management style) ── */
+.ds-sect-hdr { display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+.ds-sect-toggle { border:1px solid var(--border); background:var(--bg-dark); color:var(--text-muted); border-radius:4px; width:22px; height:22px; line-height:18px; font-size:12px; cursor:pointer; }
+.ds-sect-body.ds-sect-collapsed { display:none !important; }
+
+/* ── Lined editor ── */
+.sql-lined-wrap { display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:var(--surface2); }
+.sql-pane-resizer {
+    height:10px;
+    cursor:ns-resize;
+    border-top:1px solid var(--border);
+    margin-top:4px;
+    border-radius:0 0 6px 6px;
+    background:repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 10px,
+        rgba(148, 163, 184, 0.35) 10px,
+        rgba(148, 163, 184, 0.35) 20px
+    );
+}
+.sql-line-gutter { min-width:42px; background:var(--bg-dark); border-right:1px solid var(--border); color:var(--text-muted); font-family:monospace; font-size:12px; line-height:18px; padding:4px 4px 4px 0; text-align:right; overflow:hidden; user-select:none; pointer-events:none; white-space:pre; flex-shrink:0; }
+.sql-line-gutter .gln { display:block; line-height:18px; padding-right:4px; }
+.sql-line-gutter .gln.sql-err-line { color:var(--danger); font-weight:700; background:rgba(239,68,68,.18); }
+.sql-line-gutter .gln.sql-same-line { color:var(--accent); font-weight:700; background:rgba(59,130,246,.15); }
+.sql-lined-ta { border:none !important; border-radius:0 !important; flex:1; min-width:0; line-height:18px; }
+.sql-lined-wrap .CodeMirror { flex:1 1 auto; width:100% !important; height:100% !important; min-height:120px; }
+.sql-lined-wrap .CodeMirror-scroll { min-height:120px; max-height:none; height:100%; }
+#sql-editor-wrap {
+    resize: vertical;
+    overflow: hidden;
+}
+#sql-result-content {
+    resize: vertical;
+    overflow: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+#sql-workspace-frame .sql-pane-resizer {
+    display: none;
+}
+/* ── Frozen-header split-table grid ── */
+.sql-result-grid {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+.sql-result-thead-wrap {
+    flex-shrink: 0;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+}
+.sql-result-tbody-wrap {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+}
+.sql-result-thead-wrap table,
+.sql-result-tbody-wrap table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    font-size: 12px;
+}
+.sql-result-thead-wrap th {
+    position: relative;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 8px;
+    white-space: nowrap;
+    overflow: visible;
+    text-transform: none;
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+}
+.col-resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    cursor: col-resize;
+    z-index: 5;
+    background: transparent;
+}
+.col-resizer:hover, .col-resizer:active {
+    background: var(--accent);
+    opacity: 0.6;
+}
+.sql-result-tbody-wrap td {
+    padding: 6px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    border-bottom: 1px solid var(--border);
+}
+.sql-result-tbody-wrap tr:hover td { background: var(--bg-card-hover); }
+/* ── CodeMirror fold gutter icon override ── */
+.CodeMirror-foldgutter { width: 1em !important; }
+.CodeMirror-foldgutter-open:after,
+.CodeMirror-foldgutter-folded:after {
+    font-size: 12px !important;
+    font-weight: bold !important;
+    color: #22c55e !important;
+    font-family: monospace !important;
+}
+.CodeMirror-foldgutter-open:after   { content: '\2212' !important; /* − */ }
+.CodeMirror-foldgutter-folded:after { content: '+' !important; }
+/* ── Table Inspector ── */
+#tbl-insp-tabs { display:flex;flex-wrap:wrap;gap:6px;overflow-x:auto;flex:1;min-width:0; }
+#tbl-insp-tabs .tbl-insp-main-tab { font-size:12px;padding:4px 10px; }
+#tbl-insp-subtabs { display:flex;flex-wrap:wrap;gap:0;padding:0; }
+.tbl-subtab-btn { padding:7px 15px;font-size:12px;font-weight:500;color:var(--text-muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;margin-bottom:-1px;transition:color .15s,border-color .15s; }
+.tbl-subtab-btn:hover { color:var(--text); }
+.tbl-subtab-active { color:var(--accent)!important;border-bottom-color:var(--accent)!important; }
+#tbl-insp-toolbar { align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap; }
+#tbl-insp-filter { font-family:monospace;font-size:12px;width:260px; }
+#tbl-insp-row-count { font-size:12px;color:var(--text-muted);margin-left:4px; }
+#tbl-insp-content { overflow:auto; }
+.tbl-insp-grid thead tr th { position:sticky;top:0;z-index:2; }
+.tbl-insp-grid .tbl-insp-row:hover td { background:rgba(59,130,246,.07); }
+.tbl-insp-actions-wrap { position:relative; }
+#tbl-insp-actions-menu { position:absolute;top:100%;left:0;z-index:200;background:var(--bg-card,#1e293b);border:1px solid var(--border);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.35);min-width:160px;padding:4px 0; }
+.tbl-insp-menu-item,.tbl-insp-menu-btn { display:block;width:100%;padding:7px 16px;background:none;border:none;color:var(--text);font-size:13px;text-align:left;cursor:pointer;white-space:nowrap; }
+.tbl-insp-menu-item:hover,.tbl-insp-menu-btn:hover { background:rgba(255,255,255,.07); }
+
+/* ── Table Inspector inline edit ── */
+.tbl-insp-row-new td { background: rgba(34,197,94,.06) !important; border-left: 2px solid #22c55e; }
+.tbl-insp-row-dirty td { background: rgba(59,130,246,.06) !important; border-left: 2px solid #3b82f6; }
+.tbl-insp-cell { cursor: text; }
+.tbl-insp-cell:hover > * { background: rgba(255,255,255,.03); }
+.tbl-insp-inline-inp { width:100%; box-sizing:border-box; background:var(--surface2,#0f172a); border:1px solid var(--accent,#3b82f6); border-radius:3px; color:var(--text,#f1f5f9); font-family:monospace; font-size:12px; padding:1px 4px; outline:none; }
+.tbl-insp-inline-inp:focus { border-color:#60a5fa; box-shadow:0 0 0 2px rgba(59,130,246,.25); }
+#tbl-insp-save-btn { transition: opacity .15s; }
+#tbl-insp-save-btn:not(:disabled) { background: var(--success,#22c55e) !important; border-color: var(--success,#22c55e) !important; color:#000 !important; }
+
+/* ── SQL Hint dropdown ── */
+.CodeMirror-hints {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.6) !important;
+    padding: 2px 0 !important;
+    font-family: monospace !important;
+    font-size: 12px !important;
+    z-index: 9999 !important;
+}
+.CodeMirror-hint {
+    color: #22c55e !important;          /* green — table names */
+    padding: 3px 12px !important;
+    border-radius: 0 !important;
+}
+.CodeMirror-hint-active,
+li.CodeMirror-hint-active {
+    background: #1e3a5f !important;
+    color: #7dd3fc !important;          /* blue when selected */
+    outline: none !important;
+}
+.cm-hint-schema  { color: #7dd3fc !important; }          /* schema names: blue */
+.cm-hint-table   { color: #22c55e !important; }          /* table names: green */
+.cm-hint-column  { color: #fbbf24 !important; }          /* column names: amber */
+.cm-hint-keyword { color: #c084fc !important; font-weight: 600; }  /* SQL keywords: purple */
+.cm-hint-info    { color: #475569 !important; font-style: italic; }
+/* ── Error line: wrap-type class lands on outer line div ── */
+.CodeMirror .cm-error-line,
+.CodeMirror-code .cm-error-line {
+    background: rgba(220,38,38,.45) !important;
+    box-shadow: inset 3px 0 0 #ef4444, inset -1px 0 0 rgba(220,38,38,.3);
+}
+/* ── Selected token match highlight ── */
+.CodeMirror .cm-same-token { background: rgba(220,38,38,.35); border-radius: 2px; outline: 1px solid rgba(239,68,68,.6); }
+.CodeMirror-foldmarker { border: 1px solid rgba(59,130,246,.4); border-radius: 3px; margin-left: 4px; }
+
+/* ── SQL workspace fullscreen behavior ── */
+#sql-workspace-frame.sql-workspace-fullscreen {
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    min-height:calc(100vh - 110px);
+}
+#sql-workspace-frame.sql-workspace-fullscreen #sql-results-section {
+    flex:1;
+    min-height:260px;
+    overflow:hidden;
+}
+#sql-workspace-frame.sql-workspace-fullscreen #ds-sql-terminal-body {
+    max-height:none;
+    overflow:hidden;
+}
+#sql-workspace-frame.sql-workspace-fullscreen #sql-result-content {
+    height:100%;
+    max-height:none;
+}
+#sql-workspace-frame.sql-workspace-fullscreen #sql-results-body {
+    overflow:hidden;
+}
+#sql-workspace-frame.sql-workspace-fullscreen #sql-workspace {
+    overflow:hidden;
+}
+#sql-workspace-frame.sql-workspace-pseudo-fullscreen {
+    position:fixed;
+    inset:58px 8px 8px 8px;
+    z-index:1200;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px;
+    overflow:auto;
+}
+#sql-workspace-frame.sql-workspace-pseudo-fullscreen #sql-result-content {
+    height:100%;
+    max-height:none;
+}
+</style>
+{% endblock %}

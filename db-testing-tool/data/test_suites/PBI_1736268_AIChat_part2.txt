@@ -1,0 +1,116 @@
+﻿```json
+[
+  {
+    "id": "TC_015",
+    "name": "Validate JBJ_CDSMANUC_TEST Trailer Parsing",
+    "description": "Ensure rows in JBJ_CDSMANUC_TEST match CDSM_RULE_MAP output for TRAILER, TRANS_TP_CODE, TRANS_SBTP_CODE, EXEC_SBTP_CODE, CNX_IND.",
+    "category": "CDSMANUC Trailer Parsing",
+    "sql": "SELECT t.TRAILER, t.TRANS_TP_CODE, t.TRANS_SBTP_CODE, t.EXEC_SBTP_CODE, t.CNX_IND FROM CDS_STG_OWNER.JBJ_CDSMANUC_TEST t JOIN CDS_STG_OWNER.CDSM_RULE_MAP r ON t.CDSM_RULE_MAP_ID = r.CDSM_RULE_MAP_ID WHERE r.REC_TP = 7;",
+    "expected_behavior": "All rows in JBJ_CDSMANUC_TEST match the corresponding CDSM_RULE_MAP output."
+  },
+  {
+    "id": "TC_016",
+    "name": "Validate BUS_DY_FLAG Date Adjustment",
+    "description": "Verify EFFECTIVE_DATE is used directly when BUS_DY_FLAG=1, otherwise next business day is derived from DATE_DIM.",
+    "category": "BUS_DY_FLAG Date Adjustment",
+    "sql": "SELECT t.BUS_DY_FLAG, t.EFFECTIVE_DATE, d.NEXT_BUSINESS_DAY FROM CDS_STG_OWNER.STCCCALQ_STG t LEFT JOIN CCAL_OWNER.DATE_DIM d ON t.EFFECTIVE_DATE = d.CALENDAR_DATE WHERE t.BUS_DY_FLAG = 0;",
+    "expected_behavior": "When BUS_DY_FLAG=1, EFFECTIVE_DATE is used directly; otherwise, NEXT_BUSINESS_DAY is derived from DATE_DIM."
+  },
+  {
+    "id": "TC_017",
+    "name": "Validate TXN_SRC_KEY Uniqueness in TXN",
+    "description": "Ensure TXN_SRC_KEY values in TXN table are unique.",
+    "category": "Target TXN",
+    "sql": "SELECT TXN_SRC_KEY, COUNT(*) AS key_count FROM CCAL_OWNER.TXN GROUP BY TXN_SRC_KEY HAVING COUNT(*) > 1;",
+    "expected_behavior": "No duplicate TXN_SRC_KEY values exist in the TXN table."
+  },
+  {
+    "id": "TC_018",
+    "name": "Validate SRC_STM_CODE Values in TXN",
+    "description": "Ensure SRC_STM_CODE values in TXN table are valid.",
+    "category": "Target TXN",
+    "sql": "SELECT DISTINCT SRC_STM_CODE FROM CCAL_OWNER.TXN WHERE SRC_STM_CODE NOT IN ('S10REC', 'S10DEL', 'MULBALMT', 'S10TFRS');",
+    "expected_behavior": "All SRC_STM_CODE values are valid and within the allowed set."
+  },
+  {
+    "id": "TC_019",
+    "name": "Validate TXN_TP_CD and TXN_SBTP_CD Population",
+    "description": "Ensure TXN_TP_CD and TXN_SBTP_CD are populated in TXN table.",
+    "category": "Target TXN",
+    "sql": "SELECT TXN_ID FROM CCAL_OWNER.TXN WHERE TXN_TP_CD IS NULL OR TXN_SBTP_CD IS NULL;",
+    "expected_behavior": "No records have NULL values in TXN_TP_CD or TXN_SBTP_CD."
+  },
+  {
+    "id": "TC_020",
+    "name": "Validate APA_TP_CD Values in APA",
+    "description": "Ensure APA_TP_CD values in APA table are correctly assigned as APASEC11 or APASEC79.",
+    "category": "Target APA",
+    "sql": "SELECT APA_TP_CD FROM CCAL_OWNER.APA WHERE APA_TP_CD NOT IN ('APASEC11', 'APASEC79');",
+    "expected_behavior": "All APA_TP_CD values are either APASEC11 or APASEC79."
+  },
+  {
+    "id": "TC_021",
+    "name": "Validate PD_ID Lookup in APA",
+    "description": "Ensure PD_ID values in APA table are correctly derived from CCAL_CIRD_PD_MAP.",
+    "category": "Target APA",
+    "sql": "SELECT APA_ID, PD_ID FROM CCAL_OWNER.APA WHERE PD_ID NOT IN (SELECT PD_ID FROM CCAL_OWNER.CCAL_CIRD_PD_MAP);",
+    "expected_behavior": "All PD_ID values in APA table exist in CCAL_CIRD_PD_MAP."
+  },
+  {
+    "id": "TC_022",
+    "name": "Validate APA Amount Calculations",
+    "description": "Verify APA amounts are calculated correctly based on SHARES sign.",
+    "category": "Target APA",
+    "sql": "SELECT APA_ID, SHARES, APA_AMOUNT FROM CCAL_OWNER.APA WHERE (SHARES >= 0 AND APA_AMOUNT < 0) OR (SHARES < 0 AND APA_AMOUNT >= 0);",
+    "expected_behavior": "APA amounts are positive when SHARES >= 0 and negative when SHARES < 0."
+  },
+  {
+    "id": "TC_023",
+    "name": "Validate FIP Records for STCCCALQ Source",
+    "description": "Ensure FIP records exist for all corresponding STCCCALQ source records.",
+    "category": "Target FIP",
+    "sql": "SELECT s.SRC_ID FROM CDS_STG_OWNER.STCCCALQ_STG s LEFT JOIN CCAL_OWNER.FIP f ON s.SRC_ID = f.SRC_ID WHERE f.FIP_ID IS NULL;",
+    "expected_behavior": "All STCCCALQ source records have corresponding FIP records."
+  },
+  {
+    "id": "TC_024",
+    "name": "Validate TXN_RLTNP_TP_CD Values",
+    "description": "Ensure TXN_RLTNP_TP_CD values in TXN_RLTNP table are valid.",
+    "category": "Target TXN_RLTNP",
+    "sql": "SELECT DISTINCT TXN_RLTNP_TP_CD FROM CCAL_OWNER.TXN_RLTNP WHERE TXN_RLTNP_TP_CD NOT IN ('REL1', 'REL2', 'REL3');",
+    "expected_behavior": "All TXN_RLTNP_TP_CD values are valid and within the allowed set."
+  },
+  {
+    "id": "TC_025",
+    "name": "Validate Relationship Pairs in TXN_RLTNP",
+    "description": "Ensure relationship pairs in TXN_RLTNP table are correctly established.",
+    "category": "Target TXN_RLTNP",
+    "sql": "SELECT TXN_ID, RELATED_TXN_ID FROM CCAL_OWNER.TXN_RLTNP WHERE TXN_ID IS NULL OR RELATED_TXN_ID IS NULL;",
+    "expected_behavior": "No relationship pairs have NULL TXN_ID or RELATED_TXN_ID."
+  },
+  {
+    "id": "TC_026",
+    "name": "Validate MNY_TXN_QUALFR Records Match CDSM_RULE_MAP",
+    "description": "Ensure MNY_TXN_QUALFR records from SBDI flow match CDSM_RULE_MAP REC_TP=7.",
+    "category": "MNY_TXN_QUALFR",
+    "sql": "SELECT q.QUALFR_ID FROM CCAL_OWNER.MNY_TXN_QUALFR q LEFT JOIN CDS_STG_OWNER.CDSM_RULE_MAP r ON q.CDSM_RULE_MAP_ID = r.CDSM_RULE_MAP_ID WHERE r.REC_TP = 7 AND r.CDSM_RULE_MAP_ID IS NULL;",
+    "expected_behavior": "All MNY_TXN_QUALFR records from SBDI flow match CDSM_RULE_MAP REC_TP=7."
+  },
+  {
+    "id": "TC_027",
+    "name": "Validate No Orphan TXN Without APA or FIP",
+    "description": "Ensure no TXN records exist without corresponding APA or FIP records.",
+    "category": "Negative Tests",
+    "sql": "SELECT t.TXN_ID FROM CCAL_OWNER.TXN t LEFT JOIN CCAL_OWNER.APA a ON t.TXN_ID = a.TXN_ID LEFT JOIN CCAL_OWNER.FIP f ON t.TXN_ID = f.TXN_ID WHERE a.APA_ID IS NULL AND f.FIP_ID IS NULL;",
+    "expected_behavior": "No TXN records exist without corresponding APA or FIP records."
+  },
+  {
+    "id": "TC_028",
+    "name": "Validate No NULL TXN_SRC_KEY in TXN",
+    "description": "Ensure no TXN records have NULL TXN_SRC_KEY values.",
+    "category": "Negative Tests",
+    "sql": "SELECT TXN_ID FROM CCAL_OWNER.TXN WHERE TXN_SRC_KEY IS NULL;",
+    "expected_behavior": "No TXN records have NULL TXN_SRC_KEY values."
+  }
+]
+```
