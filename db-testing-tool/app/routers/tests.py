@@ -348,6 +348,24 @@ class TrainingEventRequest(BaseModel):
     knowledge_refs: List[str] = []
 
 
+class ControlTableTrainingRuleUpdate(BaseModel):
+    """Update model for control table training rules."""
+    replacement_expression: Optional[str] = None
+    recommended_source: Optional[str] = None
+    issue_type: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class ControlTableTrainingRuleCreate(BaseModel):
+    """Create model for control table training rules."""
+    target_table: str
+    target_column: str
+    replacement_expression: Optional[str] = None
+    recommended_source: Optional[str] = None
+    issue_type: Optional[str] = None
+    notes: Optional[str] = None
+
+
 class TrainingAutomationRequest(BaseModel):
     interval_seconds: int = 600
     mode: str = "ghc"
@@ -1514,26 +1532,26 @@ async def delete_training_rule(rule_id: int, db: AsyncSession = Depends(get_db))
 
 
 @router.put("/control-table/training/rules/{rule_id}")
-async def update_training_rule(rule_id: int, body: dict, db: AsyncSession = Depends(get_db)):
+async def update_training_rule(rule_id: int, body: ControlTableTrainingRuleUpdate, db: AsyncSession = Depends(get_db)):
     rule = await db.get(ControlTableCorrectionRule, rule_id)
     if not rule:
         raise HTTPException(status_code=404, detail="Rule not found")
-    if "replacement_expression" in body:
-        rule.replacement_expression = body["replacement_expression"]
-    if "recommended_source" in body:
-        rule.recommended_source = body["recommended_source"]
-    if "issue_type" in body:
-        rule.issue_type = body["issue_type"]
-    if "notes" in body:
-        rule.notes = body["notes"]
+    if body.replacement_expression is not None:
+        rule.replacement_expression = body.replacement_expression
+    if body.recommended_source is not None:
+        rule.recommended_source = body.recommended_source
+    if body.issue_type is not None:
+        rule.issue_type = body.issue_type
+    if body.notes is not None:
+        rule.notes = body.notes
     await db.commit()
     return {"updated": True, "id": rule_id}
 
 
 @router.post("/control-table/training/rules")
-async def create_training_rule(body: dict, db: AsyncSession = Depends(get_db)):
-    target_table = (body.get("target_table") or "").strip().upper()
-    target_column = (body.get("target_column") or "").strip().upper()
+async def create_training_rule(body: ControlTableTrainingRuleCreate, db: AsyncSession = Depends(get_db)):
+    target_table = body.target_table.strip().upper()
+    target_column = body.target_column.strip().upper()
     if not target_table or not target_column:
         raise HTTPException(status_code=400, detail="target_table and target_column are required")
     # Deduplicate: if rule for same table+column exists, update it instead of creating a new one
@@ -1548,20 +1566,20 @@ async def create_training_rule(body: dict, db: AsyncSession = Depends(get_db)):
         # Delete any older duplicates for this table+column
         for old_rule in all_existing[1:]:
             await db.delete(old_rule)
-        rule.replacement_expression = body.get("replacement_expression", rule.replacement_expression)
-        rule.recommended_source = body.get("recommended_source", rule.recommended_source)
-        rule.issue_type = body.get("issue_type", rule.issue_type)
-        if "notes" in body:
-            rule.notes = body["notes"]
+        rule.replacement_expression = body.replacement_expression or rule.replacement_expression
+        rule.recommended_source = body.recommended_source or rule.recommended_source
+        rule.issue_type = body.issue_type or rule.issue_type
+        if body.notes is not None:
+            rule.notes = body.notes
         await db.commit()
         return {"created": False, "updated": True, "id": rule.id}
     rule = ControlTableCorrectionRule(
         target_table=target_table,
         target_column=target_column,
-        replacement_expression=body.get("replacement_expression", ""),
-        recommended_source=body.get("recommended_source", "manual"),
-        issue_type=body.get("issue_type", "expression_mismatch"),
-        notes=body.get("notes", ""),
+        replacement_expression=body.replacement_expression or "",
+        recommended_source=body.recommended_source or "manual",
+        issue_type=body.issue_type or "expression_mismatch",
+        notes=body.notes or "",
     )
     db.add(rule)
     await db.commit()
