@@ -71,6 +71,10 @@ async def startup():
     await sync_datasources_from_env()
     await restore_training_automation_loop()
     await start_session_watchdog()
+    # Restore completed/failed/stopped operation states from disk (survives restarts)
+    from app.services.operation_control import restore_persisted_operations
+    import asyncio
+    await asyncio.to_thread(restore_persisted_operations)
     # Build missing hint indices in background (non-blocking)
     import threading
     def _build_missing_hint_indices():
