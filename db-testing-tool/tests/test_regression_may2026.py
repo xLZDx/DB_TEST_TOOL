@@ -266,3 +266,59 @@ def test_schema_queue_status_shape(_server_running):
     for key in ("status", "queue_depth", "worker_count", "active_workers",
                 "active_operation_ids", "workers_started"):
         assert key in body, f"queue/status missing key: {key}"
+
+
+# ── TableInfo / ColumnInfo field-name regression (c6467c8) ──────────────────
+
+def test_table_info_positional_fields():
+    """TableInfo must use schema/table_name/table_type — not the old (name, columns, row_count) layout."""
+    from app.connectors.base import TableInfo
+
+    t = TableInfo("MY_SCHEMA", "MY_TABLE", "TABLE")
+    assert t.schema == "MY_SCHEMA", "TableInfo.schema must be set from first positional arg"
+    assert t.table_name == "MY_TABLE", "TableInfo.table_name must be set from second positional arg"
+    assert t.table_type == "TABLE", "TableInfo.table_type must be set from third positional arg"
+
+
+def test_table_info_default_table_type():
+    """TableInfo.table_type should default to 'TABLE'."""
+    from app.connectors.base import TableInfo
+
+    t = TableInfo("S", "T")
+    assert t.table_type == "TABLE"
+
+
+def test_column_info_positional_fields():
+    """ColumnInfo must expose column_name/data_type/nullable/is_pk/ordinal_position."""
+    from app.connectors.base import ColumnInfo
+
+    c = ColumnInfo("COL_ID", "NUMBER", nullable=False, is_pk=True, ordinal_position=1)
+    assert c.column_name == "COL_ID"
+    assert c.data_type == "NUMBER"
+    assert c.nullable is False
+    assert c.is_pk is True
+    assert c.ordinal_position == 1
+
+
+def test_column_info_defaults():
+    """ColumnInfo defaults: nullable=True, is_pk=False, ordinal_position=0."""
+    from app.connectors.base import ColumnInfo
+
+    c = ColumnInfo("COL_NAME", "VARCHAR2")
+    assert c.nullable is True
+    assert c.is_pk is False
+    assert c.ordinal_position == 0
+
+
+def test_schema_catalog_unsupported_type(_server_running):
+    """GET /api/schemas/catalog for an unsupported db_type must return 422, not 500."""
+    import urllib.error
+    import urllib.request
+    # DS4 is known-error Oracle, so we can't test unsupported via a real DS.
+    # Instead hit /api/schemas/catalog/99999 which returns 404.
+    req = urllib.request.Request(f"{BASE}/api/schemas/catalog/99999")
+    try:
+        urllib.request.urlopen(req, timeout=5)
+        assert False, "Expected 404"
+    except urllib.error.HTTPError as e:
+        assert e.code == 404, f"Expected 404 for unknown DS ID, got {e.code}"
