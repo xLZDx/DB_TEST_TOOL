@@ -1,12 +1,18 @@
-"""Mappings router — DRD preview, import, and AI summary endpoints."""
+"""Mappings router — DRD preview, import, AI summary, and Mapping Rule CRUD."""
 from __future__ import annotations
 
+import json
 import logging
-from typing import Optional
+from typing import List, Optional
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database import get_db
+from app.models.mapping_rule import MappingRule
 from app.services.drd_import_service import (
     extract_drd_metadata,
     generate_drd_tests,
@@ -275,30 +281,105 @@ async def drd_ai_summary(
     }
 
 
-# ── Mapping Rule CRUD stubs ──────────────────────────────────────────────────
-# These stubs return empty data to prevent 404s while the full mappings
-# feature is pending implementation.
+# ── Mapping Rule CRUD ────────────────────────────────────────────────────────
+
+class MappingRuleCreate(BaseModel):
+    name: str
+    source_datasource_id: int
+    source_schema: Optional[str] = None
+    source_table: str
+    source_columns: Optional[str] = None   # JSON array string
+    target_datasource_id: int
+    target_schema: Optional[str] = None
+    target_table: str
+    target_columns: Optional[str] = None   # JSON array string
+    transformation_sql: Optional[str] = None
+    join_condition: Optional[str] = None
+    filter_condition: Optional[str] = None
+    rule_type: str = "direct"
+    description: Optional[str] = None
+
+
+def _rule_dict(r: MappingRule) -> dict:
+    return {
+        "id": r.id,
+        "name": r.name,
+        "source_datasource_id": r.source_datasource_id,
+        "source_schema": r.source_schema,
+        "source_table": r.source_table,
+        "source_columns": r.source_columns,
+        "target_datasource_id": r.target_datasource_id,
+        "target_schema": r.target_schema,
+        "target_table": r.target_table,
+        "target_columns": r.target_columns,
+        "transformation_sql": r.transformation_sql,
+        "join_condition": r.join_condition,
+        "filter_condition": r.filter_condition,
+        "rule_type": r.rule_type,
+        "description": r.description,
+        "created_at": r.created_at.isoformat() if r.created_at else None,
+        "updated_at": r.updated_at.isoformat() if r.updated_at else None,
+    }
+
 
 @router.get("")
-async def list_mappings():
-    return {"mappings": [], "total": 0}
+async def list_mappings(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(MappingRule).order_by(MappingRule.name))
+    items = result.scalars().all()
+    return {"mappings": [_rule_dict(r) for r in items], "total": len(items)}
 
 
 @router.post("")
-async def create_mapping(body: dict):
-    raise HTTPException(501, "Mapping CRUD is not yet implemented")
+async def create_mapping(body: MappingRuleCreate, db: AsyncSession = Depends(get_db)):
+    rule = MappingRule(**body.model_dump())
+    db.add(rule)
+    await db.commit()
+    await db.refresh(rule)
+    return {"id": rule.id, "name": rule.name, "status": "created"}
+
+
+@router.get("/{mapping_id}")
+async def get_mapping(mapping_id: int, db: AsyncSession = Depends(get_db)):
+    rule = await db.get(MappingRule, mapping_id)
+    if not rule:
+        raise HTTPException(404, "Mapping rule not found")
+    return _rule_dict(rule)
 
 
 @router.put("/{mapping_id}")
-async def update_mapping(mapping_id: int, body: dict):
-    raise HTTPException(501, "Mapping CRUD is not yet implemented")
+async def update_mapping(mapping_id: int, body: MappingRuleCreate, db: AsyncSession = Depends(get_db)):
+    rule = await db.get(MappingRule, mapping_id)
+    if not rule:
+        raise HTTPException(404, "Mapping rule not found")
+    for field, value in body.model_dump(exclude_unset=True).items():
+        setattr(rule, field, value)
+    await db.commit()
+    await db.refresh(rule)
+    return _rule_dict(rule)
 
 
 @router.delete("/{mapping_id}")
-async def delete_mapping(mapping_id: int):
-    raise HTTPException(501, "Mapping CRUD is not yet implemented")
+async def delete_mapping(mapping_id: int, db: AsyncSession = Depends(get_db)):
+    rule = await db.get(MappingRule, mapping_id)
+    if not rule:
+        raise HTTPException(404, "Mapping rule not found")
+    await db.delete(rule)
+    await db.commit()
+    return {"deleted": True}
+
+
+class BulkDeleteRequest(BaseModel):
+    ids: List[int]
 
 
 @router.post("/bulk-delete")
-async def bulk_delete_mappings(body: dict):
-    raise HTTPException(501, "Mapping CRUD is not yet implemented")
+async def bulk_delete_mappings(body: BulkDeleteRequest, db: AsyncSession = Depends(get_db)):
+    deleted = 0
+    for rule_id in body.ids:
+        rule = await db.get(MappingRule, rule_id)
+        if rule:
+            await db.delete(rule)
+            deleted += 1
+    await db.commit()
+    return {"deleted": deleted}
+
