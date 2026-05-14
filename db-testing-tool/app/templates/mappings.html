@@ -356,6 +356,11 @@
                 <label>Mapping Document (.csv, .xlsx, .xls)</label>
                 <input type="file" class="form-control" id="drd-file" accept=".csv,.xlsx,.xls" required>
             </div>
+            <div class="form-group" style="margin-top:12px">
+                <label>ODI XML File <span class="text-muted" style="font-size:11px">(optional — for quality gate comparison)</span></label>
+                <input type="file" class="form-control" id="drd-xml-file" accept=".xml">
+            </div>
+            <div id="drd-xml-parse-result" style="display:none;margin-top:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:12px;max-height:200px;overflow:auto"></div>
             <div id="drd-upload-progress" style="display:none;margin-top:16px">
                 <span class="spinner"></span> Analyzing file...
             </div>
@@ -1155,6 +1160,12 @@
                         <button class="ct-sect-toggle" id="ct-sect-suite-btn" type="button">&#9660;</button>
                     </div>
                     <div class="ct-sect-body" id="ct-sect-suite">
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+                            <button class="btn btn-primary btn-sm" onclick="generatePerAttributeTestSuite('CT')">&#9654; Generate Per-Attribute Test Suite</button>
+                            <button class="btn btn-outline btn-sm" onclick="generatePerAttributeTestSuite('DRD')">Generate DRD Suite</button>
+                            <button class="btn btn-outline btn-sm" onclick="generatePerAttributeTestSuite('CHAT')">Generate Chat Suite</button>
+                            <span id="ct-gen-suite-status" class="text-muted" style="font-size:11px"></span>
+                        </div>
                         <div id="ct-tests-summary" class="text-muted" style="margin-bottom:10px"></div>
                         <div id="ct-tests-list" style="max-height:420px;overflow-y:auto"></div>
                     </div>
@@ -7084,5 +7095,94 @@ async function fetchTfsContextForDrd(force = false) {
         if (progress) progress.style.display = 'none';
     }
 }
+
+// ── Per-Attribute Test Suite Generator ──────────────────────────────────────
+async function generatePerAttributeTestSuite(prefix) {
+    const statusEl = document.getElementById('ct-gen-suite-status');
+    if (statusEl) statusEl.textContent = `Generating ${prefix} suite...`;
+
+    // Gather analysis rows from current CT state
+    const rows = window._ctAnalysisRows || [];
+    if (!rows.length) {
+        showToast('No analysis rows available. Run CT analysis first.', 'error');
+        if (statusEl) statusEl.textContent = '';
+        return;
+    }
+
+    const targetSchema = (document.getElementById('ct-target-schema') || {}).value || '';
+    const targetTable = (document.getElementById('ct-target-table') || {}).value || '';
+    const generatedSql = window._ctGeneratedSql || '';
+    const srcDsId = parseInt((document.getElementById('ct-source-ds') || {}).value || '0');
+    const tgtDsId = parseInt((document.getElementById('ct-target-ds') || {}).value || '0');
+    const pbiId = (document.getElementById('drd-tfs-item-id') || {}).value || '';
+
+    try {
+        const res = await api('POST', '/api/tests/control-table/generate-attribute-tests', {
+            analysis_rows: rows,
+            generated_sql: generatedSql,
+            target_schema: targetSchema,
+            target_table: targetTable,
+            source_datasource_id: srcDsId,
+            target_datasource_id: tgtDsId,
+            pbi_id: pbiId ? `PBI${pbiId}` : '',
+            suite_prefix: prefix,
+            folder_name: `${prefix}_TEST`,
+        });
+        if (statusEl) statusEl.textContent = `✓ Created ${res.count} tests in folder "${res.folder_name}" (ID ${res.folder_id})`;
+        showToast(`Generated ${res.count} per-attribute tests → ${res.folder_name}`, 'success');
+    } catch (e) {
+        showToast(`Failed to generate ${prefix} suite: ${e.message}`, 'error');
+        if (statusEl) statusEl.textContent = 'Error: ' + e.message;
+    }
+}
+
+// ── XML File Upload Handler ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    const xmlInput = document.getElementById('drd-xml-file');
+    if (xmlInput) {
+        xmlInput.addEventListener('change', async function() {
+            const file = this.files[0];
+            const resultDiv = document.getElementById('drd-xml-parse-result');
+            if (!file || !resultDiv) return;
+
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<span class="spinner"></span> Parsing XML...';
+
+            const formData = new FormData();
+            formData.append('xml_file', file);
+
+            try {
+                const resp = await fetch('/api/tests/control-table/parse-xml', {method: 'POST', body: formData});
+                if (!resp.ok) throw new Error((await resp.json()).detail || resp.statusText);
+                const data = await resp.json();
+                const r = data.result || {};
+                let html = `<strong style="color:var(--success)">✓ XML Parsed:</strong> ${data.filename} (${(data.size_bytes/1024).toFixed(1)} KB)<br>`;
+                if (r.scenario_name) html += `<strong>Scenario:</strong> ${escapeHtml(r.scenario_name)}<br>`;
+                if (r.target_table) html += `<strong>Target:</strong> ${escapeHtml(r.target_table)}<br>`;
+                if (r.steps && r.steps.length) html += `<strong>Steps:</strong> ${r.steps.length}<br>`;
+                if (r.final_merge_columns) html += `<strong>Final merge columns:</strong> ${r.final_merge_columns.length}<br>`;
+                if (r.stage_create_columns) html += `<strong>Stage columns:</strong> ${r.stage_create_columns.length}<br>`;
+                resultDiv.innerHTML = html;
+                // Store for later comparison
+                window._ctXmlParseResult = data.result;
+            } catch (e) {
+                resultDiv.innerHTML = `<span style="color:var(--error)">XML parse failed: ${escapeHtml(e.message)}</span>`;
+            }
+        });
+    }
+});
+
+// ── TFS Project Loading on modal open ────────────────────────────────────────
+(function() {
+    const origOpenModal = window.openModal;
+    if (origOpenModal) {
+        window.openModal = function(id) {
+            origOpenModal(id);
+            if (id === 'modal-drd-import') {
+                ensureTfsProjectsLoadedForMappings();
+            }
+        };
+    }
+})();
 </script>
 {% endblock %}

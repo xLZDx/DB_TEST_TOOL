@@ -1,0 +1,67 @@
+{
+  "dimension_role_rules": [
+    {
+      "name": "dimension_key_role_mapping",
+      "description": "Maps role-prefixed dimension keys (e.g. EOD_AR_DIM_ID → AR_DIM_ID)",
+      "target_pattern": ".*_DIM_ID$",
+      "source_pattern": ".*_DIM_ID$",
+      "ignore_prefixes": ["EOD", "SRC", "CURR", "PREV", "ORIG", "NEW", "OLD"],
+      "abbreviations": {
+        "OFST": "OFFSET",
+        "AR": "ACCOUNT_RELATIONSHIP",
+        "SEC": "SECURITY",
+        "CASH": "CASH",
+        "PD": "PRODUCT",
+        "DIM": "DIMENSION",
+        "ID": "IDENTIFIER",
+        "CCY": "CURRENCY",
+        "TP": "TYPE",
+        "IMT": "IMPACT",
+        "CMPLN": "COMPLETION",
+        "CNCL": "CANCEL",
+        "RSN": "REASON",
+        "SBC": "SUB_CUSTODY",
+        "LGCY": "LEGACY",
+        "FA": "FINANCIAL_ACCOUNT",
+        "BKR": "BROKER",
+        "ENT": "ENTITY",
+        "ENTP": "ENTERPRISE",
+        "STM": "STREAM",
+        "TXN": "TRANSACTION",
+        "AVY": "ADVISORY",
+        "ACG": "ACCOUNTING_GROUP",
+        "APA": "APPOINTMENT_ALLOCATION",
+        "FIP": "FINANCIAL_INSTRUMENT_POSITION",
+        "GRP": "GROUP",
+        "SUBDIM": "SUB_DIMENSION",
+        "NM": "NAME",
+        "CD": "CODE",
+        "DT": "DATE",
+        "NUM": "NUMBER",
+        "AMT": "AMOUNT",
+        "QTY": "QUANTITY",
+        "PCT": "PERCENTAGE",
+        "IND": "INDICATOR",
+        "DESC": "DESCRIPTION",
+        "SHRT": "SHORT"
+      },
+      "auto_accept_threshold": 0.88,
+      "review_threshold": 0.72
+    },
+    {
+      "name": "staging_prefix_mapping",
+      "description": "Maps stage-prefixed columns where EOD/SRC/etc. prefix indicates temporal context",
+      "target_pattern": ".*",
+      "source_pattern": "^(EOD|SRC|CURR|PREV|ORIG)_.*",
+      "ignore_prefixes": ["EOD", "SRC", "CURR", "PREV", "ORIG"],
+      "auto_accept_threshold": 0.90,
+      "review_threshold": 0.75
+    }
+  ],
+  "alias_categories": {
+    "source": [],
+    "lookup": ["LK", "DIM", "REF", "MAP", "VW"],
+    "stage": ["STG", "STEP", "RT", "I$", "C$", "J$", "S$", "TMP", "TEMP"],
+    "target": ["T", "TARGET", "TGT"]
+  }
+}

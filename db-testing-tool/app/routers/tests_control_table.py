@@ -1326,3 +1326,111 @@ async def pdm_enrich_control_table(
         },
         "quality_gate": quality,
     }
+
+
+# ── Per-Attribute Test Suite Generator ─────────────────────────────────────
+
+class GenerateAttributeTestsRequest(BaseModel):
+    analysis_rows: List[dict]
+    generated_sql: str = ""
+    target_schema: str = ""
+    target_table: str = ""
+    source_datasource_id: int = 0
+    target_datasource_id: int = 0
+    pbi_id: str = ""
+    suite_prefix: str = "CT"
+    grain_columns: Optional[List[str]] = None
+    folder_name: Optional[str] = None
+
+
+@_ct_router.post("/control-table/generate-attribute-tests")
+async def generate_attribute_test_suite(body: GenerateAttributeTestsRequest, db: AsyncSession = Depends(get_db)):
+    """Generate one test per attribute (e.g. 367 tests for 367 columns).
+
+    Each test validates a single attribute from source→target using the full
+    CTE/JOIN SQL from the generated control table.
+    """
+    from app.services.attribute_test_generator_service import generate_attribute_tests
+
+    tests = generate_attribute_tests(
+        analysis_rows=body.analysis_rows,
+        target_schema=body.target_schema,
+        target_table=body.target_table,
+        generated_sql=body.generated_sql,
+        source_datasource_id=body.source_datasource_id,
+        target_datasource_id=body.target_datasource_id,
+        pbi_id=body.pbi_id,
+        suite_prefix=body.suite_prefix,
+        grain_columns=body.grain_columns,
+    )
+
+    if not tests:
+        raise HTTPException(422, "No attribute tests could be generated from the provided rows")
+
+    # Create folder
+    folder_name = body.folder_name or f"{body.suite_prefix}_TEST"
+    folder = await _create_new_folder(db, folder_name)
+
+    # Create test cases in DB
+    created = []
+    for test_def in tests:
+        tc = TestCase(
+            name=test_def["name"],
+            test_type=test_def.get("test_type", "value_match"),
+            source_datasource_id=test_def.get("source_datasource_id"),
+            target_datasource_id=test_def.get("target_datasource_id"),
+            source_query=test_def.get("source_query", ""),
+            target_query=test_def.get("target_query", ""),
+            expected_result=test_def.get("expected_result", "0"),
+            severity=test_def.get("severity", "medium"),
+            description=test_def.get("description", ""),
+            is_active=True,
+        )
+        db.add(tc)
+        await db.flush()
+        if folder:
+            await _assign_test_to_folder(db, tc.id, folder.id)
+        created.append(tc)
+
+    await db.commit()
+    return {
+        "count": len(created),
+        "suite_prefix": body.suite_prefix,
+        "folder_name": folder.name if folder else folder_name,
+        "folder_id": folder.id if folder else None,
+        "tests": [{"id": t.id, "name": t.name} for t in created],
+    }
+
+
+# ── XML / ODI File Upload for Manual Validation ───────────────────────────
+
+@_ct_router.post("/control-table/parse-xml")
+async def parse_xml_for_validation(
+    xml_file: UploadFile = File(...),
+):
+    """Parse an ODI XML file and return the extracted schema/transformation data.
+
+    Allows manual XML upload for comparison against DRD/generated SQL.
+    """
+    import asyncio
+    from app.services.odi_xml_reverse_engineer_service import OdiXmlReverseEngineerService
+
+    if not xml_file.filename or not xml_file.filename.lower().endswith(".xml"):
+        raise HTTPException(400, "File must be an XML file")
+
+    xml_bytes = await xml_file.read()
+    if len(xml_bytes) > 5 * 1024 * 1024:
+        raise HTTPException(413, "XML file exceeds 5 MB limit")
+
+    try:
+        service = OdiXmlReverseEngineerService()
+        result = await asyncio.to_thread(service.reverse_engineer, xml_bytes)
+    except Exception as exc:
+        raise HTTPException(422, f"XML parse failed: {exc}") from exc
+
+    return {
+        "filename": xml_file.filename,
+        "size_bytes": len(xml_bytes),
+        "result": result,
+    }
+

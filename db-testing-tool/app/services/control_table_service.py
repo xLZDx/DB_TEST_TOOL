@@ -1049,6 +1049,8 @@ def compare_insert_variants(
             manual_expr,
             manual_supplied=manual_supplied,
             compare_mode=compare_mode,
+            target_column=col,
+            source_attribute=(row.get("source_attribute") or "").strip().upper(),
         )
         recommended = recommend_source(drd_expr, generated_expr, manual_expr, compare_mode=compare_mode)
         rows.append(
@@ -1075,6 +1077,9 @@ def compare_column_status(
     *,
     manual_supplied: bool = False,
     compare_mode: str = "all",
+    target_column: str = "",
+    source_attribute: str = "",
+    saved_rules: Optional[List[Dict[str, Any]]] = None,
 ) -> str:
     drd_norm = normalize_sql_expr(drd_expr)
     gen_norm = normalize_sql_expr(generated_expr)
@@ -1094,13 +1099,69 @@ def compare_column_status(
         if drd_norm == gen_norm == man_norm:
             return "match_all"
         if drd_norm == gen_norm and drd_norm != man_norm:
+            # Before returning manual_mismatch, try canonical lineage resolution
+            canonical_status = _try_canonical_resolution(
+                target_column, source_attribute or drd_expr,
+                generated_expr, manual_expr, saved_rules,
+            )
+            if canonical_status:
+                return canonical_status
             return "manual_mismatch"
         if drd_norm == man_norm and drd_norm != gen_norm:
             return "generated_mismatch"
         if gen_norm == man_norm and drd_norm != gen_norm:
             return "both_match_each_other_not_drd"
+        # All different — try canonical resolution before giving up
+        canonical_status = _try_canonical_resolution(
+            target_column, source_attribute or drd_expr,
+            generated_expr, manual_expr, saved_rules,
+        )
+        if canonical_status:
+            return canonical_status
         return "all_different"
     return "match_all" if drd_norm == gen_norm else "generated_mismatch"
+
+
+def _try_canonical_resolution(
+    target_column: str,
+    drd_source_attribute: str,
+    generated_expr: str,
+    manual_expr: str,
+    saved_rules: Optional[List[Dict[str, Any]]] = None,
+) -> Optional[str]:
+    """Attempt canonical lineage + semantic resolution before declaring mismatch.
+
+    Returns a match_all-compatible status if canonical mapping resolves the
+    apparent mismatch, or None if it's a real mismatch.
+    """
+    if not target_column:
+        return None
+    try:
+        from app.services.canonical_mapping_service import build_canonical_mapping
+        canonical = build_canonical_mapping(
+            target_column=target_column,
+            drd_source_attribute=drd_source_attribute,
+            generated_expression=generated_expr,
+            manual_or_xml_expression=manual_expr,
+            saved_rules=saved_rules,
+        )
+        status = canonical.get("match_status", "")
+        # If canonical says it's a semantic match, return match_all
+        # so the UI treats it as resolved
+        if status in (
+            "EXACT_EXPRESSION_MATCH",
+            "MATCH_BY_OUTPUT_ALIAS",
+            "MATCH_BY_STAGE_PROJECTION",
+            "MATCH_BY_ROOT_SOURCE_LINEAGE",
+            "MATCH_BY_ROLE_BASED_DIMENSION_KEY",
+            "MATCH_BY_DRD_SOURCE_ATTRIBUTE",
+            "MATCH_BY_PDM_PREDICTION",
+            "MATCH_BY_SAVED_RULE",
+        ):
+            return "match_all"
+    except Exception:
+        pass
+    return None
 
 
 def recommend_source(drd_expr: str, generated_expr: str, manual_expr: str, compare_mode: str = "all") -> str:
