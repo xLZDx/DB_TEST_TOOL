@@ -981,6 +981,40 @@
                         </div>
                         <div id="ct-compare-summary" class="text-muted" style="margin-top:10px"></div>
                         <div id="ct-compare-results" style="margin-top:10px"></div>
+
+                        <div style="margin-top:14px;border:1px solid var(--border);border-radius:8px;background:var(--surface2)">
+                            <div class="ct-sect-hdr" onclick="ctToggleSection('ct-sect-doc-compare')" style="padding:10px 12px">
+                                <div style="font-weight:600;display:flex;gap:8px;align-items:center">
+                                    <span>DRD / ODI / Manual SQL Compare</span>
+                                    <span class="text-muted" style="font-size:12px">pairwise + multi-compare</span>
+                                </div>
+                                <button class="ct-sect-toggle" id="ct-sect-doc-compare-btn" type="button">&#9660;</button>
+                            </div>
+                            <div class="ct-sect-body" id="ct-sect-doc-compare" style="padding:12px">
+                                <div class="grid grid-2" style="gap:10px;align-items:start">
+                                    <div>
+                                        <label style="font-size:12px">DRD File</label>
+                                        <input type="file" id="ct-doc-drd" class="form-control" accept=".xlsx,.xls,.csv,.xml,.txt" />
+                                    </div>
+                                    <div>
+                                        <label style="font-size:12px">ODI XML #1</label>
+                                        <input type="file" id="ct-doc-odi-1" class="form-control" accept=".xml,.txt" />
+                                    </div>
+                                    <div>
+                                        <label style="font-size:12px">ODI XML #2</label>
+                                        <input type="file" id="ct-doc-odi-2" class="form-control" accept=".xml,.txt" />
+                                    </div>
+                                    <div>
+                                        <label style="font-size:12px">Manual SQL (optional)</label>
+                                        <textarea id="ct-doc-manual-sql" class="form-control" rows="5" placeholder="Paste manual SQL to include in pairwise/multi compare" style="font-family:monospace;font-size:12px"></textarea>
+                                    </div>
+                                </div>
+                                <div class="flex gap-8 mt-8">
+                                    <button class="btn btn-outline btn-sm" onclick="runControlTableDocCompare()">Run Pairwise/Multi Compare</button>
+                                </div>
+                                <div id="ct-doc-compare-results" style="margin-top:10px;font-size:12px"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="ct-tab-insert" style="display:none">
@@ -3417,6 +3451,8 @@ let tfsState = {
     lastFailedTestPoints: [],
     currentRun: null,
     isExecuting: false,
+    // Maps planId → actual TFS project (handles cross-project team-alias scenario)
+    planProjectMap: {},
 };
 
 let _tfsDatasourcesCache = [];
@@ -3512,6 +3548,7 @@ async function onProjectChanged() {
     tfsState.testPlans = {};
     tfsState.selectedPlanId = null;
     tfsState.selectedSuiteId = null;
+    tfsState.planProjectMap = {};
     await loadTestPlans();
 }
 
@@ -3578,11 +3615,16 @@ async function loadTestSuites(planId, element) {
         element.classList.add('loading');
         const resp = await API.getTestSuites(project, planId);
         element.classList.remove('loading');
+        // Store the actual TFS project for this plan (may differ from selectedProject)
+        const resolvedProject = resp.resolved_project || project;
+        if (resolvedProject !== project) {
+            tfsState.planProjectMap[planId] = resolvedProject;
+        }
         const hideHeavy = !!document.getElementById('filter-hide-heavy')?.checked;
         let innerHtml = `<div class="tfs-tree-item tfs-indent-1" style="font-weight:bold;cursor:default;">📋 ${escapeHtml(tfsState.testPlans[planId]?.name || String(planId))}</div>`;
         for (const suite of (resp.suites || [])) {
             if (hideHeavy && suite.is_heavy) continue;
-            tfsState.testSuites[suite.id] = { ...suite, plan_id: planId, project };
+            tfsState.testSuites[suite.id] = { ...suite, plan_id: planId, project: resolvedProject };
             const hasTests = suite.test_case_count > 0;
             innerHtml += `<div class="tfs-tree-item tfs-indent-2" style="cursor:pointer;" id="suite-row-${suite.id}"><div class="suite-row" onclick="toggleSuite(${planId}, ${suite.id}, this.parentElement)"><span>📁 ${escapeHtml(suite.name)} <span class="text-muted">(${suite.test_case_count})</span></span><span><button class="suite-add-local" onclick="event.stopPropagation(); importSelectedLocalTestsToChosenSuite(${planId}, ${suite.id}, this)">+ Add Selected</button>${hasTests ? `<button class="suite-select-all" onclick="event.stopPropagation(); selectAllFromSuite(${planId}, ${suite.id}, this)">☑ Select All</button>` : ''}</span></div></div>`;
         }
@@ -3598,10 +3640,12 @@ async function loadTestSuites(planId, element) {
 }
 
 async function refreshSuiteRowAfterInlineImport(planId, suiteId) {
-    const project = tfsState.selectedProject;
+    const project = tfsState.planProjectMap[planId] || tfsState.selectedProject;
     if (!project) return;
     try {
         const resp = await API.getTestSuites(project, planId);
+        const resolvedProject = resp.resolved_project || project;
+        if (resolvedProject !== project) tfsState.planProjectMap[planId] = resolvedProject;
         const suite = (resp.suites || []).find(s => Number(s.id) === Number(suiteId));
         if (!suite) return;
 
@@ -3656,20 +3700,25 @@ function openTfsPointItem(testCaseId) {
 }
 
 async function loadTestPoints(planId, suiteId, element) {
-    const project = tfsState.selectedProject;
+    const project = tfsState.planProjectMap[planId] || tfsState.selectedProject;
     if (!project) return;
     if (document.getElementById(`suite-points-${suiteId}`)) return;
     try {
         element.classList.add('loading');
         const resp = await API.getTestPoints(project, planId, suiteId);
         element.classList.remove('loading');
+        // Update resolved project if fallback was used
+        const resolvedProject = resp.resolved_project || project;
+        if (resolvedProject !== (tfsState.planProjectMap[planId] || tfsState.selectedProject)) {
+            tfsState.planProjectMap[planId] = resolvedProject;
+        }
         tfsState.suiteTestPoints[suiteId] = [];
         let innerHtml = '';
         for (const tp of (resp.test_points || [])) {
-            tfsState.testPoints[tp.test_point_id] = { ...tp, suite_id: suiteId, plan_id: planId, project };
+            tfsState.testPoints[tp.test_point_id] = { ...tp, suite_id: suiteId, plan_id: planId, project: resolvedProject };
             tfsState.suiteTestPoints[suiteId].push(tp.test_point_id);
             const checked = tfsState.selectedTestPoints.has(tp.test_point_id) ? 'checked' : '';
-            innerHtml += `<div class="tfs-tree-item tfs-indent-3" data-tp="${tp.test_point_id}"><label class="checkbox-label" style="margin:0;display:flex;gap:8px;align-items:center;justify-content:space-between"><span style="display:flex;gap:8px;align-items:center;min-width:0;flex:1"><input type="checkbox" value="${tp.test_point_id}" ${checked} onchange="onTestPointToggled(this)"><span>${escapeHtml(tp.title)}</span></span><button class="btn btn-outline btn-sm" type="button" onclick="event.stopPropagation(); openTfsPointItem(${tp.test_case_id})">Open</button></label></div>`;
+            innerHtml += `<div class="tfs-tree-item tfs-indent-3" data-tp="${tp.test_point_id}"><label class="checkbox-label" style="margin:0;display:flex;gap:8px;align-items:center;justify-content:space-between"><span style="display:flex;gap:8px;align-items:center;min-width:0;flex:1"><input type="checkbox" value="${tp.test_point_id}" ${checked} onchange="onTestPointToggled(this)"><span>${escapeHtml(tp.title || `TC #${tp.test_case_id}`)}</span></span><button class="btn btn-outline btn-sm" type="button" onclick="event.stopPropagation(); openTfsPointItem(${tp.test_case_id})">Open</button></label></div>`;
         }
         const container = document.createElement('div');
         container.id = `suite-points-${suiteId}`;
@@ -3683,16 +3732,18 @@ async function loadTestPoints(planId, suiteId, element) {
 }
 
 async function selectAllFromSuite(planId, suiteId, btn) {
-    const project = tfsState.selectedProject;
+    const project = tfsState.planProjectMap[planId] || tfsState.selectedProject;
     if (!project) return;
     if (!tfsState.suiteTestPoints[suiteId]) {
         btn.textContent = '...';
         btn.disabled = true;
         try {
             const resp = await API.getTestPoints(project, planId, suiteId);
+            const resolvedProject = resp.resolved_project || project;
+            if (resolvedProject !== project) tfsState.planProjectMap[planId] = resolvedProject;
             tfsState.suiteTestPoints[suiteId] = [];
             for (const tp of (resp.test_points || [])) {
-                tfsState.testPoints[tp.test_point_id] = { ...tp, suite_id: suiteId, plan_id: planId, project };
+                tfsState.testPoints[tp.test_point_id] = { ...tp, suite_id: suiteId, plan_id: planId, project: resolvedProject };
                 tfsState.suiteTestPoints[suiteId].push(tp.test_point_id);
             }
         } catch (e) {
@@ -3723,7 +3774,8 @@ async function importSelectedLocalTestsToChosenSuite(planId, suiteId, btn) {
         return;
     }
 
-    const project = tfsState.selectedProject;
+    // Use resolved project for this plan (handles cross-project team-alias scenario)
+    const project = tfsState.planProjectMap[planId] || tfsState.selectedProject;
     if (!project) {
         showToast('Select TFS project first', 'warning');
         return;
@@ -4667,6 +4719,12 @@ function renderEditLastRunResult(test) {
     const err = String(test?.last_error_message || '').trim();
     const actual = String(test?.last_actual_result || '').trim();
     const mismatchCount = Number(test?.last_mismatch_count || 0);
+    let parsedActual = null;
+    try { parsedActual = actual ? JSON.parse(actual) : null; } catch (_) { parsedActual = null; }
+    const diag = parsedActual?.diagnostics || parsedActual?.detail?.diagnostics || {};
+    const suggestions = parsedActual?.suggestions || parsedActual?.detail?.suggestions || [];
+    const missingCols = Array.isArray(diag?.missing_columns) ? diag.missing_columns : [];
+    const missingTables = Array.isArray(diag?.missing_tables) ? diag.missing_tables : [];
     if (status === 'untested' && !err && !actual) {
         el.innerHTML = '<span class="text-muted">No execution result yet.</span>';
         return;
@@ -4676,6 +4734,9 @@ function renderEditLastRunResult(test) {
         <div><strong>Executed:</strong> ${escapeHtml(executedAt || '-')}</div>
         <div><strong>Mismatches:</strong> ${mismatchCount}</div>
         ${err ? `<div style="margin-top:6px;color:var(--danger);white-space:pre-wrap"><strong>Error:</strong><br>${escapeHtml(err)}</div>` : ''}
+        ${missingTables.length ? `<div style="margin-top:6px;color:var(--warning);white-space:pre-wrap"><strong>Missing Tables:</strong><br>${escapeHtml(missingTables.map(t => `${t.schema}.${t.table}${t.closest_table ? ` -> closest: ${t.closest_table}` : ''}`).join('\n'))}</div>` : ''}
+        ${missingCols.length ? `<div style="margin-top:6px;color:var(--warning);white-space:pre-wrap"><strong>Missing Columns:</strong><br>${escapeHtml(missingCols.map(c => `${c.schema}.${c.table}.${c.column}${c.closest_column ? ` -> closest: ${c.closest_column}` : ''}`).join('\n'))}</div>` : ''}
+        ${suggestions.length ? `<div style="margin-top:6px;color:var(--info);white-space:pre-wrap"><strong>Suggested Fixes:</strong><br>${escapeHtml(suggestions.join('\n'))}</div>` : ''}
         ${actual ? `<div style="margin-top:6px;white-space:pre-wrap"><strong>Actual Result:</strong><br>${escapeHtml(actual)}</div>` : ''}
     `;
 }
@@ -6243,7 +6304,7 @@ async function askControlTableCoach() {
         const historyMessages = _ctCoachHistory.slice(-20); // last 20 messages for context
         const messages = [...historyMessages, { role: 'user', content: question }];
         const agentIds = mode === 'local' && agentId ? [agentId] : [];
-        const provider = mode === 'ghc' ? 'githubcopilot' : '';
+        const provider = mode === 'ghc' ? 'githubcopilot' : 'local';
         const res = await API.aiChat(messages, context, provider, agentIds, 'control-table training loop');
         const reply = res.reply || '(no response)';
         output.value = reply;
@@ -6762,6 +6823,80 @@ async function compareControlTableStatements(mode = 'all') {
         showToast(`Comparison complete: ${comparison.mismatch_count || 0} mismatch columns`, 'success');
     } catch (e) {
         showToast('Comparison failed: ' + e.message, 'error');
+    }
+}
+
+async function runControlTableDocCompare() {
+    const out = document.getElementById('ct-doc-compare-results');
+    if (!out) return;
+    const drdFile = document.getElementById('ct-doc-drd')?.files?.[0] || null;
+    const odi1 = document.getElementById('ct-doc-odi-1')?.files?.[0] || null;
+    const odi2 = document.getElementById('ct-doc-odi-2')?.files?.[0] || null;
+    const manualSql = (document.getElementById('ct-doc-manual-sql')?.value || '').trim();
+
+    if (!drdFile && !odi1 && !odi2 && !manualSql) {
+        showToast('Provide at least two sources to compare', 'warning');
+        return;
+    }
+
+    out.innerHTML = '<span class="text-muted spinner-sm">&#8987; Comparing documents...</span>';
+    try {
+        const res = await API.compareControlTableDocs({
+            drd_file: drdFile,
+            odi_file_1: odi1,
+            odi_file_2: odi2,
+            manual_sql: manualSql,
+        });
+
+        const docs = Array.isArray(res.documents) ? res.documents : [];
+        const pairwise = Array.isArray(res.pairwise) ? res.pairwise : [];
+        const multi = res.multi_compare || {};
+        const conflicts = Array.isArray(multi.conflicts) ? multi.conflicts : [];
+
+        const docsHtml = docs.length
+            ? `<div style="margin-bottom:8px"><strong>Sources:</strong> ${docs.map(d => `${escapeHtml(d.name)} (${Number(d.mapping_count||0)} mappings)`).join(' | ')}</div>`
+            : '';
+
+        const pairHtml = pairwise.length
+            ? `<table style="width:100%;border-collapse:collapse;font-size:12px">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;border-bottom:1px solid var(--border);padding:6px">Pair</th>
+                        <th style="text-align:right;border-bottom:1px solid var(--border);padding:6px">Common</th>
+                        <th style="text-align:right;border-bottom:1px solid var(--border);padding:6px">Only Left</th>
+                        <th style="text-align:right;border-bottom:1px solid var(--border);padding:6px">Only Right</th>
+                        <th style="text-align:right;border-bottom:1px solid var(--border);padding:6px">Expr Conflicts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${pairwise.map(p => `<tr>
+                        <td style="padding:6px;border-bottom:1px solid var(--border)">${escapeHtml(`${p.left} vs ${p.right}`)}</td>
+                        <td style="padding:6px;border-bottom:1px solid var(--border);text-align:right">${Number(p.common_count||0)}</td>
+                        <td style="padding:6px;border-bottom:1px solid var(--border);text-align:right">${Array.isArray(p.only_left) ? p.only_left.length : 0}</td>
+                        <td style="padding:6px;border-bottom:1px solid var(--border);text-align:right">${Array.isArray(p.only_right) ? p.only_right.length : 0}</td>
+                        <td style="padding:6px;border-bottom:1px solid var(--border);text-align:right">${Number(p.conflict_count||0)}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>`
+            : '<div class="text-muted">No pairwise results</div>';
+
+        const conflictHtml = conflicts.length
+            ? `<div style="margin-top:8px"><strong>Multi-compare conflicts:</strong><br>${escapeHtml(conflicts.slice(0, 25).map(c => c.target).join(', '))}${conflicts.length > 25 ? ' ...' : ''}</div>`
+            : '<div style="margin-top:8px;color:var(--success)">No multi-way expression conflicts in shared targets.</div>';
+
+        out.innerHTML = `
+            ${docsHtml}
+            <div style="margin-bottom:8px">
+                <strong>Multi-compare:</strong>
+                shared targets ${Number(multi.common_target_count||0)} / union ${Number(multi.union_target_count||0)}
+            </div>
+            ${pairHtml}
+            ${conflictHtml}
+        `;
+        showToast('Document comparison completed', 'success');
+    } catch (e) {
+        out.innerHTML = `<span style="color:var(--danger)">${escapeHtml(e.message || String(e))}</span>`;
+        showToast('Document compare failed: ' + (e.message || String(e)), 'error');
     }
 }
 
