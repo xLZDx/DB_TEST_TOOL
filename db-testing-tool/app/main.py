@@ -19,6 +19,7 @@ import app.models
 from app.routers import (
     datasources, credentials, schemas, tests, tfs, agents, ai,
     chat_assistant, external_tools, odi, regression_lab, system_watchdog, mappings,
+    orchestrator,
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -62,6 +63,7 @@ app.include_router(chat_assistant.router)
 app.include_router(regression_lab.router)
 app.include_router(system_watchdog.router)
 app.include_router(mappings.router)
+app.include_router(orchestrator.router)
 
 
 @app.on_event("startup")
