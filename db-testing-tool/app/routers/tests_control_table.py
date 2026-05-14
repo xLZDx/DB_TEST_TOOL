@@ -6,6 +6,8 @@ into the main /api/tests router.
 import hashlib
 import json
 import re
+import difflib
+from itertools import combinations
 from pathlib import Path
 from typing import Optional, List
 
@@ -237,6 +239,76 @@ def _serialize_training_rule(rule: ControlTableCorrectionRule) -> dict:
     }
 
 
+def _extract_doc_mappings(text: str) -> dict:
+    """Extract target-source style mappings from SQL/XML text using tolerant regexes."""
+    mappings: list[dict] = []
+    src = text or ""
+    # SQL style: expr AS target_col
+    for m in re.finditer(r'(?P<expr>[A-Z0-9_\.\"\(\)\s\+\-\*/,:]+?)\s+AS\s+(?P<target>[A-Z0-9_\"$#]+)', src, flags=re.IGNORECASE):
+        expr = re.sub(r'\s+', ' ', (m.group('expr') or '').strip())
+        target = (m.group('target') or '').replace('"', '').strip().upper()
+        if target:
+            mappings.append({"target": target, "expression": expr})
+
+    # ODI/XML style snippets: target="COL" source="SRC.COL" or <targetColumn>COL</targetColumn>
+    for m in re.finditer(r'target\s*=\s*"(?P<target>[A-Z0-9_\$#]+)"[^\n\r>]*source\s*=\s*"(?P<source>[^"]+)"', src, flags=re.IGNORECASE):
+        target = (m.group('target') or '').strip().upper()
+        source = re.sub(r'\s+', ' ', (m.group('source') or '').strip())
+        if target:
+            mappings.append({"target": target, "expression": source})
+
+    for m in re.finditer(r'<targetColumn>(?P<target>[A-Z0-9_\$#]+)</targetColumn>\s*<sourceExpression>(?P<source>.*?)</sourceExpression>', src, flags=re.IGNORECASE | re.DOTALL):
+        target = (m.group('target') or '').strip().upper()
+        source = re.sub(r'\s+', ' ', (m.group('source') or '').strip())
+        if target:
+            mappings.append({"target": target, "expression": source})
+
+    # Deduplicate by target/expression tuple preserving first occurrence.
+    seen = set()
+    out = []
+    for item in mappings:
+        key = (item.get('target'), (item.get('expression') or '').upper())
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(item)
+
+    by_target: dict[str, list[str]] = {}
+    for item in out:
+        by_target.setdefault(item['target'], []).append(item.get('expression') or '')
+
+    return {"mappings": out, "by_target": by_target}
+
+
+def _compare_doc_pair(left_name: str, left_map: dict, right_name: str, right_map: dict) -> dict:
+    left_targets = set((left_map or {}).keys())
+    right_targets = set((right_map or {}).keys())
+    only_left = sorted(left_targets - right_targets)
+    only_right = sorted(right_targets - left_targets)
+    common = sorted(left_targets & right_targets)
+
+    expr_conflicts = []
+    for t in common:
+        l_exprs = {str(e).strip().upper() for e in (left_map.get(t) or []) if str(e).strip()}
+        r_exprs = {str(e).strip().upper() for e in (right_map.get(t) or []) if str(e).strip()}
+        if l_exprs and r_exprs and l_exprs.isdisjoint(r_exprs):
+            expr_conflicts.append({
+                "target": t,
+                "left_expressions": sorted(left_map.get(t) or []),
+                "right_expressions": sorted(right_map.get(t) or []),
+            })
+
+    return {
+        "left": left_name,
+        "right": right_name,
+        "only_left": only_left,
+        "only_right": only_right,
+        "common_count": len(common),
+        "conflict_count": len(expr_conflicts),
+        "expression_conflicts": expr_conflicts,
+    }
+
+
 # ── SQL analysis helpers (used only by check_control_table_insert_sql) ────────
 
 
@@ -341,7 +413,16 @@ def _analyze_sql_references(connector, sql: str) -> dict:
         except Exception:
             exists = True
         if not exists:
-            missing_tables.append({"schema": schema, "table": table})
+            closest_table = None
+            if hasattr(connector, "get_tables"):
+                try:
+                    known = [str(t.table_name).upper() for t in connector.get_tables(schema)]
+                    matches = difflib.get_close_matches(table, known, n=1, cutoff=0.62)
+                    if matches:
+                        closest_table = matches[0]
+                except Exception:
+                    pass
+            missing_tables.append({"schema": schema, "table": table, "closest_table": closest_table})
 
     columns_cache: dict = {}
     missing_columns: List[dict] = []
@@ -380,7 +461,20 @@ def _analyze_sql_references(connector, sql: str) -> dict:
             except Exception:
                 columns_cache[cache_key] = set()
         if columns_cache[cache_key] and col not in columns_cache[cache_key]:
-            missing_columns.append({"schema": schema, "table": table, "column": col, "alias": alias})
+            closest_column = None
+            try:
+                matches = difflib.get_close_matches(col, list(columns_cache[cache_key]), n=1, cutoff=0.58)
+                if matches:
+                    closest_column = matches[0]
+            except Exception:
+                pass
+            missing_columns.append({
+                "schema": schema,
+                "table": table,
+                "column": col,
+                "alias": alias,
+                "closest_column": closest_column,
+            })
 
     if insert_target_schema and insert_target_table and insert_target_columns:
         cache_key = (insert_target_schema, insert_target_table)
@@ -393,11 +487,19 @@ def _analyze_sql_references(connector, sql: str) -> dict:
         if columns_cache[cache_key]:
             for col in insert_target_columns:
                 if col not in columns_cache[cache_key]:
+                    closest_column = None
+                    try:
+                        matches = difflib.get_close_matches(col, list(columns_cache[cache_key]), n=1, cutoff=0.58)
+                        if matches:
+                            closest_column = matches[0]
+                    except Exception:
+                        pass
                     missing_columns.append({
                         "schema": insert_target_schema,
                         "table": insert_target_table,
                         "column": col,
                         "alias": "INSERT_TARGET",
+                        "closest_column": closest_column,
                     })
 
     unknown_aliases: List[dict] = []
@@ -464,9 +566,11 @@ def _analyze_sql_references(connector, sql: str) -> dict:
 
     suggestions: List[str] = []
     for t in missing_tables:
-        suggestions.append(f"Table not found: {t['schema']}.{t['table']}. Verify schema/table name in FROM/JOIN/INTO or choose correct datasource.")
+        hint = f" Did you mean {t['schema']}.{t['closest_table']}?" if t.get("closest_table") else ""
+        suggestions.append(f"Table not found: {t['schema']}.{t['table']}. Verify schema/table name in FROM/JOIN/INTO or choose correct datasource.{hint}")
     for c in missing_columns:
-        suggestions.append(f"Column not found: {c['schema']}.{c['table']}.{c['column']} (alias {c['alias']}). Fix attribute name or lookup join/table.")
+        hint = f" Closest column: {c['closest_column']}." if c.get("closest_column") else ""
+        suggestions.append(f"Column not found: {c['schema']}.{c['table']}.{c['column']} (alias {c['alias']}). Fix attribute name or lookup join/table.{hint}")
     for a in unknown_aliases:
         suggestions.append(f"Alias mismatch: {a['alias']}.{a['column']} is used in SELECT/WHERE but alias {a['alias']} is not present in FROM/JOIN.")
     for r in not_null_risks:
@@ -489,8 +593,15 @@ def _build_sql_error_suggestions(error_text: str, diagnostics: dict) -> List[str
     err = str(error_text or "")
     invalid_col = re.search(r'ORA-00904:\s*"?([A-Z0-9_\$#]+)"?: invalid identifier', err, flags=re.IGNORECASE)
     if invalid_col:
+        bad_col = invalid_col.group(1).upper()
+        closest = None
+        for c in (diagnostics or {}).get("missing_columns") or []:
+            if (c.get("column") or "").upper() == bad_col and c.get("closest_column"):
+                closest = c.get("closest_column")
+                break
+        suffix = f" Closest match: {closest}." if closest else ""
         suggestions.append(
-            f"Oracle invalid identifier: {invalid_col.group(1)}. Check column name spelling, alias context, or lookup table for that attribute."
+            f"Oracle invalid identifier: {bad_col}. Check column name spelling, alias context, or lookup table for that attribute.{suffix}"
         )
     if re.search(r'ORA-00942: table or view does not exist', err, flags=re.IGNORECASE):
         suggestions.append("Oracle could not find a table/view referenced by the SQL. Verify schema.table names and datasource selection.")
@@ -532,19 +643,24 @@ async def analyze_control_table_from_drd(
 
     rules = await _load_training_rules(db, target_table_u)
 
-    result = analyze_control_table(
-        file_bytes=file_bytes,
-        filename=filename,
-        target_schema=target_schema,
-        target_table=target_table,
-        source_datasource_id=source_datasource_id,
-        target_datasource_id=resolved_target_datasource_id,
-        control_schema=control_schema.upper(),
-        main_grain=main_grain,
-        manual_sql=manual_sql or (restored_state.final_insert_sql if restored_state else ""),
-        selected_fields=selected_fields if selected_fields else None,
-        sheet_name=sheet_name.strip() or None,
-    )
+    try:
+        result = analyze_control_table(
+            file_bytes=file_bytes,
+            filename=filename,
+            target_schema=target_schema,
+            target_table=target_table,
+            source_datasource_id=source_datasource_id,
+            target_datasource_id=resolved_target_datasource_id,
+            control_schema=control_schema.upper(),
+            main_grain=main_grain,
+            manual_sql=manual_sql or (restored_state.final_insert_sql if restored_state else ""),
+            selected_fields=selected_fields if selected_fields else None,
+            sheet_name=sheet_name.strip() or None,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Control-table generation failed: {exc}")
     comparison = result.get("comparison") or {"rows": []}
     result["comparison"] = _apply_training_rules_to_comparison(comparison, rules)
     result["file_fingerprint"] = fingerprint
@@ -614,6 +730,73 @@ async def compare_control_table_sql(body: ControlTableCompareRequest, db: AsyncS
         rules = await _load_training_rules(db, target_table)
         comparison = _apply_training_rules_to_comparison(comparison, rules)
     return comparison
+
+
+@_ct_router.post("/control-table/compare-docs")
+async def compare_control_table_documents(
+    drd_file: Optional[UploadFile] = File(None),
+    odi_file_1: Optional[UploadFile] = File(None),
+    odi_file_2: Optional[UploadFile] = File(None),
+    manual_sql: Optional[str] = Form(None),
+):
+    docs: list[dict] = []
+
+    async def _add_doc(name: str, upload: Optional[UploadFile]):
+        if not upload:
+            return
+        content = await upload.read()
+        text = (content or b"").decode("utf-8", errors="ignore")
+        extracted = _extract_doc_mappings(text)
+        docs.append({"name": name, "mappings": extracted.get("mappings") or [], "by_target": extracted.get("by_target") or {}})
+
+    await _add_doc("DRD", drd_file)
+    await _add_doc("ODI XML 1", odi_file_1)
+    await _add_doc("ODI XML 2", odi_file_2)
+
+    if (manual_sql or "").strip():
+        extracted = _extract_doc_mappings(manual_sql or "")
+        docs.append({"name": "Manual SQL", "mappings": extracted.get("mappings") or [], "by_target": extracted.get("by_target") or {}})
+
+    if len(docs) < 2:
+        raise HTTPException(status_code=400, detail="Provide at least two sources (DRD/ODI files and/or Manual SQL)")
+
+    pairwise = []
+    for i, j in combinations(range(len(docs)), 2):
+        left = docs[i]
+        right = docs[j]
+        pairwise.append(_compare_doc_pair(left["name"], left["by_target"], right["name"], right["by_target"]))
+
+    all_targets = None
+    union_targets = set()
+    for d in docs:
+        t = set((d.get("by_target") or {}).keys())
+        union_targets |= t
+        all_targets = t if all_targets is None else (all_targets & t)
+    all_targets = all_targets or set()
+
+    multi_conflicts = []
+    for target in sorted(all_targets):
+        variants = {}
+        for d in docs:
+            exprs = sorted(d.get("by_target", {}).get(target) or [])
+            if exprs:
+                variants[d["name"]] = exprs
+        normalized_sets = {name: {e.strip().upper() for e in exprs if e.strip()} for name, exprs in variants.items()}
+        if normalized_sets:
+            baseline = next(iter(normalized_sets.values()))
+            if any(s != baseline for s in normalized_sets.values()):
+                multi_conflicts.append({"target": target, "variants": variants})
+
+    return {
+        "documents": [{"name": d["name"], "mapping_count": len(d["mappings"])} for d in docs],
+        "pairwise": pairwise,
+        "multi_compare": {
+            "common_target_count": len(all_targets),
+            "union_target_count": len(union_targets),
+            "all_shared_targets": sorted(all_targets),
+            "conflicts": multi_conflicts,
+        },
+    }
 
 
 @_ct_router.post("/control-table/apply")
@@ -998,4 +1181,148 @@ async def replay_control_table_training_rules(body: ControlTableReplayRequest, d
             "total_rule_hits": total_rule_hits,
             "hit_rate": round((total_rule_hits / total_rows) * 100, 2) if total_rows else 0.0,
         },
+    }
+
+
+# ── CT Orchestrator: Verify with XML (99% parity) ─────────────────────────
+
+@_ct_router.post("/control-table/verify-xml")
+async def verify_control_table_with_xml(
+    drd_file: UploadFile = File(...),
+    xml_file: UploadFile = File(...),
+    config_json: str = Form("{}"),
+):
+    """Run 99% parity scoring on DRD vs XML for CT validation.
+
+    Returns score + per-column match data that the CT tab can overlay on analysis_rows.
+    """
+    import asyncio
+    from app.services.orchestrator_99_service import run_99_orchestration
+
+    if not (drd_file.filename or "").lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(400, "drd_file must be .xlsx or .xls")
+    if not (xml_file.filename or "").lower().endswith(".xml"):
+        raise HTTPException(400, "xml_file must be an ODI .xml export")
+
+    drd_bytes = await drd_file.read()
+    xml_bytes = await xml_file.read()
+
+    if len(drd_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(413, "DRD file exceeds 10 MB limit")
+    if len(xml_bytes) > 5 * 1024 * 1024:
+        raise HTTPException(413, "XML file exceeds 5 MB limit")
+
+    try:
+        config = json.loads(config_json) if (config_json or "").strip() else {}
+    except Exception as exc:
+        raise HTTPException(400, f"Invalid config_json: {exc}") from exc
+
+    try:
+        result = await asyncio.to_thread(run_99_orchestration, drd_bytes, xml_bytes, config)
+    except Exception as exc:
+        raise HTTPException(500, f"99% orchestration failed: {exc}") from exc
+
+    return result
+
+
+@_ct_router.post("/control-table/pdm-enrich")
+async def pdm_enrich_control_table(
+    drd_file: UploadFile = File(...),
+    xml_file: Optional[UploadFile] = File(None),
+    target_schema: str = Form(""),
+    target_table: str = Form(""),
+    source_datasource_id: int = Form(0),
+    target_datasource_id: int = Form(0),
+    sheet_name: str = Form(""),
+):
+    """Run PDM-aware enrichment + SQL generation on a DRD file for CT tab.
+
+    Returns enriched rows, all SQL modes (CTE preferred for CT), and quality gate result.
+    """
+    import asyncio
+    from app.services.drd_import_service import parse_drd_file
+    from app.services.drd_pdm_enrichment_service import DRDPDMEnrichmentService
+    from app.services.statement_mode_generation_service import StatementModeGenerationService
+    from app.services.semantic_alias_quality_gate_service import SemanticAliasQualityGateService
+    from app.services.schema_kb_service import _kb_dir
+
+    if not (drd_file.filename or "").lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(400, "drd_file must be .xlsx or .xls")
+
+    drd_bytes = await drd_file.read()
+    if len(drd_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(413, "DRD file exceeds 10 MB limit")
+
+    xml_bytes = None
+    if xml_file and (xml_file.filename or "").strip():
+        xml_bytes = await xml_file.read()
+        if len(xml_bytes) > 5 * 1024 * 1024:
+            raise HTTPException(413, "XML file exceeds 5 MB limit")
+
+    selected_fields = [
+        "logical_name", "physical_name", "source_schema", "source_table",
+        "source_attribute", "transformation", "notes", "target_datatype_oracle",
+        "target_nullable_oracle",
+    ]
+    try:
+        parse_result = await asyncio.to_thread(
+            parse_drd_file,
+            file_bytes=drd_bytes,
+            filename=drd_file.filename or "drd.xlsx",
+            selected_fields=selected_fields,
+            target_schema=target_schema,
+            target_table=target_table,
+            source_datasource_id=source_datasource_id or 1,
+            target_datasource_id=target_datasource_id or 1,
+            sheet_name=sheet_name.strip() or None,
+        )
+    except Exception as exc:
+        raise HTTPException(422, f"DRD parse failed: {exc}") from exc
+
+    column_mappings = parse_result.get("column_mappings", [])
+    if not column_mappings:
+        raise HTTPException(422, "No column mappings found in DRD file")
+
+    rows = []
+    for r in column_mappings:
+        row = dict(r)
+        row.setdefault("column", row.get("physical_name", ""))
+        row.setdefault("dtype", row.get("target_datatype_oracle", ""))
+        rows.append(row)
+
+    config = {"pdm_cache": {"local_kb_dir": str(_kb_dir())}}
+    if target_schema or target_table:
+        config["table"] = {"name": f"{target_schema}.{target_table}"}
+
+    try:
+        def _run():
+            enricher = DRDPDMEnrichmentService(config)
+            enriched, resolutions, cache_summary = enricher.enrich_rows(rows)
+            gen = StatementModeGenerationService(config)
+            generated = gen.generate_all(enriched)
+            gate = SemanticAliasQualityGateService()
+            quality = gate.evaluate(generated, xml_bytes, config)
+            return enriched, resolutions, cache_summary, generated, quality
+
+        enriched, resolutions, cache_summary, generated, quality = await asyncio.to_thread(_run)
+    except Exception as exc:
+        raise HTTPException(500, f"PDM pipeline failed: {exc}") from exc
+
+    plan = generated.get("plan", {})
+    return {
+        "status": quality.get("status"),
+        "parse_result": {"total_rows": len(column_mappings), "errors": parse_result.get("errors", [])},
+        "pdm_resolution": {"resolutions": resolutions, "cache_summary": cache_summary},
+        "sql": {
+            "source_select": generated.get("source_select"),
+            "insert_select": generated.get("insert_select"),
+            "cte": generated.get("cte"),
+            "merge": generated.get("merge"),
+        },
+        "plan": {
+            "primary_source": plan.get("primary_pair"),
+            "joins": plan.get("joins", []),
+            "unresolved": generated.get("unresolved", []),
+        },
+        "quality_gate": quality,
     }
