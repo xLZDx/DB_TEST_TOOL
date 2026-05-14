@@ -753,6 +753,12 @@ def parse_drd_file(
                 elif (record.get("logical_name") or "").strip():
                     record["source_attribute"] = (record.get("logical_name") or "").strip().upper().replace(" ", "_")
 
+            # Clean source_table: when a DRD cell contains multiple table names
+            # (newline- or comma-separated), use only the first one as the primary source.
+            _st_raw = (record.get("source_table") or "").strip()
+            if _st_raw and ("\n" in _st_raw or "," in _st_raw):
+                record["source_table"] = _st_raw.split("\n")[0].split(",")[0].strip()
+
             # Apply default source table if not specified in record
             if not record.get("source_table") and default_source_table:
                 record["source_table"] = default_source_table

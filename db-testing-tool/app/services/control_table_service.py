@@ -368,6 +368,9 @@ def build_analysis_rows(
         drd_expr = expr_info.get("expression") or fallback_drd_expression(row, source_attr)
         lookup_join = expr_info.get("lookup_join") or ""
 
+        # Always compute bare source-table name for use in expression normalization.
+        _src_table_for_check = (row.get("source_table") or "").strip().upper().split(".")[-1]
+
         # If baseline did not preserve lookup metadata, derive it from DRD transformation text.
         if not lookup_join:
             lookup_join, derived_expr = derive_lookup_from_transformation(
@@ -377,7 +380,6 @@ def build_analysis_rows(
                 source_schema_index=source_schema_index,
                 source_block=expr_info.get("source_block") or fallback_source_block(row),
             )
-            _src_table_for_check = (row.get("source_table") or "").strip().upper().split(".")[-1]
             _plain_ref_forms = {normalize_sql_expr(f"S.{source_attr}")}
             if _src_table_for_check:
                 _plain_ref_forms.add(normalize_sql_expr(f"{_src_table_for_check}.{source_attr}"))
@@ -424,7 +426,9 @@ def fallback_drd_expression(row: Dict[str, Any], source_attr: str) -> str:
     if source_attr in {"NULL", "NONE", "N/A"}:
         return "NULL"
     src_table = (row.get("source_table") or "").strip()
-    src_prefix = f"{src_table}." if src_table else ""
+    # Use only the bare table name as alias prefix (last segment of FQ name)
+    src_table_bare = src_table.split(".")[-1] if src_table else ""
+    src_prefix = f"{src_table_bare}." if src_table_bare else ""
     transformation = (row.get("transformation") or "").strip()
     notes = (row.get("notes") or "").strip()
     if transformation:
@@ -491,62 +495,85 @@ def build_control_insert_sql(
     analysis_rows: List[Dict[str, Any]],
 ) -> str:
     row_map = {row["column"]: row for row in analysis_rows}
-    source_blocks = [row.get("source_block", "") for row in analysis_rows if row.get("source_block")]
-    base_source = Counter(source_blocks).most_common(1)[0][0] if source_blocks else "FROM SOURCE_SCHEMA.SOURCE_TABLE"
 
-    # ── Detect source table alias from DRD expressions ────────────────────
-    # DRD expressions frequently reference e.g. OPN_TAX_LOTS_NONBKR_TGT.COLUMN
-    # where OPN_TAX_LOTS_NONBKR_TGT is the alias (or bare table name) used in the
-    # original ETL query.  We must detect and preserve this in the FROM clause.
-    _from_match = re.search(r'\bFROM\s+((?:[A-Z0-9_]+\.)?([A-Z0-9_]+))(?:\s+([A-Z][A-Z0-9_]*))?\s*$',
-                            base_source, flags=re.IGNORECASE)
-    _src_fq = _from_match.group(1).upper() if _from_match else "SOURCE_SCHEMA.SOURCE_TABLE"
-    _src_table_name = _from_match.group(2).upper() if _from_match else "SOURCE_TABLE"
-    _src_explicit_alias = (_from_match.group(3) or "").upper() if _from_match else ""
-
-    # Count which prefix is most used in DRD expressions to infer the real alias
-    _alias_freq: Dict[str, int] = {}
+    # ── Collect all unique non-lookup source tables from DRD rows ─────────
+    # Each DRD row may come from a different source table (multi-join fact tables).
+    # Build an ordered map of FQ_table -> bare_alias so the FROM clause lists all
+    # required tables.  First occurrence order is preserved.
+    _src_table_registry: Dict[str, str] = {}  # fq_upper -> bare_alias_upper
+    _src_schema_parts: set = set()
     for _row in analysis_rows:
-        expr = (_row.get("drd_expression") or "").upper()
-        for m in re.finditer(r'\b([A-Z][A-Z0-9_]*)\.[A-Z_][A-Z0-9_]*\b', expr):
-            prefix = m.group(1)
-            if prefix not in {"SYSDATE", "SYSTIMESTAMP", "DUAL", "NULL", "NVL", "CASE", "TO_CHAR", "TO_DATE", "TO_NUMBER"}:
-                _alias_freq[prefix] = _alias_freq.get(prefix, 0) + 1
-
-    # The most frequent non-lookup prefix that isn't the schema name is likely the source alias
-    _src_schema_parts = set()
-    for _r in analysis_rows:
-        _ss = (_r.get("source_schema") or "").upper()
+        # Clean source_table: take only first entry if cell has multiple (newline/comma separated)
+        _st_raw = (_row.get("source_table") or "").strip()
+        _st = _st_raw.split("\n")[0].split(",")[0].strip().upper()
+        _ss = (_row.get("source_schema") or "").strip().upper()
         if _ss:
             _src_schema_parts.add(_ss)
-    _inferred_alias = ""
-    if _alias_freq:
-        _sorted_aliases = sorted(_alias_freq.items(), key=lambda x: -x[1])
-        for _cand, _cnt in _sorted_aliases:
-            if _cand in _src_schema_parts:
-                continue
-            if _cand == _src_table_name:
-                # Expression uses bare table name — no alias needed
-                _inferred_alias = ""
-                break
-            if _cnt >= 3:
-                _inferred_alias = _cand
-                break
+        if not _st or _is_lookup_table_name(_st):
+            continue
+        _bare = _st.split(".")[-1]
+        if "." in _st:
+            _fq = _st
+        elif _ss:
+            _fq = f"{_ss}.{_bare}"
+        else:
+            _fq = _bare
+        if _fq not in _src_table_registry:
+            _src_table_registry[_fq] = _bare
 
-    # Determine the effective alias to use in FROM clause
-    _effective_alias = _src_explicit_alias or _inferred_alias
-    # Single-letter aliases like S, T are generally from ODI and not useful
-    if _effective_alias and len(_effective_alias) == 1:
-        _effective_alias = ""
+    _multi_source = len(_src_table_registry) > 1
 
-    # Rebuild base_source with alias if needed
-    if _effective_alias:
-        base_source = f"FROM {_src_fq} {_effective_alias}"
+    if _multi_source:
+        # Multi-table FROM: list every source table with its bare name as alias.
+        _from_parts = [f"{fq} {alias}" for fq, alias in _src_table_registry.items()]
+        base_source = "FROM\n    " + ",\n    ".join(_from_parts)
+        # Primary reference name = first table's bare alias (used for S. fallback only).
+        _src_fq = next(iter(_src_table_registry))
+        _src_table_name = next(iter(_src_table_registry.values()))
+        _src_ref_name = _src_table_name
     else:
-        base_source = f"FROM {_src_fq}"
+        # Single-source path (original logic) ─────────────────────────────
+        source_blocks = [row.get("source_block", "") for row in analysis_rows if row.get("source_block")]
+        base_source = Counter(source_blocks).most_common(1)[0][0] if source_blocks else "FROM SOURCE_SCHEMA.SOURCE_TABLE"
 
-    # The name expressions should use to reference source columns
-    _src_ref_name = _effective_alias or _src_table_name
+        _from_match = re.search(r'\bFROM\s+((?:[A-Z0-9_]+\.)?([A-Z0-9_]+))(?:\s+([A-Z][A-Z0-9_]*))?\s*$',
+                                base_source, flags=re.IGNORECASE)
+        _src_fq = _from_match.group(1).upper() if _from_match else "SOURCE_SCHEMA.SOURCE_TABLE"
+        _src_table_name = _from_match.group(2).upper() if _from_match else "SOURCE_TABLE"
+        _src_explicit_alias = (_from_match.group(3) or "").upper() if _from_match else ""
+
+        # Count which prefix is most used in DRD expressions to infer the real alias
+        _alias_freq: Dict[str, int] = {}
+        for _row in analysis_rows:
+            expr = (_row.get("drd_expression") or "").upper()
+            for m in re.finditer(r'\b([A-Z][A-Z0-9_]*)\.[A-Z_][A-Z0-9_]*\b', expr):
+                prefix = m.group(1)
+                if prefix not in {"SYSDATE", "SYSTIMESTAMP", "DUAL", "NULL", "NVL", "CASE", "TO_CHAR", "TO_DATE", "TO_NUMBER"}:
+                    _alias_freq[prefix] = _alias_freq.get(prefix, 0) + 1
+
+        _inferred_alias = ""
+        if _alias_freq:
+            _sorted_aliases = sorted(_alias_freq.items(), key=lambda x: -x[1])
+            for _cand, _cnt in _sorted_aliases:
+                if _cand in _src_schema_parts:
+                    continue
+                if _cand == _src_table_name:
+                    _inferred_alias = ""
+                    break
+                if _cnt >= 3:
+                    _inferred_alias = _cand
+                    break
+
+        _effective_alias = _src_explicit_alias or _inferred_alias
+        if _effective_alias and len(_effective_alias) == 1:
+            _effective_alias = ""
+
+        if _effective_alias:
+            base_source = f"FROM {_src_fq} {_effective_alias}"
+        else:
+            base_source = f"FROM {_src_fq}"
+
+        _src_ref_name = _effective_alias or _src_table_name
 
     # Build source-staging attribute set (non-lookup tables only) for alias validation.
     source_attr_set: set = set()
@@ -725,6 +752,9 @@ def build_control_insert_sql(
     # All valid aliases that can appear in generated expressions.
     # Source table name (or alias) + all lookup aliases + fully-qualified schema.table parts
     all_valid_aliases: set = {_src_table_name, _src_ref_name} | set(na for (_, na) in join_alias_map.values())
+    # Add ALL bare source table names from DRD (multi-source-table support)
+    for _fq, _bare in _src_table_registry.items():
+        all_valid_aliases.add(_bare)
     # Also allow schema prefixes from FQ references (e.g. TAXLOT_STG_OWNER, COMMON_OWNER)
     for _row in analysis_rows:
         _ss = (_row.get("source_schema") or "").upper()
@@ -753,8 +783,10 @@ def build_control_insert_sql(
             if re.search(r'\b' + re.escape(_old_a_u) + r'\.[A-Z_]', expr, flags=re.IGNORECASE):
                 expr = replace_alias_token(expr, _old_a_u, _new_a)
 
-        # Normalize S. references to use source table ref name (alias or bare table)
-        expr = re.sub(r'\bS\.([A-Z0-9_#\$]+)\b', f'{_src_ref_name}.\\1', expr, flags=re.IGNORECASE)
+        # Normalize S. references: use the row's own source table bare name (multi-table aware)
+        _row_src_bare = (row.get("source_table") or "").strip().split("\n")[0].split(",")[0].strip().upper().split(".")[-1]
+        _row_ref = _row_src_bare or _src_ref_name
+        expr = re.sub(r'\bS\.([A-Z0-9_#\$]+)\b', f'{_row_ref}.\\1', expr, flags=re.IGNORECASE)
 
         expr = sanitize_generated_expression(
             expr,
