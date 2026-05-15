@@ -11,6 +11,7 @@ import csv
 import io
 import uuid
 from collections import Counter
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -412,12 +413,24 @@ async def list_tests(db: AsyncSession = Depends(get_db)):
     folders_r = await db.execute(select(TestFolder))
     folders = folders_r.scalars().all()
     folder_names = {f.id: f.name for f in folders}
+
+    # Fetch latest run per test in ONE query using a correlated subquery — avoids N+1
+    from sqlalchemy import text
+    latest_runs_r = await db.execute(
+        text(
+            "SELECT tr.* FROM test_runs tr "
+            "INNER JOIN ("
+            "  SELECT test_case_id, MAX(id) AS max_id FROM test_runs GROUP BY test_case_id"
+            ") latest ON tr.id = latest.max_id"
+        )
+    )
+    latest_run_map: dict[int, Any] = {}
+    for row in latest_runs_r.mappings():
+        latest_run_map[row["test_case_id"]] = row
+
     payload = []
     for t in items:
-        latest_run_q = await db.execute(
-            select(TestRun).where(TestRun.test_case_id == t.id).order_by(TestRun.id.desc()).limit(1)
-        )
-        latest_run = latest_run_q.scalar_one_or_none()
+        lr = latest_run_map.get(t.id)
         folder_id = test_to_folder.get(t.id)
         payload.append({
             "id": t.id, "name": t.name, "test_type": t.test_type,
@@ -430,10 +443,10 @@ async def list_tests(db: AsyncSession = Depends(get_db)):
             "is_active": t.is_active,
             "is_ai_generated": t.is_ai_generated,
             "description": t.description,
-            "last_run_status": latest_run.status if latest_run else "untested",
-            "last_run_at": str(latest_run.executed_at) if latest_run and latest_run.executed_at else None,
-            "last_run_batch_id": latest_run.batch_id if latest_run else None,
-            "last_error_message": latest_run.error_message if latest_run else None,
+            "last_run_status": lr["status"] if lr else "untested",
+            "last_run_at": str(lr["executed_at"]) if lr and lr["executed_at"] else None,
+            "last_run_batch_id": lr["batch_id"] if lr else None,
+            "last_error_message": lr["error_message"] if lr else None,
             "folder_id": folder_id,
             "folder_name": folder_names.get(folder_id) if folder_id else None,
         })

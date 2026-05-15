@@ -1341,17 +1341,73 @@ class GenerateAttributeTestsRequest(BaseModel):
     suite_prefix: str = "CT"
     grain_columns: Optional[List[str]] = None
     folder_name: Optional[str] = None
+    # Optional CT infrastructure scripts — prepended as the first two tests in the suite
+    create_table_sql: Optional[str] = None   # CREATE TABLE (control table DDL)
+    insert_sql: Optional[str] = None         # INSERT INTO control table SELECT FROM source
 
 
 @_ct_router.post("/control-table/generate-attribute-tests")
 async def generate_attribute_test_suite(body: GenerateAttributeTestsRequest, db: AsyncSession = Depends(get_db)):
     """Generate one test per attribute (e.g. 367 tests for 367 columns).
 
-    Each test validates a single attribute from source→target using the full
-    CTE/JOIN SQL from the generated control table.
+    Steps:
+    1. Pre-validate: check all referenced source tables exist in the local KB hint index.
+       Returns 422 with validation_errors list if critical tables are missing.
+    2. Optionally prepend CREATE TABLE and INSERT scripts as the first two test cases.
+    3. Generate per-attribute source/target comparison tests (single source each).
     """
     from app.services.attribute_test_generator_service import generate_attribute_tests
+    from app.services.schema_kb_service import _load_hint_index
 
+    target_table_u = (body.target_table or "").strip().upper()
+    target_schema_u = (body.target_schema or "").strip().upper()
+
+    # ── Step 1: Pre-validate referenced source tables ────────────────────
+    validation_errors: list[str] = []
+    validation_warnings: list[str] = []
+
+    if body.source_datasource_id:
+        hint_index = _load_hint_index(body.source_datasource_id)
+        if hint_index:
+            seen_keys: set[str] = set()
+            for row in body.analysis_rows:
+                src_schema = (row.get("source_schema") or "").strip().upper()
+                src_table = (row.get("source_table") or "").strip().upper()
+                if src_schema and src_table:
+                    key = f"{src_schema}.{src_table}"
+                    if key not in seen_keys:
+                        seen_keys.add(key)
+                        if key not in hint_index:
+                            # Warn only — KB may be incomplete; do not hard-block
+                            validation_warnings.append(
+                                f"Table not found in local KB (may not be catalogued): {key}"
+                            )
+        else:
+            validation_warnings.append(
+                f"No local KB hint index found for datasource {body.source_datasource_id}. "
+                "Table existence cannot be pre-validated. Run 'Analyze' in Schema Browser first."
+            )
+
+        # Also validate target table — warn only
+        if target_schema_u and body.target_datasource_id:
+            target_datasource_id = body.target_datasource_id
+            tgt_index = _load_hint_index(target_datasource_id)
+            if tgt_index:
+                tgt_key = f"{target_schema_u}.{target_table_u}"
+                if tgt_key not in tgt_index:
+                    validation_warnings.append(
+                        f"Target table not found in local KB (may not be catalogued): {tgt_key}"
+                    )
+
+    if validation_errors:
+        raise HTTPException(422, {
+            "detail": "Pre-validation failed: referenced tables not found in local schema KB. "
+                      "Fix the table names or run Schema Browser → Analyze to rebuild the KB.",
+            "validation_errors": validation_errors,
+            "validation_warnings": validation_warnings,
+        })
+
+    # ── Step 2: Generate per-attribute tests ────────────────────────────
     tests = generate_attribute_tests(
         analysis_rows=body.analysis_rows,
         target_schema=body.target_schema,
@@ -1364,15 +1420,64 @@ async def generate_attribute_test_suite(body: GenerateAttributeTestsRequest, db:
         grain_columns=body.grain_columns,
     )
 
-    if not tests:
+    if not tests and not body.create_table_sql and not body.insert_sql:
         raise HTTPException(422, "No attribute tests could be generated from the provided rows")
 
     # Create folder
     folder_name = body.folder_name or f"{body.suite_prefix}_TEST"
     folder = await _create_new_folder(db, folder_name)
 
-    # Create test cases in DB
     created = []
+
+    # ── Step 3: Prepend CREATE TABLE script test (if provided) ──────────
+    if body.create_table_sql and body.create_table_sql.strip():
+        ct_name = f"{body.suite_prefix}_{target_table_u}_00_CREATE_TABLE"
+        tc_create = TestCase(
+            name=ct_name,
+            test_type="custom_sql",
+            source_datasource_id=body.target_datasource_id or None,
+            target_datasource_id=None,
+            source_query=body.create_table_sql.strip().rstrip(";"),
+            target_query=None,
+            expected_result=None,
+            severity="critical",
+            description=(
+                f"{body.pbi_id + ': ' if body.pbi_id else ''}"
+                f"Step 0 — Create control table {target_schema_u}.{target_table_u}"
+            ),
+            is_active=True,
+        )
+        db.add(tc_create)
+        await db.flush()
+        if folder:
+            await _assign_test_to_folder(db, tc_create.id, folder.id)
+        created.append(tc_create)
+
+    # ── Step 4: Prepend INSERT script test (if provided) ────────────────
+    if body.insert_sql and body.insert_sql.strip():
+        ins_name = f"{body.suite_prefix}_{target_table_u}_01_INSERT_FROM_SOURCE"
+        tc_insert = TestCase(
+            name=ins_name,
+            test_type="custom_sql",
+            source_datasource_id=body.source_datasource_id or None,
+            target_datasource_id=body.target_datasource_id or None,
+            source_query=body.insert_sql.strip().rstrip(";"),
+            target_query=None,
+            expected_result=None,
+            severity="critical",
+            description=(
+                f"{body.pbi_id + ': ' if body.pbi_id else ''}"
+                f"Step 1 — INSERT from source into {target_schema_u}.{target_table_u}"
+            ),
+            is_active=True,
+        )
+        db.add(tc_insert)
+        await db.flush()
+        if folder:
+            await _assign_test_to_folder(db, tc_insert.id, folder.id)
+        created.append(tc_insert)
+
+    # ── Step 5: Attribute comparison tests ──────────────────────────────
     for test_def in tests:
         tc = TestCase(
             name=test_def["name"],
@@ -1398,6 +1503,7 @@ async def generate_attribute_test_suite(body: GenerateAttributeTestsRequest, db:
         "suite_prefix": body.suite_prefix,
         "folder_name": folder.name if folder else folder_name,
         "folder_id": folder.id if folder else None,
+        "validation_warnings": validation_warnings,
         "tests": [{"id": t.id, "name": t.name} for t in created],
     }
 

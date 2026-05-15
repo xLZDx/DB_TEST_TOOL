@@ -1360,17 +1360,22 @@ function renderSqlTabs() {
     _initSqlResultColResizers(contentEl);
 
     const tbodyWrap = contentEl.querySelector('.sql-result-tbody-wrap');
+    const theadWrap = contentEl.querySelector('.sql-result-thead-wrap');
     if (tbodyWrap) {
         tbodyWrap.onscroll = () => {
+            // Sync header horizontal scroll with body
+            if (theadWrap) theadWrap.scrollLeft = tbodyWrap.scrollLeft;
+
             const active = activeSqlTab();
             if (!active || !active.rows || active.visibleRows >= active.rows.length) return;
             const nearBottom = tbodyWrap.scrollTop + tbodyWrap.clientHeight >= tbodyWrap.scrollHeight - 16;
             if (!nearBottom) return;
             active.visibleRows = Math.min(active.visibleRows + SQL_VISIBLE_STEP, active.rows.length);
             const prevTop = tbodyWrap.scrollTop;
+            const prevLeft = tbodyWrap.scrollLeft;
             renderSqlTabs();
             const newWrap = document.querySelector('#sql-result-content .sql-result-tbody-wrap');
-            if (newWrap) newWrap.scrollTop = prevTop;
+            if (newWrap) { newWrap.scrollTop = prevTop; newWrap.scrollLeft = prevLeft; }
         };
     }
 }
@@ -2406,7 +2411,7 @@ async function askDatasourceAssistant() {
             last_error: tab?.error || '',
             result_columns: tab?.columns || [],
         }, null, 2);
-        const provider = mode === 'ghc' ? 'githubcopilot' : '';
+        const provider = mode === 'ghc' ? 'githubcopilot' : 'local';
         const agentIds = mode === 'local' && agentId ? [agentId] : [];
         const res = await API.aiChat([{ role: 'user', content: question }], context, provider, agentIds, 'datasource sql assistant');
         output.value = res.reply || '(no response)';
@@ -3825,10 +3830,14 @@ document.addEventListener('keydown', (event) => {
 }
 .sql-result-thead-wrap {
     flex-shrink: 0;
-    overflow: hidden;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
     border-bottom: 1px solid var(--border);
     background: var(--bg-card);
 }
+.sql-result-thead-wrap::-webkit-scrollbar { display: none; }
 .sql-result-tbody-wrap {
     flex: 1;
     overflow: auto;

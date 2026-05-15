@@ -51,8 +51,8 @@ def generate_attribute_tests(
     primary_src = (primary_source_table or "").strip().upper()
     grain_cols = [g.upper() for g in (grain_columns or ["TXN_ID"])]
 
-    # Extract FROM + JOIN block from generated SQL
-    from_join_block = _extract_from_join_block(generated_sql or join_sql)
+    # Extract main FROM + JOIN block from generated SQL (skips CTEs)
+    from_join_block = _extract_main_from_join_block(generated_sql or join_sql, target_schema_u, target_table_u)
 
     tests = []
     for i, row in enumerate(analysis_rows, start=1):
@@ -66,16 +66,29 @@ def generate_attribute_tests(
         source_sch = (row.get("source_schema") or source_schema_u).strip().upper()
         transformation = (row.get("transformation") or "").strip()
 
-        # Build validation query for this single attribute
-        source_query = _build_attribute_validation_query(
+        # Resolve the source expression — prefer generated, fall back to source_attr, then col name
+        if gen_expr:
+            src_expr = gen_expr
+        elif source_attr:
+            src_expr = source_attr
+        else:
+            src_expr = col
+
+        # Build source-only query (NEVER joins to the target table)
+        source_query = _build_attribute_source_query(
             target_column=col,
-            source_expression=gen_expr or f"S.{source_attr}" if source_attr else f"S.{col}",
+            source_expression=src_expr,
             from_join_block=from_join_block,
-            grain_columns=grain_cols,
-            target_schema=target_schema_u,
-            target_table=target_table_u,
             source_schema=source_sch,
             source_table=source_table,
+        )
+
+        # Target query — single source: only the target table, counts non-null values
+        target_query = (
+            f"-- Target column: {target_schema_u}.{target_table_u}.{col}\n"
+            f"SELECT COUNT(*) AS cnt\n"
+            f"FROM {target_schema_u}.{target_table_u}\n"
+            f"WHERE {col} IS NOT NULL"
         )
 
         # Description includes mapping lineage
@@ -94,7 +107,7 @@ def generate_attribute_tests(
             "severity": "high" if col in grain_cols else "medium",
             "description": "".join(desc_parts),
             "source_query": source_query,
-            "target_query": f"-- Target column: {target_schema_u}.{target_table_u}.{col}\nSELECT {col} FROM {target_schema_u}.{target_table_u} WHERE ROWNUM <= 100",
+            "target_query": target_query,
             "expected_result": "0",
         }
         tests.append(test)
@@ -190,77 +203,160 @@ def generate_chat_suite(
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
 
-def _build_attribute_validation_query(
+def _build_attribute_source_query(
     target_column: str,
     source_expression: str,
     from_join_block: str,
-    grain_columns: List[str],
-    target_schema: str,
-    target_table: str,
     source_schema: str = "",
     source_table: str = "",
 ) -> str:
-    """Build a validation query that compares source expression vs target column.
+    """Build a source-only validation query for one attribute.
 
-    Uses NVL comparison pattern:
-    SELECT COUNT(*) FROM source_joins
-    LEFT JOIN target ON grain
-    WHERE NVL(source_expr, '-999') <> NVL(target.col, '-999')
+    Rules:
+    - NEVER joins to the target table.
+    - NEVER uses ON 1=1.
+    - Counts non-null values of the source expression.
+    - Uses the sanitized FROM+JOIN block from the generated SQL (source tables only).
     """
-    # Grain join condition
-    grain_join = " AND ".join(
-        f"S.{g} = T.{g}" for g in grain_columns
-    )
-
-    # Source expression — ensure it has an alias qualifier
-    src_expr = source_expression
-    if not any(src_expr.startswith(f"{q}.") for q in ["S", "B", "T"]) and "." not in src_expr and "(" not in src_expr:
-        src_expr = f"S.{src_expr}"
-
     lines = [
-        f"-- Attribute validation: {target_column}",
-        f"-- Source expression: {source_expression}",
-        f"SELECT /*+ PARALLEL(8) */",
-        f"COUNT(*) AS cnt",
+        f"-- Source attribute: {target_column}",
+        f"-- Expression: {source_expression}",
+        f"SELECT COUNT(*) AS cnt",
     ]
 
     if from_join_block:
         lines.append(from_join_block)
     else:
-        src_full = f"{source_schema}.{source_table}" if source_schema else source_table
-        lines.append(f"FROM {src_full} S")
+        src_full = f"{source_schema}.{source_table}" if source_schema else source_table or "DUAL"
+        lines.append(f"FROM {src_full}")
 
-    lines.extend([
-        f"LEFT JOIN {target_schema}.{target_table} T",
-        f"ON {grain_join}",
-        f"WHERE NVL(TO_CHAR({src_expr}), '-999') <> NVL(TO_CHAR(T.{target_column}), '-999')",
-    ])
-
+    lines.append(f"WHERE {source_expression} IS NOT NULL")
     return "\n".join(lines)
 
 
-def _extract_from_join_block(sql: str) -> str:
-    """Extract the FROM + JOIN section from a SQL statement."""
+def _extract_main_from_join_block(sql: str, target_schema: str = "", target_table: str = "") -> str:
+    """Extract the main query's FROM + JOIN block from SQL.
+
+    Handles:
+    - INSERT INTO ... SELECT ... FROM ...
+    - WITH cte AS (...) SELECT ... FROM ...
+    - Plain SELECT ... FROM ...
+
+    Always strips:
+    - Trailing semicolons
+    - ON 1=1 joins (cartesian/bad joins)
+    - Any JOIN that references the target table
+    """
     if not sql:
         return ""
 
-    # Find FROM keyword at level 0
-    upper = sql.upper()
-    # Look for FROM that starts the main query body
-    from_match = re.search(
-        r"\bFROM\b\s+([\w.$\"]+(?:\s+\w+)?(?:\s*\n?\s*(?:LEFT|RIGHT|INNER|OUTER|CROSS|FULL)?\s*(?:OUTER\s+)?JOIN\s+[\s\S]*?)?)"
-        r"(?=\bWHERE\b|\bGROUP\s+BY\b|\bORDER\s+BY\b|\bHAVING\b|$)",
+    # Strip trailing semicolons
+    sql = sql.rstrip().rstrip(";").strip()
+
+    main_sql = sql
+
+    # For INSERT INTO ... SELECT: find the SELECT part after INSERT INTO
+    insert_m = re.search(
+        r"\bINSERT\b[^(]*?\bSELECT\b",
         sql,
         flags=re.IGNORECASE | re.DOTALL,
     )
-    if from_match:
-        block = from_match.group(0).strip()
-        # Limit to reasonable size
-        if len(block) > 10000:
-            block = block[:10000]
-        return block
+    if insert_m:
+        main_sql = sql[insert_m.end() - len("SELECT"):]
+    elif re.match(r"\s*WITH\s+", sql, re.IGNORECASE):
+        # CTEs: skip all CTE definitions, find the final SELECT after the last '\)'
+        depth = 0
+        pos = 0
+        final_select_pos = 0
+        i = 0
+        n = len(sql)
+        while i < n:
+            ch = sql[i]
+            if ch == "'":
+                i += 1
+                while i < n:
+                    if sql[i] == "'" and i + 1 < n and sql[i + 1] == "'":
+                        i += 2
+                        continue
+                    if sql[i] == "'":
+                        i += 1
+                        break
+                    i += 1
+                continue
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    # After this closing paren of a CTE, look for INSERT/SELECT at depth 0
+                    rest = sql[i + 1:].lstrip()
+                    upper_rest = rest.upper()
+                    if upper_rest.startswith("SELECT") or upper_rest.startswith("INSERT"):
+                        offset = len(sql[i + 1:]) - len(rest)
+                        final_select_pos = i + 1 + offset
+                        break
+            i += 1
+        if final_select_pos:
+            candidate = sql[final_select_pos:]
+            # If INSERT INTO follows CTE, recurse to get SELECT part
+            ins2 = re.search(r"\bINSERT\b[^(]*?\bSELECT\b", candidate, re.IGNORECASE | re.DOTALL)
+            if ins2:
+                main_sql = candidate[ins2.end() - len("SELECT"):]
+            else:
+                main_sql = candidate
 
-    return ""
+    # Now extract FROM ... [JOINs] up to WHERE / GROUP BY / ORDER BY / HAVING
+    from_match = re.search(
+        r"\bFROM\b([\s\S]+?)(?=\bWHERE\b|\bGROUP\s+BY\b|\bORDER\s+BY\b|\bHAVING\b|$)",
+        main_sql,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if not from_match:
+        return ""
+
+    block = ("FROM" + from_match.group(1)).strip()
+
+    # Limit to reasonable size
+    if len(block) > 20000:
+        block = block[:20000]
+
+    # Sanitize: strip trailing semicolons
+    block = block.rstrip(";")
+
+    # Sanitize: remove ON 1=1 joins (cartesian cross-joins)
+    block = re.sub(
+        r"\s*(?:LEFT|RIGHT|INNER|OUTER|CROSS|FULL)?\s*(?:OUTER\s+)?JOIN\s+[\w.$\"]+(?:\s+\w+)?\s+ON\s+1\s*=\s*1[^\n]*",
+        "",
+        block,
+        flags=re.IGNORECASE,
+    )
+
+    # Sanitize: remove any JOIN that references the target table (prevent source+target mixing)
+    if target_schema and target_table:
+        block = re.sub(
+            rf"\s*(?:LEFT|RIGHT|INNER|OUTER|CROSS|FULL)?\s*(?:OUTER\s+)?JOIN\s+{re.escape(target_schema)}\.{re.escape(target_table)}\b[^\n]*",
+            "",
+            block,
+            flags=re.IGNORECASE,
+        )
+        # Also remove bare target table name joins (without schema)
+        block = re.sub(
+            rf"\s*(?:LEFT|RIGHT|INNER|OUTER|CROSS|FULL)?\s*(?:OUTER\s+)?JOIN\s+{re.escape(target_table)}\s+",
+            "",
+            block,
+            flags=re.IGNORECASE,
+        )
+
+    return block.strip()
+
+
+def _extract_from_join_block(sql: str) -> str:
+    """Backward-compat alias — delegates to the main extractor."""
+    return _extract_main_from_join_block(sql)
+
+
+# Backward-compat alias kept so existing callers don't break
+_build_attribute_validation_query = _build_attribute_source_query
 
 
 def _extract_primary_source(sql: str) -> tuple:
