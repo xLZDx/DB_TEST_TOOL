@@ -17,6 +17,7 @@ from app.services.drd_import_service import (
     _extract_case_expression,
     _extract_lookup_spec,
     _is_lookup_table_name,
+    _resolve_column_name,
     generate_drd_tests,
     parse_drd_file,
     validate_column_mappings_with_kb,
@@ -2409,6 +2410,10 @@ def _validate_control_table_requirements(
         src_attr = (row.get("source_attribute") or "").strip().upper()
         if not src_table:
             continue
+        # Strip DRD annotations like "(FROM T2)", "(FROM TX)", etc.
+        src_attr = re.sub(r"\s*\(FROM\s+\w+\)\s*$", "", src_attr, flags=re.IGNORECASE).strip()
+        if not src_attr:
+            continue
         # Skip lookup / dimension tables in source column validation —
         # they are referenced for JOIN output only, not as staging input.
         if _is_lookup_table_name(src_table):
@@ -2421,8 +2426,11 @@ def _validate_control_table_requirements(
                 continue
 
         src_entry = find_table(source_index, src_schema, src_table)
-        if src_entry and src_attr and src_attr not in {"NULL", "NONE", "N/A"} and src_attr not in src_entry.get("columns", {}):
-            missing_source_columns.append(f"{src_schema}.{src_table}.{src_attr}" if src_schema else f"{src_table}.{src_attr}")
+        if src_entry and src_attr and src_attr not in {"NULL", "NONE", "N/A"}:
+            col_map = src_entry.get("columns", {})
+            # Try exact match first, then fuzzy match via PDM column resolver
+            if src_attr not in col_map and not _resolve_column_name(col_map, src_attr):
+                missing_source_columns.append(f"{src_schema}.{src_table}.{src_attr}" if src_schema else f"{src_table}.{src_attr}")
 
     if missing_source_tables:
         # Don't hard-block: source tables may live in schemas not yet in the PDM.
