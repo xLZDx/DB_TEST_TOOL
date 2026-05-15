@@ -261,7 +261,13 @@ def validate_column_mappings_with_kb(
             rec["source_table"] = src_tbl.get("table") or rec.get("source_table")
 
         src_col_map = (src_tbl or {}).get("columns", {})
-        src_resolved, src_conf = _resolve_column_with_confidence(src_col_map, src_attr) if src_tbl else (src_attr, 100.0 if src_attr else 0.0)
+        # If the DRD source_attribute already matches a column exactly, keep it
+        # and skip fuzzy resolution to avoid mis-mapping similar column names.
+        src_attr_u = src_attr.upper().strip()
+        if src_col_map and src_attr_u and src_attr_u in src_col_map:
+            src_resolved, src_conf = src_col_map[src_attr_u], 100.0
+        else:
+            src_resolved, src_conf = _resolve_column_with_confidence(src_col_map, src_attr) if src_tbl else (src_attr, 100.0 if src_attr else 0.0)
         if src_resolved:
             rec["source_attribute"] = src_resolved
             validated += 1
@@ -272,7 +278,13 @@ def validate_column_mappings_with_kb(
         confidence_log.append({"field": f"{src_schema}.{src_table}.{src_attr}", "resolved": src_resolved, "confidence": src_conf, "side": "source"})
 
         tgt_candidate = tgt_attr or (logical.upper().replace(" ", "_") if logical else "")
-        tgt_resolved, tgt_conf = _resolve_column_with_confidence(target_col_map, tgt_candidate) if target_col_map else (tgt_candidate, 100.0 if tgt_candidate else 0.0)
+        # If the DRD target column already matches exactly, keep it — don't let
+        # fuzzy matching reassign it to a different column with a similar name.
+        tgt_candidate_u = (tgt_candidate or "").upper().strip()
+        if target_col_map and tgt_candidate_u and tgt_candidate_u in target_col_map:
+            tgt_resolved, tgt_conf = target_col_map[tgt_candidate_u], 100.0
+        else:
+            tgt_resolved, tgt_conf = _resolve_column_with_confidence(target_col_map, tgt_candidate) if target_col_map else (tgt_candidate, 100.0 if tgt_candidate else 0.0)
         if tgt_resolved:
             rec["physical_name"] = tgt_resolved
             validated += 1

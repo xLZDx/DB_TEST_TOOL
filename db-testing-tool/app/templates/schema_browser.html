@@ -964,6 +964,11 @@ async function sbSwitchSubtab(key) {
     await _sbLoadSubtab(key);
 }
 
+function _sbSanitizeIdent(raw) {
+    // Strip everything except letters, digits, underscore, hash, dollar — Oracle identifier safe chars
+    return String(raw || '').replace(/[^A-Za-z0-9_#$]/g, '').toUpperCase();
+}
+
 async function _sbLoadSubtab(subtab) {
     const dsId = document.getElementById('sb-ds')?.value;
     const { schema, table } = _sbTblDetailsState;
@@ -971,19 +976,27 @@ async function _sbLoadSubtab(subtab) {
     const content = document.getElementById('sb-tbl-details-content');
     content.innerHTML = '<div style="padding:20px;color:var(--text-muted)"><span class="spinner"></span> Loading…</div>';
 
+    // Sanitize schema/table to prevent SQL injection
+    const safeSchema = _sbSanitizeIdent(schema);
+    const safeTable = _sbSanitizeIdent(table);
+    if (!safeSchema || !safeTable) {
+        content.innerHTML = '<div class="text-danger" style="padding:16px">Invalid schema or table name.</div>';
+        return;
+    }
+
     let sql = '';
     if (subtab === 'columns') {
-        sql = `SELECT COLUMN_ID, COLUMN_NAME, DATA_TYPE, DATA_LENGTH, DATA_PRECISION, DATA_SCALE, NULLABLE FROM ALL_TAB_COLUMNS WHERE OWNER='${schema.toUpperCase()}' AND TABLE_NAME='${table.toUpperCase()}' ORDER BY COLUMN_ID`;
+        sql = `SELECT COLUMN_ID, COLUMN_NAME, DATA_TYPE, DATA_LENGTH, DATA_PRECISION, DATA_SCALE, NULLABLE FROM ALL_TAB_COLUMNS WHERE OWNER='${safeSchema}' AND TABLE_NAME='${safeTable}' ORDER BY COLUMN_ID`;
     } else if (subtab === 'data') {
-        sql = `SELECT * FROM ${schema}.${table} WHERE ROWNUM <= 200`;
+        sql = `SELECT * FROM ${safeSchema}.${safeTable} WHERE ROWNUM <= 200`;
     } else if (subtab === 'constraints') {
-        sql = `SELECT CONSTRAINT_NAME, CONSTRAINT_TYPE, SEARCH_CONDITION, R_CONSTRAINT_NAME, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='${schema.toUpperCase()}' AND TABLE_NAME='${table.toUpperCase()}'`;
+        sql = `SELECT CONSTRAINT_NAME, CONSTRAINT_TYPE, SEARCH_CONDITION, R_CONSTRAINT_NAME, STATUS FROM ALL_CONSTRAINTS WHERE OWNER='${safeSchema}' AND TABLE_NAME='${safeTable}'`;
     } else if (subtab === 'statistics') {
-        sql = `SELECT NUM_ROWS, BLOCKS, AVG_ROW_LEN, LAST_ANALYZED, PARTITIONED, TEMPORARY FROM ALL_TABLES WHERE OWNER='${schema.toUpperCase()}' AND TABLE_NAME='${table.toUpperCase()}'`;
+        sql = `SELECT NUM_ROWS, BLOCKS, AVG_ROW_LEN, LAST_ANALYZED, PARTITIONED, TEMPORARY FROM ALL_TABLES WHERE OWNER='${safeSchema}' AND TABLE_NAME='${safeTable}'`;
     } else if (subtab === 'indexes') {
-        sql = `SELECT INDEX_NAME, INDEX_TYPE, UNIQUENESS, STATUS, TABLESPACE_NAME FROM ALL_INDEXES WHERE TABLE_OWNER='${schema.toUpperCase()}' AND TABLE_NAME='${table.toUpperCase()}'`;
+        sql = `SELECT INDEX_NAME, INDEX_TYPE, UNIQUENESS, STATUS, TABLESPACE_NAME FROM ALL_INDEXES WHERE TABLE_OWNER='${safeSchema}' AND TABLE_NAME='${safeTable}'`;
     } else if (subtab === 'sql') {
-        sql = `SELECT DBMS_METADATA.GET_DDL('TABLE','${table.toUpperCase()}','${schema.toUpperCase()}') AS DDL_TEXT FROM DUAL`;
+        sql = `SELECT DBMS_METADATA.GET_DDL('TABLE','${safeTable}','${safeSchema}') AS DDL_TEXT FROM DUAL`;
     }
 
     try {
