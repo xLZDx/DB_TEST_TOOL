@@ -502,6 +502,7 @@ def build_control_insert_sql(
     # Build an ordered map of FQ_table -> bare_alias so the FROM clause lists all
     # required tables.  First occurrence order is preserved.
     _src_table_registry: Dict[str, str] = {}  # fq_upper -> bare_alias_upper
+    _src_table_counts: Dict[str, int] = defaultdict(int)
     _src_schema_parts: set = set()
     for _row in analysis_rows:
         # Clean source_table: take only first entry if cell has multiple (newline/comma separated)
@@ -519,19 +520,24 @@ def build_control_insert_sql(
             _fq = f"{_ss}.{_bare}"
         else:
             _fq = _bare
+        _src_table_counts[_fq] += 1
         if _fq not in _src_table_registry:
             _src_table_registry[_fq] = _bare
 
     _multi_source = len(_src_table_registry) > 1
 
     if _multi_source:
-        # Multi-table FROM: list every source table with its bare name as alias.
-        _from_parts = [f"{fq} {alias}" for fq, alias in _src_table_registry.items()]
-        base_source = "FROM\n    " + ",\n    ".join(_from_parts)
-        # Primary reference name = first table's bare alias (used for S. fallback only).
-        _src_fq = next(iter(_src_table_registry))
-        _src_table_name = next(iter(_src_table_registry.values()))
+        # Avoid comma-based multi-table FROM because it creates cartesian products
+        # when DRD rows span many lookup/dimension tables. Use the most frequent
+        # source table as the base and keep other tables reachable via explicit joins.
+        _order_index = {fq: i for i, fq in enumerate(_src_table_registry.keys())}
+        _src_fq = max(
+            _src_table_registry.keys(),
+            key=lambda fq: (_src_table_counts.get(fq, 0), -_order_index.get(fq, 0)),
+        )
+        _src_table_name = _src_table_registry[_src_fq]
         _src_ref_name = _src_table_name
+        base_source = f"FROM {_src_fq} {_src_ref_name}"
     else:
         # Single-source path (original logic) ─────────────────────────────
         source_blocks = [row.get("source_block", "") for row in analysis_rows if row.get("source_block")]
@@ -752,10 +758,18 @@ def build_control_insert_sql(
 
     # All valid aliases that can appear in generated expressions.
     # Source table name (or alias) + all lookup aliases + fully-qualified schema.table parts
-    all_valid_aliases: set = {_src_table_name, _src_ref_name} | set(na for (_, na) in join_alias_map.values())
-    # Add ALL bare source table names from DRD (multi-source-table support)
-    for _fq, _bare in _src_table_registry.items():
-        all_valid_aliases.add(_bare)
+    _joined_aliases = set(na for (_, na) in join_alias_map.values())
+    all_valid_aliases: set = {_src_table_name, _src_ref_name} | _joined_aliases
+    alias_by_base: Dict[str, List[str]] = defaultdict(list)
+    for _alias in sorted(_joined_aliases):
+        _base = re.sub(r"_\d+$", "", _alias.upper())
+        alias_by_base[_base].append(_alias)
+    # Only allow all DRD source-table aliases when we are truly in single-source mode.
+    # In multi-source mode, base FROM is anchored to one table and other raw aliases must
+    # be resolved via explicit joins (otherwise they are unsafe/unjoined references).
+    if not _multi_source:
+        for _fq, _bare in _src_table_registry.items():
+            all_valid_aliases.add(_bare)
     # Also allow schema prefixes from FQ references (e.g. TAXLOT_STG_OWNER, COMMON_OWNER)
     for _row in analysis_rows:
         _ss = (_row.get("source_schema") or "").upper()
@@ -764,6 +778,14 @@ def build_control_insert_sql(
     # Add bare lookup table names (they may appear in expressions before aliasing)
     for _lk_alias, _lk_fq in lk_table_map.items():
         all_valid_aliases.add(_lk_fq.split(".")[-1].upper())
+    # In single-source mode, tolerate raw source-table prefixes seen in DRD expressions.
+    # In multi-source mode we intentionally anchor FROM to one primary table, so keeping
+    # all raw source-table aliases would allow invalid, unjoined references to leak through.
+    if not _multi_source:
+        for _row in analysis_rows:
+            _st = (_row.get("source_table") or "").strip().upper().split("\n")[0].split(",")[0].strip().split(".")[-1]
+            if _st:
+                all_valid_aliases.add(_st)
 
     select_lines = []
     insert_cols = []
@@ -825,6 +847,12 @@ def build_control_insert_sql(
             for _undef_a in _undef_aliases:
                 if _undef_a in combined_alias_rename:
                     expr = replace_alias_token(expr, _undef_a, combined_alias_rename[_undef_a])
+                    continue
+                # Handle numbered alias drift (e.g. CL_VAL_20 -> CL_VAL_1) by base alias.
+                _undef_base = re.sub(r"_\d+$", "", _undef_a)
+                _cands = alias_by_base.get(_undef_base, [])
+                if _cands:
+                    expr = replace_alias_token(expr, _undef_a, _cands[0])
             # Recheck after targeted renames
             _still_undef = any(
                 m.group(1).upper() not in all_valid_aliases
