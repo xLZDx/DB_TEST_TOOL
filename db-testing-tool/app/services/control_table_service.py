@@ -851,6 +851,12 @@ def build_control_insert_sql(
                 # Handle numbered alias drift (e.g. CL_VAL_20 -> CL_VAL_1) by base alias.
                 _undef_base = re.sub(r"_\d+$", "", _undef_a)
                 _cands = alias_by_base.get(_undef_base, [])
+                if not _cands:
+                    # Fuzzy fallback for small naming drifts:
+                    # FA_NUMBER -> FA_NUMBER_V_1, SRC_TAX_CODE -> SRC_TAX_CODE_LKUP_1, etc.
+                    for _base, _base_cands in alias_by_base.items():
+                        if _base.startswith(_undef_base) or _undef_base.startswith(_base):
+                            _cands.extend(_base_cands)
                 if _cands:
                     expr = replace_alias_token(expr, _undef_a, _cands[0])
             # Recheck after targeted renames
@@ -2135,16 +2141,8 @@ def normalize_source_expression_aliases(expr: str, *, source_schema: str = "", s
     if table_u:
         text = re.sub(r"\bS\.", f"{table_u}.", text, flags=re.IGNORECASE)
 
-    # If a single unknown alias remains, replace it with table name.
-    lk_pattern = re.compile(r'^(?:LK\d*|[A-Z_]+_\d+)$')
-    aliases = {
-        a.upper()
-        for a in re.findall(r"\b([A-Z_][A-Z0-9_]*)\.", text, flags=re.IGNORECASE)
-        if a and a.upper() != table_u and not lk_pattern.match(a.upper())
-    }
-    if len(aliases) == 1 and table_u:
-        only_alias = next(iter(aliases))
-        text = re.sub(rf"\b{re.escape(only_alias)}\.", f"{table_u}.", text, flags=re.IGNORECASE)
+    # Do not coerce arbitrary aliases to source table names. That heuristic can
+    # corrupt valid lookup expressions such as AR_DIM.COL or FA_NUMBER.COL.
     return text
 
 

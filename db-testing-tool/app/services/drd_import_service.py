@@ -878,35 +878,74 @@ def _read_excel(file_bytes: bytes, sheet_name: Optional[str] = None) -> List[Lis
 def _pick_best_drd_sheet(wb) -> Any:
     """Pick the best DRD data sheet from an openpyxl Workbook.
 
-    Priority:
-    1. Sheet whose name starts with ``Table-View``
-    2. Sheet that contains typical DRD header indicators
-    3. The active (first) sheet
+     Priority:
+     1. Prefer ``Table-View (2)`` style tabs when present
+     2. Among ``Table-View*`` tabs, pick the one with strongest header match
+         and the highest non-empty physical-name coverage in column B below header
+     3. Otherwise pick the sheet with strongest DRD header indicators
+     4. Fallback to active (first) sheet
     """
     _header_indicators = [
         "logical name", "physical name", "target column", "target attribute",
         "source attribute", "source column", "column name", "source table",
         "transformation", "data type",
     ]
-    candidates = []
-    for sn in wb.sheetnames:
-        if sn.lower().startswith("table-view") or sn.lower().startswith("table view"):
-            candidates.append(sn)
-    if len(candidates) == 1:
-        return wb[candidates[0]]
-    # Score each sheet by header indicator matches
-    best_sheet = None
-    best_score = -1
-    for sn in (candidates or wb.sheetnames):
-        ws = wb[sn]
+    def _norm_name(name: str) -> str:
+        return re.sub(r"[\s_\-]+", "", (name or "").lower())
+
+    def _header_score(ws) -> int:
+        best = 0
         for row_vals in ws.iter_rows(min_row=1, max_row=15, values_only=True):
             cells = [str(c).strip().lower() if c else "" for c in row_vals]
             score = sum(1 for ind in _header_indicators if any(ind in c for c in cells))
-            if score > best_score:
-                best_score = score
-                best_sheet = ws
-                if score >= 3:
-                    return ws
+            if score > best:
+                best = score
+        return best
+
+    def _col_b_non_empty_below_header(ws) -> int:
+        rows = [[cell.value for cell in row] for row in ws.iter_rows()]
+        if not rows:
+            return 0
+        header_idx, _headers = _find_header_row(rows)
+        count = 0
+        for row in rows[header_idx + 1:]:
+            # Column B contains physical target name in enterprise DRD template.
+            val = row[1] if len(row) > 1 else None
+            if val is not None and str(val).strip():
+                count += 1
+        return count
+
+    candidates = [
+        sn for sn in wb.sheetnames
+        if _norm_name(sn).startswith("tableview")
+    ]
+
+    if candidates:
+        scored = []
+        for sn in candidates:
+            ws = wb[sn]
+            ns = _norm_name(sn)
+            prefers_tab2 = 1 if "(2)" in sn or ns.endswith("2") else 0
+            scored.append((
+                prefers_tab2,
+                _header_score(ws),
+                _col_b_non_empty_below_header(ws),
+                ws,
+            ))
+        scored.sort(key=lambda t: (t[0], t[1], t[2]), reverse=True)
+        return scored[0][3]
+
+    # Fallback: score each sheet by header indicator matches.
+    best_sheet = None
+    best_score = -1
+    for sn in wb.sheetnames:
+        ws = wb[sn]
+        score = _header_score(ws)
+        if score > best_score:
+            best_score = score
+            best_sheet = ws
+            if score >= 3:
+                return ws
     return best_sheet or wb.active
 
 
@@ -1804,12 +1843,78 @@ def _extract_lookup_spec(
             return True
         return t.endswith("_DIM") or t.endswith("_MAP") or t.endswith("CL_VAL") or t == "CL_VAL"
 
+    def _normalize_lookup_table_token(token: str) -> str:
+        t = (token or "").strip().upper()
+        if "." in t:
+            return t
+        if src_schema:
+            return f"{src_schema.upper()}.{t}"
+        return t
+
     # Pattern 0: Explicit LEFT [OUTER] JOIN schema.table alias ON col1 = col2
-    m0 = re.search(r'LEFT\s+(?:OUTER\s+)?JOIN\s+([\w\.]+)\s+\w+\s+ON\s+([\w\.]+)\s*=\s*([\w\.]+)', upper)
+    m0 = re.search(r'LEFT\s+(?:OUTER\s+)?JOIN\s+(?:TO\s+)?([\w\.]+)\s+\w+(?:\s+TABLE)?\s+ON\s+([\w\.]+)\s*=\s*([\w\.]+)', upper)
     if m0:
         lk_tbl = m0.group(1)
         _, lk_join_col = _column_token_parts(m0.group(2))
         _, src_col = _column_token_parts(m0.group(3))
+        if _looks_like_lookup_table(lk_tbl) and lk_join_col and src_col:
+            return {
+                "lookup_table": lk_tbl,
+                "source_lookup_col": src_col,
+                "lookup_join_col": lk_join_col,
+                "lookup_value_col": target_col_u,
+                "extra_filter": _extract_lookup_filters(transformation),
+                "explicit_on_clause": True,
+            }
+
+    # Pattern 0b: "LOOK UP USING A.B = C.D"
+    m0b = re.search(r'(?:LOOK\s*UP|LOOKUP)\s+USING\s+([A-Z0-9_\.]+)\s*=\s*([A-Z0-9_\.]+)', upper)
+    if m0b:
+        left_tok = m0b.group(1)
+        right_tok = m0b.group(2)
+        left_tbl, left_col = _column_token_parts(left_tok)
+        right_tbl, right_col = _column_token_parts(right_tok)
+
+        src_table_u = (src_table or "").strip().upper().split(".")[-1]
+        src_schema_u = (src_schema or "").strip().upper()
+
+        def _matches_src(tbl: str) -> bool:
+            t = (tbl or "").strip().upper()
+            if not t:
+                return False
+            if t == src_table_u:
+                return True
+            if src_schema_u and t == f"{src_schema_u}.{src_table_u}":
+                return True
+            return False
+
+        # If one side references the row's source table, treat the other side as driving source.
+        if _matches_src(right_tbl):
+            lk_tbl = right_tbl
+            lk_join_col = right_col
+            src_col = left_col
+        elif _matches_src(left_tbl):
+            lk_tbl = left_tbl
+            lk_join_col = left_col
+            src_col = right_col
+        else:
+            # Fallback: keep non-TXN side as lookup table when possible.
+            left_is_txn = (left_tbl or "").strip().upper().endswith(".TXN") or (left_tbl or "").strip().upper() == "TXN"
+            right_is_txn = (right_tbl or "").strip().upper().endswith(".TXN") or (right_tbl or "").strip().upper() == "TXN"
+            if left_is_txn and not right_is_txn:
+                lk_tbl = right_tbl
+                lk_join_col = right_col
+                src_col = left_col
+            elif right_is_txn and not left_is_txn:
+                lk_tbl = left_tbl
+                lk_join_col = left_col
+                src_col = right_col
+            else:
+                lk_tbl = right_tbl or left_tbl
+                lk_join_col = right_col or left_col
+                src_col = left_col or src_attr_u
+
+        lk_tbl = _normalize_lookup_table_token(lk_tbl)
         if _looks_like_lookup_table(lk_tbl) and lk_join_col and src_col:
             return {
                 "lookup_table": lk_tbl,
