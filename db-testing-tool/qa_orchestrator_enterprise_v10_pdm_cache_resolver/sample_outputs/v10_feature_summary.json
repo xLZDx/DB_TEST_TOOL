@@ -1,0 +1,17 @@
+{
+  "version": "v10",
+  "features": [
+    "PDM cache validation",
+    "PDM-based table/attribute prediction",
+    "automatic backfill request hook",
+    "DRD-only generation when XML is unavailable",
+    "XML optional semantic quality gate",
+    "statement modes: source_select, insert_select, cte, merge"
+  ],
+  "recommended_modes": {
+    "DRD generator": "insert_select",
+    "control table": "cte",
+    "debug": "source_select",
+    "target load simulation": "merge"
+  }
+}

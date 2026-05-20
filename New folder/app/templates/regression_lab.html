@@ -1,0 +1,1282 @@
+{% extends "base.html" %}
+{% block title %}Regression Lab – DB Testing Tool{% endblock %}
+{% block page_title %}Regression Lab{% endblock %}
+{% block topbar_actions %}
+    <button class="btn btn-outline" onclick="syncRegressionCatalogFromUi()">Sync Index</button>
+    <button class="btn btn-outline" onclick="validateRegressionCatalogFromUi()">Validate</button>
+{% endblock %}
+
+{% block content %}
+<style>
+.rl-sect-hdr { display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none; gap:12px; }
+.rl-sect-toggle { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:14px; padding:0 4px; line-height:1; }
+.rl-sect-body.rl-collapsed { display:none !important; }
+.rl-kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+.rl-kpi { background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; padding:14px 12px; text-align:center; }
+.rl-kpi-value { font-size:28px; font-weight:700; color:var(--text); }
+.rl-kpi-label { font-size:11px; color:var(--text-muted); margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
+.rl-report-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+.rl-report-list { background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; padding:12px; max-height:280px; overflow:auto; }
+.rl-report-list-item { display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.05); font-size:12px; }
+.rl-report-list-item:last-child { border-bottom:none; }
+.rl-report-list-item .rl-report-name { color:var(--text); font-weight:500; flex:1; }
+.rl-report-list-item .rl-report-count { color:var(--text-muted); font-weight:700; margin-left:12px; }
+.rl-report-list-item .rl-report-meta { color:var(--text-muted); font-size:11px; margin-left:8px; }
+.rl-group-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; }
+.rl-group-card { background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; padding:12px; }
+.rl-group-title { font-size:14px; font-weight:700; color:var(--text); display:flex; justify-content:space-between; gap:8px; }
+.rl-group-suites { margin-top:8px; max-height:180px; overflow:auto; }
+.rl-group-suites div { font-size:12px; color:var(--text-muted); padding:3px 0; border-bottom:1px solid rgba(255,255,255,.04); }
+.rl-results-box { background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; padding:12px; min-height:160px; white-space:pre-wrap; }
+.rl-table-note { font-size:11px; color:var(--text-muted); }
+.rl-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.rl-plan-row { background:rgba(96,165,250,.08); font-weight:700; }
+.rl-suite-row { background:rgba(34,197,94,.07); }
+.rl-mono { font-family:monospace; font-size:11px; }
+.rl-header-actions { display:flex; align-items:center; gap:8px; }
+.rl-results-box.rl-summary-box { min-height:96px; max-height:180px; overflow:auto; }
+.rl-search-results-wrap { max-height:520px; overflow:auto; }
+.rl-group-suite-card { padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+.rl-group-suite-card:last-child { border-bottom:none; }
+.rl-group-suite-name { font-size:12px; font-weight:700; color:var(--text); }
+.rl-group-suite-plan { font-size:11px; color:var(--text-muted); margin-top:2px; }
+.rl-card-fullscreen { position:fixed !important; inset:0 !important; z-index:1600; margin:0 !important; border-radius:0 !important; overflow:auto; }
+.rl-card-fullscreen .rl-search-results-wrap { max-height:calc(100vh - 320px); }
+.rl-card-fullscreen .rl-results-box.rl-summary-box { max-height:220px; }
+.rl-card-fullscreen .rl-catalog-table-wrap { max-height:calc(100vh - 250px); overflow:auto; }
+.rl-filter-card { background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:12px; }
+.rl-filter-list { max-height:180px; overflow:auto; border:1px solid var(--border); border-radius:4px; padding:4px; background:rgba(0,0,0,.15); }
+.rl-filter-list label { display:block; font-size:11px; padding:3px 6px; color:var(--text-muted); cursor:pointer; border-radius:3px; }
+.rl-filter-list label:hover { background:rgba(255,255,255,.06); }
+.rl-filter-list label input { margin-right:6px; }
+.rl-filter-search { width:100%; padding:4px 8px; font-size:11px; margin-bottom:4px; border:1px solid var(--border); border-radius:4px; background:var(--bg-dark); color:var(--text); }
+</style>
+
+<div class="card mb-16">
+    <div class="card-header rl-sect-hdr" onclick="toggleRegressionSection('rl-sync-body','rl-sync-toggle')">
+        <h2 style="margin:0">Catalog Sync, Defaults, Exclusions</h2>
+        <button class="rl-sect-toggle" id="rl-sync-toggle" type="button">▼</button>
+    </div>
+    <div class="rl-sect-body" id="rl-sync-body">
+        <div class="grid grid-4" style="gap:12px;margin-bottom:12px">
+            <div class="form-group" style="margin:0">
+                <label>Project</label>
+                <select class="form-control" id="rl-project" onchange="onRegressionProjectChanged()"></select>
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>Area Path Prefixes</label>
+                <input class="form-control" id="rl-area-paths" list="rl-area-options" placeholder="CDSIntegration\CDSCCAL">
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>Iteration Path Prefixes</label>
+                <input class="form-control" id="rl-iteration-paths" list="rl-iteration-options" placeholder="CDSIntegration\CCAL">
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>Changed Since</label>
+                <input class="form-control" id="rl-min-changed-date" type="date">
+            </div>
+        </div>
+        <div class="grid grid-4" style="gap:12px;margin-bottom:12px">
+            <div class="form-group" style="margin:0">
+                <label>Tags Contains</label>
+                <input class="form-control" id="rl-tags" placeholder="regression, balances, aml">
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>Suite Name Contains</label>
+                <input class="form-control" id="rl-suite-filter" placeholder="Regression, CECL, R1">
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>Exclusion Keywords</label>
+                <input class="form-control" id="rl-exclusion-keywords" placeholder="archive,arch,junk">
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>Max Cases Per Sync</label>
+                <input class="form-control" id="rl-max-cases" type="number" value="300" min="25" max="1500">
+            </div>
+        </div>
+        <div class="rl-toolbar" style="margin-bottom:12px">
+            <label class="checkbox-label" style="margin:0"><input type="checkbox" id="rl-include-archived"> Include Archive/Junk matches</label>
+            <button class="btn btn-outline btn-sm" onclick="saveRegressionSettings()">Save Defaults/Exclusions</button>
+            <span class="text-muted rl-table-note">CDSIntegration defaults will auto-fill to CDSIntegration\CDSCCAL and CDSIntegration\CCAL.</span>
+        </div>
+        <datalist id="rl-area-options"></datalist>
+        <datalist id="rl-iteration-options"></datalist>
+        <div class="rl-toolbar">
+            <button class="btn btn-primary" onclick="syncRegressionCatalogFromUi()">Sync Regression Index</button>
+            <button class="btn btn-outline" onclick="resetRegressionDashboard()">Refresh Dashboard</button>
+            <span class="text-muted" id="rl-sync-status" style="font-size:12px">No sync started yet.</span>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-16">
+    <div class="card-header rl-sect-hdr" onclick="toggleRegressionSection('rl-report-body','rl-report-toggle')">
+        <h2 style="margin:0">Reporting & Aggregations</h2>
+        <button class="rl-sect-toggle" id="rl-report-toggle" type="button">▼</button>
+    </div>
+    <div class="rl-sect-body" id="rl-report-body">
+        <div class="rl-kpi-grid" id="rl-kpis"></div>
+        <div class="rl-report-grid">
+            <div class="rl-report-list">
+                <h3 style="margin:0 0 8px 0;font-size:13px;color:var(--text)">Top Plans</h3>
+                <div id="rl-top-plans"></div>
+            </div>
+            <div class="rl-report-list">
+                <h3 style="margin:0 0 8px 0;font-size:13px;color:var(--text)">Top Suites</h3>
+                <div id="rl-top-suites"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-16">
+    <div class="card-header rl-sect-hdr" onclick="toggleRegressionSection('rl-groups-body','rl-groups-toggle')">
+        <h2 style="margin:0">Grouped Suites</h2>
+        <button class="rl-sect-toggle" id="rl-groups-toggle" type="button">▼</button>
+    </div>
+    <div class="rl-sect-body" id="rl-groups-body">
+        <div class="rl-group-grid" id="rl-group-grid"></div>
+    </div>
+</div>
+
+<div class="card mb-16">
+    <div class="card-header rl-sect-hdr" onclick="toggleRegressionSection('rl-filter-discovery-body','rl-filter-discovery-toggle')">
+        <h2 style="margin:0">Filter Discovery (Iterations / Areas / Plans / Suites)</h2>
+        <button class="rl-sect-toggle" id="rl-filter-discovery-toggle" type="button">▼</button>
+    </div>
+    <div class="rl-sect-body" id="rl-filter-discovery-body">
+        <div class="rl-toolbar" style="margin-bottom:10px">
+            <input class="form-control" id="rl-filter-discovery-search" placeholder="Type to filter (e.g. CDSCCAL, CCAL, Balances)" style="max-width:400px" oninput="loadRegressionFilterDiscovery()">
+            <button class="btn btn-outline btn-sm" onclick="loadRegressionFilterDiscovery()">Refresh</button>
+            <button class="btn btn-outline btn-sm" onclick="applyFilterDiscoveryToExclusion()">Add Unchecked to Exclusion</button>
+            <span class="rl-table-note">Select iterations/areas/plans/suites you want to KEEP. Unselected can be excluded.</span>
+        </div>
+        <div class="grid grid-4" style="gap:12px">
+            <div class="rl-filter-card">
+                <h4 style="margin:0 0 6px 0;font-size:12px;color:var(--text)">Iterations <span class="text-muted" id="rl-fd-iter-count"></span></h4>
+                <input class="rl-filter-search" id="rl-fd-iter-search" placeholder="Filter iterations..." oninput="filterDiscoveryList('rl-fd-iter-list', this.value)">
+                <div class="rl-filter-list" id="rl-fd-iter-list"></div>
+            </div>
+            <div class="rl-filter-card">
+                <h4 style="margin:0 0 6px 0;font-size:12px;color:var(--text)">Areas <span class="text-muted" id="rl-fd-area-count"></span></h4>
+                <input class="rl-filter-search" id="rl-fd-area-search" placeholder="Filter areas..." oninput="filterDiscoveryList('rl-fd-area-list', this.value)">
+                <div class="rl-filter-list" id="rl-fd-area-list"></div>
+            </div>
+            <div class="rl-filter-card">
+                <h4 style="margin:0 0 6px 0;font-size:12px;color:var(--text)">Plans <span class="text-muted" id="rl-fd-plan-count"></span></h4>
+                <input class="rl-filter-search" id="rl-fd-plan-search" placeholder="Filter plans..." oninput="filterDiscoveryList('rl-fd-plan-list', this.value)">
+                <div class="rl-filter-list" id="rl-fd-plan-list"></div>
+            </div>
+            <div class="rl-filter-card">
+                <h4 style="margin:0 0 6px 0;font-size:12px;color:var(--text)">Suites <span class="text-muted" id="rl-fd-suite-count"></span></h4>
+                <input class="rl-filter-search" id="rl-fd-suite-search" placeholder="Filter suites..." oninput="filterDiscoveryList('rl-fd-suite-list', this.value)">
+                <div class="rl-filter-list" id="rl-fd-suite-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-16" id="rl-catalog-card">
+    <div class="card-header rl-sect-hdr" onclick="toggleRegressionSection('rl-catalog-body','rl-catalog-toggle')">
+        <h2 style="margin:0">Indexed Regression Catalog (Plan → Suite → Test Case)</h2>
+        <div class="rl-header-actions">
+            <button class="btn btn-outline btn-sm" id="rl-catalog-fullscreen-btn" type="button" onclick="event.stopPropagation(); toggleRegressionCatalogFullscreen()">Full Screen</button>
+            <button class="rl-sect-toggle" id="rl-catalog-toggle" type="button">▼</button>
+        </div>
+    </div>
+    <div class="rl-sect-body" id="rl-catalog-body">
+        <div class="grid grid-4" style="gap:12px;margin-bottom:12px">
+            <div class="form-group" style="margin:0"><label>Search Text</label><input class="form-control" id="rl-search-text" placeholder="balances, tax lots, performance"></div>
+            <div class="form-group" style="margin:0"><label>Group</label><select class="form-control" id="rl-group-filter"><option value="">All groups</option><option>Transactions</option><option>Positions</option><option>Balances</option><option>AML</option><option>Performance/CF Generation</option><option>Other</option></select></div>
+            <div class="form-group" style="margin:0"><label>Validation</label><select class="form-control" id="rl-status-filter"><option value="">All statuses</option><option value="passed">Passed</option><option value="partial">Partial</option><option value="failed">Failed</option><option value="no_sql">No SQL</option><option value="not_validated">Not Validated</option></select></div>
+            <div class="form-group" style="margin:0"><label>Include Excluded</label><select class="form-control" id="rl-include-excluded"><option value="0">No</option><option value="1">Yes</option></select></div>
+        </div>
+        <div class="grid grid-6" style="gap:12px;margin-bottom:12px">
+            <div class="form-group" style="margin:0"><label>Plan</label><input class="form-control" id="rl-filter-plan" placeholder="CCAL Team Test Items"></div>
+            <div class="form-group" style="margin:0"><label>Suite</label><input class="form-control" id="rl-filter-suite" placeholder="CECL / R1"></div>
+            <div class="form-group" style="margin:0"><label>Iteration</label><input class="form-control" id="rl-filter-iteration" placeholder="CDSIntegration\\CCAL"></div>
+            <div class="form-group" style="margin:0"><label>Area</label><input class="form-control" id="rl-filter-area" placeholder="CDSIntegration\\CDSCCAL"></div>
+            <div class="form-group" style="margin:0"><label>Owner</label><input class="form-control" id="rl-filter-owner" placeholder="ikorostelev"></div>
+            <div class="form-group" style="margin:0"><label>Title/Tags</label><input class="form-control" id="rl-filter-title-tags" placeholder="test name keyword"></div>
+        </div>
+        <div class="rl-toolbar" style="margin-bottom:10px">
+            <button class="btn btn-outline btn-sm" onclick="loadRegressionCatalog()">Apply Filters</button>
+            <button class="btn btn-outline btn-sm" onclick="collapseAllCatalogPlans()">Collapse All</button>
+            <button class="btn btn-outline btn-sm" onclick="expandAllCatalogPlans()">Expand All</button>
+            <button class="btn btn-outline btn-sm" onclick="selectAllRegressionCatalog(true)">Select All Visible</button>
+            <button class="btn btn-outline btn-sm" onclick="selectAllRegressionCatalog(false)">Clear</button>
+            <button class="btn btn-outline btn-sm" onclick="promoteSelectedRegressionItems()">Create Local Execution Tests</button>
+            <select class="form-control" id="rl-exclude-mode" style="width:auto">
+                <option value="item">Exclude by Test Case</option>
+                <option value="suite">Exclude by Suite</option>
+                <option value="plan">Exclude by Plan</option>
+            </select>
+            <button class="btn btn-danger btn-sm" onclick="excludeFilteredCatalog()">Add Filtered to Exclusion List</button>
+            <span class="rl-table-note">Archive/Arch/Junk are excluded by default unless "Include Archive/Junk" is enabled.</span>
+        </div>
+        <div class="table-wrap rl-catalog-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:36px"><input type="checkbox" id="rl-select-all" onchange="toggleCatalogSelectAll(this.checked)"></th>
+                        <th>Plan / Suite / Test</th>
+                        <th>Owner</th>
+                        <th>Iteration / Area</th>
+                        <th>Validation</th>
+                        <th>Links</th>
+                    </tr>
+                </thead>
+                <tbody id="rl-catalog-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2" style="gap:16px;margin-bottom:16px">
+    <div class="card" id="rl-search-card">
+        <div class="card-header rl-sect-hdr" onclick="toggleRegressionSection('rl-search-agent-body','rl-search-agent-toggle')">
+            <h2 style="margin:0">Search Agent</h2>
+            <div class="rl-header-actions">
+                <button class="btn btn-outline btn-sm" id="rl-search-fullscreen-btn" type="button" onclick="event.stopPropagation(); toggleRegressionSearchFullscreen()">Full Screen</button>
+                <button class="rl-sect-toggle" id="rl-search-agent-toggle" type="button">▼</button>
+            </div>
+        </div>
+        <div class="rl-sect-body" id="rl-search-agent-body">
+            <div class="form-group"><label>Request</label><textarea class="form-control" id="rl-agent-query" rows="4" placeholder="Find best RTC balances tests for CDS CCAL and suggest reusable candidates."></textarea></div>
+            <div class="rl-toolbar" style="margin-bottom:10px"><button class="btn btn-primary" onclick="runRegressionSearchAgent()">Run Search Agent</button></div>
+            <div class="rl-results-box rl-summary-box" id="rl-search-agent-output">Search agent summary will appear here.</div>
+            <div class="rl-toolbar" style="margin:10px 0 8px 0">
+                <button class="btn btn-outline btn-sm" onclick="selectAllRegressionSearchResults(true)">Select 50</button>
+                <button class="btn btn-outline btn-sm" onclick="selectAllRegressionSearchResults(false)">Clear</button>
+                <span class="text-muted rl-table-note" id="rl-search-results-meta">No search results yet.</span>
+            </div>
+            <div class="table-wrap rl-search-results-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:36px"><input type="checkbox" id="rl-search-select-all" onchange="toggleSearchSelectAll(this.checked)"></th>
+                            <th>Plan / Suite / Test</th>
+                            <th>Owner</th>
+                            <th>Iteration / Area</th>
+                            <th>Validation</th>
+                            <th>Links</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rl-search-results-tbody">
+                        <tr><td colspan="6" class="empty-state">No search results yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header rl-sect-hdr" onclick="toggleRegressionSection('rl-validation-agent-body','rl-validation-agent-toggle')">
+            <h2 style="margin:0">Validation Agent</h2>
+            <button class="rl-sect-toggle" id="rl-validation-agent-toggle" type="button">▼</button>
+        </div>
+        <div class="rl-sect-body" id="rl-validation-agent-body">
+            <div class="form-group"><label>Datasource PDM</label><select class="form-control" id="rl-validation-datasource"></select></div>
+            <div class="rl-toolbar" style="margin-bottom:10px"><button class="btn btn-primary" onclick="validateRegressionCatalogFromUi()">Validate Indexed Cases</button></div>
+            <div class="rl-results-box" id="rl-validation-output">Validation agent summary will appear here.</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header rl-sect-hdr" onclick="toggleRegressionSection('rl-execution-body','rl-execution-toggle')">
+        <h2 style="margin:0">Regression Execution Management</h2>
+        <button class="rl-sect-toggle" id="rl-execution-toggle" type="button">▼</button>
+    </div>
+    <div class="rl-sect-body" id="rl-execution-body">
+        <div class="grid grid-4" style="gap:12px;margin-bottom:12px">
+            <div class="form-group" style="margin:0"><label>Execution Source Datasource</label><select class="form-control" id="rl-exec-source-ds"></select></div>
+            <div class="form-group" style="margin:0"><label>Execution Target Datasource</label><select class="form-control" id="rl-exec-target-ds"></select></div>
+            <div class="form-group" style="margin:0"><label>Folder Filter</label><select class="form-control" id="rl-exec-folder-filter" onchange="loadRegressionExecutionTests()"></select></div>
+            <div class="form-group" style="margin:0;display:flex;align-items:flex-end"><button class="btn btn-outline w-100" onclick="loadRegressionExecutionTests()">Refresh Execution Tests</button></div>
+        </div>
+        <div class="rl-toolbar" style="margin-bottom:10px">
+            <button class="btn btn-success btn-sm" onclick="runSelectedRegressionExecutionTests()">Run Selected</button>
+            <button class="btn btn-outline btn-sm" onclick="runAllVisibleRegressionExecutionTests()">Run All Visible</button>
+            <button class="btn btn-outline btn-sm" onclick="exportSelectedRegressionTestsToTfsCsv()">Export to TFS CSV</button>
+        </div>
+        <div class="grid grid-4" style="gap:12px;margin-bottom:12px">
+            <div class="form-group" style="margin:0"><label>TFS Publish Project</label><select class="form-control" id="rl-publish-project"></select></div>
+            <div class="form-group" style="margin:0"><label>Plan ID</label><input class="form-control" id="rl-publish-plan-id" type="number" placeholder="12345"></div>
+            <div class="form-group" style="margin:0"><label>Suite Name</label><input class="form-control" id="rl-publish-suite-name" placeholder="Regression Lab - Balances"></div>
+            <div class="form-group" style="margin:0;display:flex;align-items:flex-end"><button class="btn btn-primary w-100" onclick="publishSelectedRegressionTestsToTfs()">Load Selected to TFS</button></div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th style="width:36px"><input type="checkbox" id="rl-exec-select-all" onchange="toggleExecutionSelectAll(this.checked)"></th><th>ID</th><th>Name</th><th>Folder</th><th>Severity</th><th>Actions</th></tr></thead>
+                <tbody id="rl-exec-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let _rlProjects = [];
+let _rlDatasources = [];
+let _rlCatalogItems = [];
+let _rlSearchMatches = [];
+let _rlExecutionTests = [];
+let _rlExecutionLoaded = false;
+let _rlSettings = null;
+let _rlCatalogPseudoFullscreen = false;
+let _rlSearchPseudoFullscreen = false;
+let _rlFilterDiscoveryData = null;
+const _rlSelectedCatalogIds = new Set();
+const _rlSelectedExecutionIds = new Set();
+const _rlPlanExpandState = {};
+const _rlSuiteExpandState = {};
+const _rlSearchPlanExpandState = {};
+const _rlSearchSuiteExpandState = {};
+
+function toggleRegressionSection(bodyId, toggleId) {
+    const body = document.getElementById(bodyId);
+    const toggle = document.getElementById(toggleId);
+    if (!body || !toggle) return;
+    const collapsed = body.classList.toggle('rl-collapsed');
+    toggle.textContent = collapsed ? '►' : '▼';
+}
+
+function _csvList(value) {
+    return String(value || '').split(',').map(v => v.trim()).filter(Boolean);
+}
+
+function _selectedProject() {
+    return document.getElementById('rl-project')?.value || '';
+}
+
+function _catalogFilters() {
+    const textTags = (document.getElementById('rl-filter-title-tags')?.value || '').trim();
+    return {
+        group: document.getElementById('rl-group-filter')?.value || '',
+        status: document.getElementById('rl-status-filter')?.value || '',
+        searchText: document.getElementById('rl-search-text')?.value || '',
+        areaPath: document.getElementById('rl-filter-area')?.value || '',
+        iterationPath: document.getElementById('rl-filter-iteration')?.value || '',
+        planName: document.getElementById('rl-filter-plan')?.value || '',
+        suiteName: document.getElementById('rl-filter-suite')?.value || '',
+        owner: document.getElementById('rl-filter-owner')?.value || '',
+        title: textTags,
+        tags: textTags,
+        minChangedDate: document.getElementById('rl-min-changed-date')?.value || '',
+        includeExcluded: (document.getElementById('rl-include-excluded')?.value || '0') === '1',
+    };
+}
+
+function _syncPayloadFromUi() {
+    return {
+        project: _selectedProject(),
+        area_paths: _csvList(document.getElementById('rl-area-paths')?.value),
+        iteration_paths: _csvList(document.getElementById('rl-iteration-paths')?.value),
+        tags: _csvList(document.getElementById('rl-tags')?.value),
+        suite_name_contains: document.getElementById('rl-suite-filter')?.value || '',
+        min_changed_date: document.getElementById('rl-min-changed-date')?.value || '',
+        max_cases: parseInt(document.getElementById('rl-max-cases')?.value || '300', 10) || 300,
+    };
+}
+
+function _openExternal(url) {
+    if (!url) return;
+    if (typeof openExternalWindow === 'function') openExternalWindow(url);
+    else window.open(url, '_blank');
+}
+
+function _normalizeDateInput(isoText) {
+    const raw = String(isoText || '').trim();
+    if (!raw) return '';
+    if (raw.length >= 10) return raw.slice(0, 10);
+    return raw;
+}
+
+function _clearExpandState(state) {
+    Object.keys(state || {}).forEach(key => delete state[key]);
+}
+
+function _setFieldValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+}
+
+function _setCheckedValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.checked = !!value;
+}
+
+function _syncCheckboxMaster(masterId, selector) {
+    const master = document.getElementById(masterId);
+    if (!master) return;
+    const boxes = Array.from(document.querySelectorAll(selector));
+    master.checked = !!boxes.length && boxes.every(cb => cb.checked);
+}
+
+function _syncRegressionMasterCheckboxes() {
+    _syncCheckboxMaster('rl-select-all', '.rl-catalog-cb');
+    _syncCheckboxMaster('rl-search-select-all', '.rl-search-cb');
+    _syncCheckboxMaster('rl-exec-select-all', '.rl-exec-cb');
+}
+
+function resetRegressionDashboardState() {
+    _rlCatalogItems = [];
+    _rlSearchMatches = [];
+    _rlExecutionTests = [];
+    _rlExecutionLoaded = false;
+    _rlSelectedCatalogIds.clear();
+    _rlSelectedExecutionIds.clear();
+    _clearExpandState(_rlPlanExpandState);
+    _clearExpandState(_rlSuiteExpandState);
+    _clearExpandState(_rlSearchPlanExpandState);
+    _clearExpandState(_rlSearchSuiteExpandState);
+
+    _setFieldValue('rl-tags', '');
+    _setFieldValue('rl-suite-filter', '');
+    _setFieldValue('rl-max-cases', '300');
+    _setFieldValue('rl-search-text', '');
+    _setFieldValue('rl-group-filter', '');
+    _setFieldValue('rl-status-filter', '');
+    _setFieldValue('rl-include-excluded', '0');
+    _setFieldValue('rl-filter-plan', '');
+    _setFieldValue('rl-filter-suite', '');
+    _setFieldValue('rl-filter-iteration', '');
+    _setFieldValue('rl-filter-area', '');
+    _setFieldValue('rl-filter-owner', '');
+    _setFieldValue('rl-filter-title-tags', '');
+    _setFieldValue('rl-agent-query', '');
+    _setFieldValue('rl-publish-plan-id', '');
+    _setFieldValue('rl-publish-suite-name', '');
+    _setCheckedValue('rl-select-all', false);
+    _setCheckedValue('rl-search-select-all', false);
+    _setCheckedValue('rl-exec-select-all', false);
+
+    const syncStatus = document.getElementById('rl-sync-status');
+    if (syncStatus) syncStatus.textContent = 'Dashboard cleared. Reloading current index...';
+    const searchOutput = document.getElementById('rl-search-agent-output');
+    if (searchOutput) searchOutput.textContent = 'Search agent summary will appear here.';
+    const searchMeta = document.getElementById('rl-search-results-meta');
+    if (searchMeta) searchMeta.textContent = 'No search results yet.';
+    const validationOutput = document.getElementById('rl-validation-output');
+    if (validationOutput) validationOutput.textContent = 'Validation agent summary will appear here.';
+    const kpis = document.getElementById('rl-kpis');
+    if (kpis) kpis.innerHTML = '';
+    const topPlans = document.getElementById('rl-top-plans');
+    if (topPlans) topPlans.textContent = 'Reloading...';
+    const topSuites = document.getElementById('rl-top-suites');
+    if (topSuites) topSuites.textContent = 'Reloading...';
+    const groupGrid = document.getElementById('rl-group-grid');
+    if (groupGrid) groupGrid.innerHTML = '';
+    const folderFilter = document.getElementById('rl-exec-folder-filter');
+    if (folderFilter) folderFilter.innerHTML = '<option value="">All Regression Folders</option>';
+
+    renderRegressionCatalogTable();
+    renderRegressionSearchResults();
+    renderRegressionExecutionTable();
+}
+
+async function resetRegressionDashboard() {
+    const project = _selectedProject();
+    if (!project) return;
+    resetRegressionDashboardState();
+    await onRegressionProjectChanged();
+    await refreshRegressionDashboard();
+    const syncStatus = document.getElementById('rl-sync-status');
+    if (syncStatus) syncStatus.textContent = 'Dashboard reloaded.';
+}
+
+function _setRegressionSearchFullscreenUi(active) {
+    const card = document.getElementById('rl-search-card');
+    const btn = document.getElementById('rl-search-fullscreen-btn');
+    if (card) {
+        if (active || _rlSearchPseudoFullscreen) card.classList.add('rl-card-fullscreen');
+        else card.classList.remove('rl-card-fullscreen');
+    }
+    if (btn) btn.textContent = (active || _rlSearchPseudoFullscreen) ? 'Exit Full Screen' : 'Full Screen';
+}
+
+function _syncRegressionSearchFullscreenUi() {
+    _setRegressionSearchFullscreenUi(false);
+}
+
+function toggleRegressionSearchFullscreen() {
+    _rlSearchPseudoFullscreen = !_rlSearchPseudoFullscreen;
+    _syncRegressionSearchFullscreenUi();
+}
+
+function _setRegressionCatalogFullscreenUi(active) {
+    const card = document.getElementById('rl-catalog-card');
+    const btn = document.getElementById('rl-catalog-fullscreen-btn');
+    if (card) {
+        if (active || _rlCatalogPseudoFullscreen) card.classList.add('rl-card-fullscreen');
+        else card.classList.remove('rl-card-fullscreen');
+    }
+    if (btn) btn.textContent = (active || _rlCatalogPseudoFullscreen) ? 'Exit Full Screen' : 'Full Screen';
+}
+
+function _syncRegressionCatalogFullscreenUi() {
+    _setRegressionCatalogFullscreenUi(false);
+}
+
+function toggleRegressionCatalogFullscreen() {
+    _rlCatalogPseudoFullscreen = !_rlCatalogPseudoFullscreen;
+    _syncRegressionCatalogFullscreenUi();
+}
+
+async function initRegressionLab() {
+    try {
+        renderRegressionCatalogTable();
+        renderRegressionSearchResults();
+        renderRegressionExecutionTable();
+        _syncRegressionSearchFullscreenUi();
+        const [projectsResp, datasources] = await Promise.all([
+            API.getTfsProjects(),
+            API.getDatasources(),
+        ]);
+        _rlProjects = projectsResp.projects || [];
+        _rlDatasources = datasources || [];
+        const options = _rlProjects.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+        document.getElementById('rl-project').innerHTML = options;
+        document.getElementById('rl-publish-project').innerHTML = options;
+
+        const dsOptions = '<option value="">(none)</option>' + _rlDatasources.map(ds => `<option value="${ds.id}">${escapeHtml(ds.name)}</option>`).join('');
+        document.getElementById('rl-validation-datasource').innerHTML = dsOptions;
+        document.getElementById('rl-exec-source-ds').innerHTML = dsOptions;
+        document.getElementById('rl-exec-target-ds').innerHTML = dsOptions;
+
+        if (_rlProjects.length) {
+            document.getElementById('rl-project').value = _rlProjects[0];
+            document.getElementById('rl-publish-project').value = _rlProjects[0];
+            await onRegressionProjectChanged();
+            await refreshRegressionDashboard();
+        }
+    } catch (e) {
+        showToast('Failed to initialize Regression Lab: ' + e.message, 'error');
+    }
+}
+
+async function onRegressionProjectChanged() {
+    const project = _selectedProject();
+    if (!project) return;
+    document.getElementById('rl-publish-project').value = project;
+
+    try {
+        _rlSettings = await API.getRegressionSettings(project);
+        document.getElementById('rl-area-paths').value = (_rlSettings.default_area_paths || []).join(', ');
+        document.getElementById('rl-iteration-paths').value = (_rlSettings.default_iteration_paths || []).join(', ');
+        document.getElementById('rl-exclusion-keywords').value = (_rlSettings.exclusion_keywords || []).join(', ');
+        document.getElementById('rl-min-changed-date').value = _normalizeDateInput(_rlSettings.min_changed_date) || '2020-01-01';
+        document.getElementById('rl-include-archived').checked = !!_rlSettings.include_archived;
+
+        if (project === 'CDSIntegration') {
+            if (!document.getElementById('rl-area-paths').value.trim()) {
+                document.getElementById('rl-area-paths').value = 'CDSIntegration\\CDSCCAL';
+            }
+            if (!document.getElementById('rl-iteration-paths').value.trim()) {
+                document.getElementById('rl-iteration-paths').value = 'CDSIntegration\\CCAL';
+            }
+        }
+    } catch (e) {
+        showToast('Failed to load regression settings: ' + e.message, 'error');
+    }
+
+    try {
+        const [areas, iterations] = await Promise.all([
+            API.getTfsClassificationNodes(project, 'areas', 6),
+            API.getTfsClassificationNodes(project, 'iterations', 6),
+        ]);
+        document.getElementById('rl-area-options').innerHTML = (areas.nodes || []).map(n => `<option value="${escapeHtml(n.path)}"></option>`).join('');
+        document.getElementById('rl-iteration-options').innerHTML = (iterations.nodes || []).map(n => `<option value="${escapeHtml(n.path)}"></option>`).join('');
+    } catch (_) {}
+}
+
+async function saveRegressionSettings() {
+    const project = _selectedProject();
+    if (!project) return;
+    try {
+        _rlSettings = await API.patchRegressionSettings(project, {
+            default_area_paths: _csvList(document.getElementById('rl-area-paths')?.value),
+            default_iteration_paths: _csvList(document.getElementById('rl-iteration-paths')?.value),
+            exclusion_keywords: _csvList(document.getElementById('rl-exclusion-keywords')?.value),
+            min_changed_date: document.getElementById('rl-min-changed-date')?.value || null,
+            include_archived: !!document.getElementById('rl-include-archived')?.checked,
+        });
+        showToast('Regression defaults/exclusions saved', 'success');
+    } catch (e) {
+        showToast('Failed to save settings: ' + e.message, 'error');
+    }
+}
+
+async function syncRegressionCatalogFromUi() {
+    const payload = _syncPayloadFromUi();
+    if (!payload.project) {
+        showToast('Select a TFS project first', 'warning');
+        return;
+    }
+    const statusEl = document.getElementById('rl-sync-status');
+    if (statusEl) statusEl.textContent = 'Syncing regression index...';
+    try {
+        const res = await API.syncRegressionCatalog(payload);
+        if (statusEl) statusEl.textContent = `Indexed ${res.indexed || 0} cases from ${res.points_scanned || 0} scanned points.`;
+        showToast(`Regression index sync completed: ${res.indexed || 0} indexed`, 'success');
+        await refreshRegressionDashboard();
+    } catch (e) {
+        if (statusEl) statusEl.textContent = 'Sync failed.';
+        showToast('Regression sync failed: ' + e.message, 'error');
+    }
+}
+
+async function refreshRegressionDashboard() {
+    await Promise.all([
+        loadRegressionCatalog(),
+        loadRegressionGroups(),
+        loadRegressionReport(),
+        loadRegressionFilterDiscovery(),
+    ]);
+}
+
+async function loadRegressionCatalog() {
+    const project = _selectedProject();
+    if (!project) return;
+    try {
+        const res = await API.getRegressionCatalog(project, _catalogFilters());
+        _rlCatalogItems = res.items || [];
+        renderRegressionCatalogTable();
+    } catch (e) {
+        showToast('Failed to load regression catalog: ' + e.message, 'error');
+    }
+}
+
+function renderRegressionValidationBadge(status, score) {
+    const normalized = status || 'not_validated';
+    const badgeClass = normalized === 'passed' ? 'badge-success' : normalized === 'partial' ? 'badge-warning' : normalized === 'failed' ? 'badge-danger' : 'badge-secondary';
+    const label = normalized.replace('_', ' ');
+    const scoreText = Number.isFinite(score) ? ` (${score})` : '';
+    return `<span class="badge ${badgeClass}">${escapeHtml(label)}${escapeHtml(scoreText)}</span>`;
+}
+
+function _groupRegressionItems(items) {
+    const plans = {};
+    for (const item of items || []) {
+        const planKey = `${item.plan_id || 0}|${item.plan_name || 'Unassigned Plan'}`;
+        const suiteKey = `${item.suite_id || 0}|${item.suite_name || 'Unassigned Suite'}`;
+        if (!plans[planKey]) plans[planKey] = { key: planKey, plan: item, suites: {} };
+        if (!plans[planKey].suites[suiteKey]) plans[planKey].suites[suiteKey] = { key: suiteKey, suite: item, items: [] };
+        plans[planKey].suites[suiteKey].items.push(item);
+    }
+    return Object.values(plans).sort((a, b) => String(a.plan.plan_name || '').localeCompare(String(b.plan.plan_name || '')));
+}
+
+function _renderRegressionTreeTable(tbodyId, items, options = {}) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+
+    const planEntries = _groupRegressionItems(items);
+    if (!planEntries.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">${escapeHtml(options.emptyMessage || 'No indexed regression cases found.')}</td></tr>`;
+        _syncRegressionMasterCheckboxes();
+        return;
+    }
+
+    let html = '';
+    for (const planGroup of planEntries) {
+        const planRowId = `${options.prefix || 'catalog'}_plan_${planGroup.key.replace(/[^a-zA-Z0-9_]/g, '_')}`;
+        if (options.planExpandState?.[planRowId] === undefined) options.planExpandState[planRowId] = true;
+        const planItemsCount = Object.values(planGroup.suites).reduce((sum, suite) => sum + suite.items.length, 0);
+        html += `
+            <tr class="rl-plan-row">
+                <td></td>
+                <td>
+                    <button class="btn btn-outline btn-sm" onclick="${options.togglePlanFn || 'togglePlanExpand'}('${planRowId}')">${options.planExpandState[planRowId] ? '▼' : '►'}</button>
+                    <strong>${escapeHtml(planGroup.plan.plan_name || 'Unassigned Plan')}</strong>
+                    <span class="text-muted">(${planItemsCount} test case(s))</span>
+                </td>
+                <td class="text-muted">-</td>
+                <td class="text-muted">-</td>
+                <td class="text-muted">-</td>
+                <td>
+                    ${planGroup.plan.test_plan_web_url ? `<button class="btn btn-outline btn-sm" onclick="_openExternal('${escapeHtml(planGroup.plan.test_plan_web_url)}')">Open Plan</button>` : '<span class="text-muted">-</span>'}
+                </td>
+            </tr>
+        `;
+
+        for (const suiteGroup of Object.values(planGroup.suites).sort((a, b) => String(a.suite.suite_name || '').localeCompare(String(b.suite.suite_name || '')))) {
+            const suiteRowId = `${options.prefix || 'catalog'}_suite_${suiteGroup.key.replace(/[^a-zA-Z0-9_]/g, '_')}`;
+            if (options.suiteExpandState?.[suiteRowId] === undefined) options.suiteExpandState[suiteRowId] = true;
+            const showSuite = !!options.planExpandState[planRowId];
+            html += `
+                <tr class="rl-suite-row" data-plan="${planRowId}" style="display:${showSuite ? '' : 'none'}">
+                    <td></td>
+                    <td>
+                        <span style="margin-left:18px"></span>
+                        <button class="btn btn-outline btn-sm" onclick="${options.toggleSuiteFn || 'toggleSuiteExpand'}('${suiteRowId}')">${options.suiteExpandState[suiteRowId] ? '▼' : '►'}</button>
+                        <strong>${escapeHtml(suiteGroup.suite.suite_name || 'Unassigned Suite')}</strong>
+                        <span class="text-muted">(${suiteGroup.items.length})</span>
+                    </td>
+                    <td class="text-muted">-</td>
+                    <td class="text-muted">-</td>
+                    <td class="text-muted">-</td>
+                    <td>
+                        ${suiteGroup.suite.test_suite_web_url ? `<button class="btn btn-outline btn-sm" onclick="_openExternal('${escapeHtml(suiteGroup.suite.test_suite_web_url)}')">Open Suite</button>` : '<span class="text-muted">-</span>'}
+                    </td>
+                </tr>
+            `;
+
+            for (const item of suiteGroup.items) {
+                const showItem = !!options.planExpandState[planRowId] && !!options.suiteExpandState[suiteRowId];
+                html += `
+                    <tr data-plan="${planRowId}" data-suite="${suiteRowId}" style="display:${showItem ? '' : 'none'}">
+                        <td><input type="checkbox" class="${options.checkboxClass || 'rl-catalog-cb'}" data-regression-id="${item.id}" value="${item.id}" ${_rlSelectedCatalogIds.has(item.id) ? 'checked' : ''} onchange="toggleRegressionSelection(${item.id}, this.checked)"></td>
+                        <td>
+                            <strong>${escapeHtml(item.title)}</strong><br>
+                            <span class="text-muted rl-mono">TC ${item.test_case_id} / TP ${item.test_point_id || '-'}</span>
+                        </td>
+                        <td>${escapeHtml(item.owner || '-')}</td>
+                        <td>
+                            <div>${escapeHtml(item.iteration_path || '-')}</div>
+                            <div class="text-muted">${escapeHtml(item.area_path || '-')}</div>
+                        </td>
+                        <td>${renderRegressionValidationBadge(item.validation_status, item.validation_score)}<br><span class="text-muted">${escapeHtml(item.changed_date ? item.changed_date.substring(0, 10) : '')}</span></td>
+                        <td>
+                            <div class="flex gap-8" style="align-items:center;flex-wrap:wrap">
+                                ${item.test_case_web_url ? `<button class="btn btn-outline btn-sm" onclick="_openExternal('${escapeHtml(item.test_case_web_url)}')">Open Test</button>` : ''}
+                                ${item.test_plan_web_url ? `<button class="btn btn-outline btn-sm" onclick="_openExternal('${escapeHtml(item.test_plan_web_url)}')">Plan</button>` : ''}
+                                ${item.test_suite_web_url ? `<button class="btn btn-outline btn-sm" onclick="_openExternal('${escapeHtml(item.test_suite_web_url)}')">Suite</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+    }
+
+    tbody.innerHTML = html;
+    _syncRegressionMasterCheckboxes();
+}
+
+function renderRegressionCatalogTable() {
+    _renderRegressionTreeTable('rl-catalog-tbody', _rlCatalogItems, {
+        prefix: 'catalog',
+        planExpandState: _rlPlanExpandState,
+        suiteExpandState: _rlSuiteExpandState,
+        togglePlanFn: 'togglePlanExpand',
+        toggleSuiteFn: 'toggleSuiteExpand',
+        checkboxClass: 'rl-catalog-cb',
+        emptyMessage: 'No indexed regression cases. Run a sync first.',
+    });
+}
+
+function renderRegressionSearchResults(totalMatches = null) {
+    const visibleMatches = (_rlSearchMatches || []).slice(0, 50);
+    const total = Number.isFinite(totalMatches) ? totalMatches : (_rlSearchMatches || []).length;
+    const meta = document.getElementById('rl-search-results-meta');
+    if (meta) {
+        meta.textContent = visibleMatches.length
+            ? `Showing first ${visibleMatches.length} of ${total} matched test case(s).`
+            : 'No search results yet.';
+    }
+    _renderRegressionTreeTable('rl-search-results-tbody', visibleMatches, {
+        prefix: 'search',
+        planExpandState: _rlSearchPlanExpandState,
+        suiteExpandState: _rlSearchSuiteExpandState,
+        togglePlanFn: 'toggleSearchPlanExpand',
+        toggleSuiteFn: 'toggleSearchSuiteExpand',
+        checkboxClass: 'rl-search-cb',
+        emptyMessage: 'No search results yet.',
+    });
+}
+
+function togglePlanExpand(planRowId) {
+    _rlPlanExpandState[planRowId] = !_rlPlanExpandState[planRowId];
+    renderRegressionCatalogTable();
+}
+
+function toggleSuiteExpand(suiteRowId) {
+    _rlSuiteExpandState[suiteRowId] = !_rlSuiteExpandState[suiteRowId];
+    renderRegressionCatalogTable();
+}
+
+function collapseAllCatalogPlans() {
+    Object.keys(_rlPlanExpandState).forEach(key => _rlPlanExpandState[key] = false);
+    Object.keys(_rlSuiteExpandState).forEach(key => _rlSuiteExpandState[key] = false);
+    renderRegressionCatalogTable();
+}
+
+function expandAllCatalogPlans() {
+    Object.keys(_rlPlanExpandState).forEach(key => _rlPlanExpandState[key] = true);
+    Object.keys(_rlSuiteExpandState).forEach(key => _rlSuiteExpandState[key] = true);
+    renderRegressionCatalogTable();
+}
+
+function toggleSearchPlanExpand(planRowId) {
+    _rlSearchPlanExpandState[planRowId] = !_rlSearchPlanExpandState[planRowId];
+    renderRegressionSearchResults();
+}
+
+function toggleSearchSuiteExpand(suiteRowId) {
+    _rlSearchSuiteExpandState[suiteRowId] = !_rlSearchSuiteExpandState[suiteRowId];
+    renderRegressionSearchResults();
+}
+
+function toggleRegressionSelection(id, checked) {
+    if (checked) _rlSelectedCatalogIds.add(id);
+    else _rlSelectedCatalogIds.delete(id);
+    document.querySelectorAll(`input[data-regression-id="${id}"]`).forEach(cb => {
+        cb.checked = checked;
+    });
+    _syncRegressionMasterCheckboxes();
+}
+
+function toggleCatalogSelectAll(checked) {
+    document.querySelectorAll('.rl-catalog-cb').forEach(cb => {
+        toggleRegressionSelection(parseInt(cb.value, 10), checked);
+    });
+    _syncRegressionMasterCheckboxes();
+}
+
+function selectAllRegressionCatalog(state) {
+    toggleCatalogSelectAll(!!state);
+}
+
+function toggleSearchSelectAll(checked) {
+    document.querySelectorAll('.rl-search-cb').forEach(cb => {
+        toggleRegressionSelection(parseInt(cb.value, 10), checked);
+    });
+    _syncRegressionMasterCheckboxes();
+}
+
+function selectAllRegressionSearchResults(state) {
+    toggleSearchSelectAll(!!state);
+}
+
+async function excludeFilteredCatalog() {
+    const project = _selectedProject();
+    if (!project) return;
+    try {
+        const filters = _catalogFilters();
+        const mode = document.getElementById('rl-exclude-mode')?.value || 'item';
+        const res = await API.excludeRegressionByFilters({
+            project,
+            mode,
+            group: filters.group,
+            status: filters.status,
+            search_text: filters.searchText,
+            area_path: filters.areaPath,
+            iteration_path: filters.iterationPath,
+            plan_name: filters.planName,
+            suite_name: filters.suiteName,
+            owner: filters.owner,
+            title: filters.title,
+            tags: filters.tags,
+            min_changed_date: filters.minChangedDate,
+        });
+        showToast(`Exclusion list updated (${res.affected || 0} rows touched)`, 'success');
+        await refreshRegressionDashboard();
+    } catch (e) {
+        showToast('Failed to update exclusion list: ' + e.message, 'error');
+    }
+}
+
+async function loadRegressionGroups() {
+    const project = _selectedProject();
+    if (!project) return;
+    try {
+        const res = await API.getRegressionGroups(project);
+        const container = document.getElementById('rl-group-grid');
+        container.innerHTML = (res.groups || []).map(group => `
+            <div class="rl-group-card">
+                <div class="rl-group-title"><span>${escapeHtml(group.group)}</span><span>${group.count || 0} test(s)</span></div>
+                <div class="rl-group-suites">
+                    ${(group.suites || []).map(suite => `
+                        <div class="rl-group-suite-card">
+                            <div class="rl-group-suite-name">${escapeHtml(suite.suite_name || suite.suite_path || 'Unassigned Suite')} <span style="float:right">${suite.count}</span></div>
+                            <div class="rl-group-suite-plan">${escapeHtml(suite.plan_name || 'Unassigned Plan')}</div>
+                            <div class="rl-group-suite-plan">${escapeHtml(suite.suite_path || '-')}</div>
+                            <div class="rl-toolbar" style="margin-top:6px">
+                                ${suite.test_plan_web_url ? `<button class="btn btn-outline btn-sm" onclick="_openExternal('${escapeHtml(suite.test_plan_web_url)}')">Open Plan</button>` : ''}
+                                ${suite.test_suite_web_url ? `<button class="btn btn-outline btn-sm" onclick="_openExternal('${escapeHtml(suite.test_suite_web_url)}')">Open Suite</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('') || '<div class="text-muted">No indexed suites</div>'}
+                </div>
+            </div>
+        `).join('') || '<div class="text-muted">No grouped suites available.</div>';
+    } catch (e) {
+        showToast('Failed to load grouped suites: ' + e.message, 'error');
+    }
+}
+
+async function loadRegressionReport() {
+    const project = _selectedProject();
+    if (!project) return;
+    try {
+        const report = await API.getRegressionReport(project);
+        const statusCounts = report.status_counts || {};
+        const groupCounts = report.group_counts || {};
+        document.getElementById('rl-kpis').innerHTML = [
+            { label: 'Indexed', value: report.total_indexed || 0, color: '' },
+            { label: 'Validated', value: report.validated || 0, color: '' },
+            { label: 'Passed', value: statusCounts.passed || 0, color: 'color:#22c55e' },
+            { label: 'Partial', value: statusCounts.partial || 0, color: 'color:#f59e0b' },
+            { label: 'Failed', value: statusCounts.failed || 0, color: 'color:#ef4444' },
+            { label: 'No SQL', value: statusCounts.no_sql || 0, color: '' },
+            { label: 'Good Ratio', value: (report.good_ratio || 0) + '%', color: '' },
+        ].map(kpi => `<div class="rl-kpi"><div class="rl-kpi-value" style="${kpi.color}">${kpi.value}</div><div class="rl-kpi-label">${escapeHtml(kpi.label)}</div></div>`).join('');
+
+        document.getElementById('rl-top-plans').innerHTML = (report.top_plans || []).map(row => `
+            <div class="rl-report-list-item">
+                <span class="rl-report-name">${escapeHtml(row.plan_name || 'Unassigned')}</span>
+                <span class="rl-report-count">${row.count}</span>
+                ${row.test_plan_web_url ? `<button class="btn btn-outline btn-sm" style="padding:2px 6px;font-size:10px" onclick="_openExternal('${escapeHtml(row.test_plan_web_url)}')">Open</button>` : ''}
+            </div>
+        `).join('') || '<div class="text-muted" style="font-size:12px">No plan stats yet.</div>';
+
+        document.getElementById('rl-top-suites').innerHTML = (report.top_suites || []).map(row => `
+            <div class="rl-report-list-item">
+                <span class="rl-report-name">${escapeHtml(row.suite_name || row.suite_path || 'Unassigned')}<br><span style="font-size:10px;color:var(--text-muted)">${escapeHtml(row.plan_name || '')}</span></span>
+                <span class="rl-report-count">${row.count}</span>
+                ${row.test_suite_web_url ? `<button class="btn btn-outline btn-sm" style="padding:2px 6px;font-size:10px" onclick="_openExternal('${escapeHtml(row.test_suite_web_url)}')">Open</button>` : ''}
+            </div>
+        `).join('') || '<div class="text-muted" style="font-size:12px">No suite stats yet.</div>';
+    } catch (e) {
+        showToast('Failed to load report: ' + e.message, 'error');
+    }
+}
+
+async function runRegressionSearchAgent() {
+    const project = _selectedProject();
+    const query = document.getElementById('rl-agent-query')?.value || '';
+    if (!project || !query.trim()) {
+        showToast('Project and search request are required', 'warning');
+        return;
+    }
+    const output = document.getElementById('rl-search-agent-output');
+    output.textContent = 'Running search agent...';
+    _rlSearchMatches = [];
+    renderRegressionSearchResults();
+    try {
+        const filters = _catalogFilters();
+        const res = await API.runRegressionSearchAgent({
+            project,
+            query,
+            group: filters.group,
+            status: filters.status,
+            area_path: filters.areaPath,
+            iteration_path: filters.iterationPath,
+            plan_name: filters.planName,
+            suite_name: filters.suiteName,
+            owner: filters.owner,
+            title: filters.title,
+            tags: filters.tags,
+        });
+        _rlSearchMatches = (res.matches || []).slice(0, 50);
+        output.textContent = res.analysis || 'Search completed.';
+        renderRegressionSearchResults(res.total_matches || _rlSearchMatches.length);
+    } catch (e) {
+        _rlSearchMatches = [];
+        renderRegressionSearchResults();
+        output.textContent = 'Search agent failed.';
+        showToast('Search agent failed: ' + e.message, 'error');
+    }
+}
+
+async function validateRegressionCatalogFromUi() {
+    const project = _selectedProject();
+    const datasourceId = parseInt(document.getElementById('rl-validation-datasource')?.value || '', 10);
+    if (!project || !datasourceId) {
+        showToast('Select a project and datasource PDM first', 'warning');
+        return;
+    }
+    const output = document.getElementById('rl-validation-output');
+    output.textContent = 'Running validation agent...';
+    try {
+        const body = { project, datasource_id: datasourceId, item_ids: Array.from(_rlSelectedCatalogIds) };
+        const res = await API.runRegressionValidationAgent(body);
+        output.textContent = res.summary || 'Validation completed.';
+        showToast('Validation agent finished', 'success');
+        await refreshRegressionDashboard();
+    } catch (e) {
+        output.textContent = 'Validation agent failed.';
+        showToast('Validation failed: ' + e.message, 'error');
+    }
+}
+
+async function promoteSelectedRegressionItems() {
+    if (!_rlSelectedCatalogIds.size) {
+        showToast('Select indexed regression cases first', 'warning');
+        return;
+    }
+    const sourceDs = parseInt(document.getElementById('rl-exec-source-ds')?.value || '', 10) || null;
+    const targetDs = parseInt(document.getElementById('rl-exec-target-ds')?.value || '', 10) || null;
+    try {
+        const res = await API.promoteRegressionItems({
+            item_ids: Array.from(_rlSelectedCatalogIds),
+            source_datasource_id: sourceDs,
+            target_datasource_id: targetDs,
+        });
+        _rlExecutionLoaded = false;
+        _rlExecutionTests = [];
+        renderRegressionExecutionTable();
+        showToast(`Created ${res.created_count || 0} local execution test(s). Use Refresh Execution Tests to review them.`, 'success');
+        await refreshRegressionDashboard();
+    } catch (e) {
+        showToast('Failed to promote regression cases: ' + e.message, 'error');
+    }
+}
+
+async function loadRegressionExecutionTests() {
+    try {
+        const [tests, folders] = await Promise.all([API.getTests(), API.getTestFolders()]);
+        const regressionFolders = (folders || []).filter(folder => String(folder.name || '').startsWith('Regression Lab - '));
+        const folderSelect = document.getElementById('rl-exec-folder-filter');
+        const currentValue = folderSelect?.value || '';
+        if (folderSelect) {
+            folderSelect.innerHTML = '<option value="">All Regression Folders</option>' + regressionFolders.map(folder => `<option value="${folder.id}">${escapeHtml(folder.name)} (${folder.test_count || 0})</option>`).join('');
+            if (currentValue && Array.from(folderSelect.options).some(opt => opt.value === currentValue)) folderSelect.value = currentValue;
+        }
+        const selectedFolderId = parseInt(folderSelect?.value || '', 10) || null;
+        _rlExecutionLoaded = true;
+        _rlExecutionTests = (tests || []).filter(test => String(test.folder_name || '').startsWith('Regression Lab - ') && (!selectedFolderId || test.folder_id === selectedFolderId));
+        renderRegressionExecutionTable();
+    } catch (e) {
+        showToast('Failed to load regression execution tests: ' + e.message, 'error');
+    }
+}
+
+function renderRegressionExecutionTable() {
+    const tbody = document.getElementById('rl-exec-tbody');
+    if (!tbody) return;
+    if (!_rlExecutionLoaded) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Execution data is not loaded automatically. Click Refresh Execution Tests when you want to review existing local regression tests.</td></tr>';
+        _syncRegressionMasterCheckboxes();
+        return;
+    }
+    tbody.innerHTML = _rlExecutionTests.map(test => `
+        <tr>
+            <td><input type="checkbox" class="rl-exec-cb" value="${test.id}" ${_rlSelectedExecutionIds.has(test.id) ? 'checked' : ''} onchange="toggleExecutionSelection(${test.id}, this.checked)"></td>
+            <td>${test.id}</td>
+            <td><strong>${escapeHtml(test.name)}</strong><br><span class="text-muted">${escapeHtml((test.source_query || '').substring(0, 110))}</span></td>
+            <td>${escapeHtml(test.folder_name || '-')}</td>
+            <td>${severityBadge(test.severity || 'medium')}</td>
+            <td class="flex gap-8"><button class="btn btn-success btn-sm" onclick="runOneRegressionExecutionTest(${test.id})">Run</button></td>
+        </tr>
+    `).join('') || '<tr><td colspan="6" class="empty-state">No promoted regression execution tests yet.</td></tr>';
+    _syncRegressionMasterCheckboxes();
+}
+
+function toggleExecutionSelection(id, checked) {
+    if (checked) _rlSelectedExecutionIds.add(id);
+    else _rlSelectedExecutionIds.delete(id);
+    _syncRegressionMasterCheckboxes();
+}
+
+function toggleExecutionSelectAll(checked) {
+    document.querySelectorAll('.rl-exec-cb').forEach(cb => {
+        cb.checked = checked;
+        toggleExecutionSelection(parseInt(cb.value, 10), checked);
+    });
+    _syncRegressionMasterCheckboxes();
+}
+
+async function runOneRegressionExecutionTest(id) {
+    try {
+        const res = await API.runTest(id);
+        showToast(`Test ${id}: ${res.status}`, res.status === 'passed' ? 'success' : 'error');
+    } catch (e) {
+        showToast('Failed to run regression test: ' + e.message, 'error');
+    }
+}
+
+async function runSelectedRegressionExecutionTests() {
+    if (!_rlSelectedExecutionIds.size) {
+        showToast('Select local regression execution tests first', 'warning');
+        return;
+    }
+    try {
+        const res = await API.runBatch(Array.from(_rlSelectedExecutionIds));
+        showToast(`Batch ${res.batch_id}: ${res.passed} passed, ${res.failed} failed`, res.failed ? 'error' : 'success');
+    } catch (e) {
+        showToast('Failed to run selected regression tests: ' + e.message, 'error');
+    }
+}
+
+async function runAllVisibleRegressionExecutionTests() {
+    const ids = _rlExecutionTests.map(test => test.id);
+    if (!ids.length) {
+        showToast('No visible regression execution tests to run', 'warning');
+        return;
+    }
+    try {
+        const res = await API.runBatch(ids);
+        showToast(`Batch ${res.batch_id}: ${res.passed} passed, ${res.failed} failed`, res.failed ? 'error' : 'success');
+    } catch (e) {
+        showToast('Failed to run visible regression tests: ' + e.message, 'error');
+    }
+}
+
+async function exportSelectedRegressionTestsToTfsCsv() {
+    if (!_rlSelectedExecutionIds.size) {
+        showToast('Select local regression execution tests first', 'warning');
+        return;
+    }
+    try {
+        await API.exportTestsToTfsCsv(Array.from(_rlSelectedExecutionIds), '', '', 'Design');
+        showToast('Regression execution tests exported to TFS CSV', 'success');
+    } catch (e) {
+        showToast('Failed to export regression tests: ' + e.message, 'error');
+    }
+}
+
+async function publishSelectedRegressionTestsToTfs() {
+    if (!_rlSelectedExecutionIds.size) {
+        showToast('Select local regression execution tests first', 'warning');
+        return;
+    }
+    const project = document.getElementById('rl-publish-project')?.value || '';
+    const planId = parseInt(document.getElementById('rl-publish-plan-id')?.value || '', 10);
+    const suiteName = document.getElementById('rl-publish-suite-name')?.value || 'Regression Lab Suite';
+    if (!project || !planId) {
+        showToast('TFS publish project and plan ID are required', 'warning');
+        return;
+    }
+    try {
+        const res = await API.importLocalTestsToTfsSuite({
+            project,
+            plan_id: planId,
+            suite_name: suiteName,
+            local_test_ids: Array.from(_rlSelectedExecutionIds),
+            area_path: '',
+            iteration_path: '',
+            assigned_to: '',
+            state: 'Design',
+        });
+        showToast(`Loaded ${res.created_test_case_count || 0} test case(s) to TFS suite`, 'success');
+    } catch (e) {
+        showToast('Failed to load regression tests to TFS: ' + e.message, 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initRegressionLab);
+
+/* ---- Filter Discovery ---- */
+async function loadRegressionFilterDiscovery() {
+    const project = _selectedProject();
+    if (!project) return;
+    const searchText = document.getElementById('rl-filter-discovery-search')?.value || '';
+    try {
+        _rlFilterDiscoveryData = await API.getRegressionFilters(project, searchText);
+        renderFilterDiscoveryLists();
+    } catch (e) {
+        showToast('Failed to load filter discovery: ' + e.message, 'error');
+    }
+}
+
+function renderFilterDiscoveryLists() {
+    const data = _rlFilterDiscoveryData;
+    if (!data) return;
+
+    const iterList = document.getElementById('rl-fd-iter-list');
+    const areaList = document.getElementById('rl-fd-area-list');
+    const planList = document.getElementById('rl-fd-plan-list');
+    const suiteList = document.getElementById('rl-fd-suite-list');
+
+    document.getElementById('rl-fd-iter-count').textContent = `(${(data.iterations || []).length})`;
+    document.getElementById('rl-fd-area-count').textContent = `(${(data.areas || []).length})`;
+    document.getElementById('rl-fd-plan-count').textContent = `(${(data.plans || []).length})`;
+    document.getElementById('rl-fd-suite-count').textContent = `(${(data.suites || []).length})`;
+
+    iterList.innerHTML = (data.iterations || []).map(item =>
+        `<label data-searchable="${escapeHtml(item.path.toLowerCase())}"><input type="checkbox" checked value="${escapeHtml(item.path)}"> ${escapeHtml(item.path)} (${item.count})</label>`
+    ).join('') || '<span class="text-muted" style="font-size:11px">No iterations found</span>';
+
+    areaList.innerHTML = (data.areas || []).map(item =>
+        `<label data-searchable="${escapeHtml(item.path.toLowerCase())}"><input type="checkbox" checked value="${escapeHtml(item.path)}"> ${escapeHtml(item.path)} (${item.count})</label>`
+    ).join('') || '<span class="text-muted" style="font-size:11px">No areas found</span>';
+
+    planList.innerHTML = (data.plans || []).map(item =>
+        `<label data-searchable="${escapeHtml((item.plan_name || '').toLowerCase())}"><input type="checkbox" checked value="${item.plan_id || 0}"> ${escapeHtml(item.plan_name || 'Unassigned')} (${item.count})</label>`
+    ).join('') || '<span class="text-muted" style="font-size:11px">No plans found</span>';
+
+    suiteList.innerHTML = (data.suites || []).map(item =>
+        `<label data-searchable="${escapeHtml((item.suite_name + ' ' + item.plan_name).toLowerCase())}"><input type="checkbox" checked value="${item.suite_id || 0}"> ${escapeHtml(item.suite_name || 'Unassigned')} <span class="text-muted">(${escapeHtml(item.plan_name)}, ${item.count})</span></label>`
+    ).join('') || '<span class="text-muted" style="font-size:11px">No suites found</span>';
+}
+
+function filterDiscoveryList(listId, searchText) {
+    const list = document.getElementById(listId);
+    if (!list) return;
+    const query = (searchText || '').toLowerCase().trim();
+    list.querySelectorAll('label').forEach(label => {
+        const text = label.getAttribute('data-searchable') || '';
+        label.style.display = (!query || text.includes(query)) ? '' : 'none';
+    });
+}
+
+function applyFilterDiscoveryToExclusion() {
+    const iterList = document.getElementById('rl-fd-iter-list');
+    const areaList = document.getElementById('rl-fd-area-list');
+    const planList = document.getElementById('rl-fd-plan-list');
+    const suiteList = document.getElementById('rl-fd-suite-list');
+
+    const uncheckedIterations = [];
+    const uncheckedAreas = [];
+    const uncheckedPlans = [];
+    const uncheckedSuites = [];
+
+    iterList?.querySelectorAll('input[type="checkbox"]').forEach(cb => { if (!cb.checked) uncheckedIterations.push(cb.value); });
+    areaList?.querySelectorAll('input[type="checkbox"]').forEach(cb => { if (!cb.checked) uncheckedAreas.push(cb.value); });
+    planList?.querySelectorAll('input[type="checkbox"]').forEach(cb => { if (!cb.checked) uncheckedPlans.push(cb.value); });
+    suiteList?.querySelectorAll('input[type="checkbox"]').forEach(cb => { if (!cb.checked) uncheckedSuites.push(cb.value); });
+
+    if (!uncheckedIterations.length && !uncheckedAreas.length && !uncheckedPlans.length && !uncheckedSuites.length) {
+        showToast('All items are checked - nothing to exclude. Uncheck items you want to exclude.', 'warning');
+        return;
+    }
+
+    const summary = [];
+    if (uncheckedPlans.length) summary.push(`${uncheckedPlans.length} plan(s)`);
+    if (uncheckedSuites.length) summary.push(`${uncheckedSuites.length} suite(s)`);
+    if (uncheckedIterations.length) summary.push(`${uncheckedIterations.length} iteration path(s) filter applied`);
+    if (uncheckedAreas.length) summary.push(`${uncheckedAreas.length} area path(s) filter applied`);
+
+    // For plans and suites, add to exclusion list
+    const project = _selectedProject();
+    if (!project) return;
+
+    const promises = [];
+    for (const planId of uncheckedPlans) {
+        if (planId && parseInt(planId, 10)) {
+            promises.push(API.excludeRegressionByFilters({ project, mode: 'plan', plan_name: '', search_text: '' }));
+        }
+    }
+
+    // Use iteration/area filter text to exclude matching items
+    if (uncheckedIterations.length || uncheckedAreas.length) {
+        // Set the catalog filters and exclude
+        for (const iterPath of uncheckedIterations) {
+            promises.push(API.excludeRegressionByFilters({ project, mode: 'item', iteration_path: iterPath }));
+        }
+        for (const areaPath of uncheckedAreas) {
+            promises.push(API.excludeRegressionByFilters({ project, mode: 'item', area_path: areaPath }));
+        }
+    }
+
+    for (const suiteId of uncheckedSuites) {
+        if (suiteId && parseInt(suiteId, 10)) {
+            promises.push(API.excludeRegressionByFilters({ project, mode: 'suite', search_text: '' }));
+        }
+    }
+
+    if (promises.length) {
+        Promise.all(promises).then(() => {
+            showToast(`Exclusion applied: ${summary.join(', ')}`, 'success');
+            refreshRegressionDashboard();
+        }).catch(e => showToast('Exclusion failed: ' + e.message, 'error'));
+    } else {
+        showToast(`Filter applied: ${summary.join(', ')}. Use catalog iteration/area filter to narrow results.`, 'info');
+    }
+}
+</script>
+{% endblock %}

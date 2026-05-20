@@ -1,0 +1,776 @@
+{% extends "base.html" %}
+{% block title %}Schema Browser – DB Testing Tool{% endblock %}
+{% block page_title %}Schema Browser{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header"><h2>Analyze</h2></div>
+        <div class="form-group">
+            <label>Data Source</label>
+            <select class="form-control ds-select" id="sb-ds" onchange="onSchemaBrowserDsChange()"></select>
+        </div>
+        <div class="form-group">
+            <label>Schema Filter</label>
+            <input class="form-control" id="sb-filter" placeholder="Type to filter schema list" oninput="filterSchemaOptions()">
+        </div>
+        <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="sb-select-all" onchange="toggleAllSchemas(this.checked)">
+                Select all visible schemas
+            </label>
+            <div id="sb-schema-options" class="schema-options-list">
+                <div class="text-muted">Select a data source to load schemas</div>
+            </div>
+        </div>
+        <div class="flex gap-8">
+            <button class="btn btn-primary" onclick="analyzeDs()">Analyze Selected</button>
+            <button class="btn btn-warning" onclick="scanOwnerSchemas()">Scan _OWNER Schemas</button>
+            <button class="btn btn-success" onclick="createPdm()">Create PDM</button>
+            <button class="btn btn-warning" onclick="saveLocalKb()">Save to Local KB</button>
+            <button class="btn btn-info" onclick="downloadPdmPdf()" title="Download PDM as PDF (requires saved Local KB)">Download PDM PDF</button>
+            <button class="btn btn-outline" onclick="downloadPdmCsv()" title="Download saved PDM as CSV (all columns)">Download PDM CSV</button>
+            <button class="btn btn-danger" id="sb-stop-btn" onclick="stopSchemaOperation()" disabled>Stop</button>
+            <button class="btn btn-outline" onclick="loadTree()">Refresh Tree</button>
+        </div>
+        <div id="sb-status" class="mt-16 text-muted"></div>
+        <div id="sb-kb-path" class="mt-16 text-muted" style="font-size:12px;">KB Path: not generated yet</div>
+        <div class="mt-16" style="border-top:1px solid var(--border);padding-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <strong style="font-size:14px">Historical PDMs By Database</strong>
+                <button class="btn btn-outline btn-sm" type="button" id="pdm-history-toggle-btn" onclick="togglePdmHistorySection()">View</button>
+            </div>
+            <div id="pdm-history-wrap" style="display:none">
+                <div id="pdm-history" class="text-muted">Loading saved PDM history...</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h2>Compare Schemas</h2></div>
+        <div class="grid grid-2">
+            <div>
+                <div class="form-group"><label>Source DS</label><select class="form-control ds-select" id="cmp-src-ds"></select></div>
+                <div class="form-group"><label>Source Schema</label><input class="form-control" id="cmp-src-schema"></div>
+                <div class="form-group"><label>Source Table</label><input class="form-control" id="cmp-src-table"></div>
+            </div>
+            <div>
+                <div class="form-group"><label>Target DS</label><select class="form-control ds-select" id="cmp-tgt-ds"></select></div>
+                <div class="form-group"><label>Target Schema</label><input class="form-control" id="cmp-tgt-schema"></div>
+                <div class="form-group"><label>Target Table</label><input class="form-control" id="cmp-tgt-table"></div>
+            </div>
+        </div>
+        <button class="btn btn-primary mt-16" onclick="compareSchemas()">Compare</button>
+        <div id="cmp-result" class="mt-16"></div>
+    </div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header"><h2>Schema Tree</h2></div>
+    <div id="schema-tree" class="empty-state">Select a data source and click Analyze or Refresh</div>
+</div>
+
+<div class="card mt-16">
+    <div class="card-header"><h2>PDM / Local KB Summary</h2></div>
+    <div id="pdm-summary" class="text-muted">Generate a PDM or save schema knowledge to local KB to view details.</div>
+    <div id="pdm-schema-breakdown" class="mt-16"></div>
+</div>
+
+<div id="sb-progress-dialog" class="sb-progress-dialog" style="display:none;">
+    <div class="sb-progress-header">
+        <strong id="sb-progress-title">Operation Progress</strong>
+        <button class="btn btn-outline btn-sm" type="button" onclick="hideProgressDialog()">Hide</button>
+    </div>
+    <div id="sb-progress-status" class="text-muted" style="margin-top:6px;">Running...</div>
+    <div class="sb-progress-bar-wrap">
+        <div id="sb-progress-bar" class="sb-progress-bar"></div>
+    </div>
+    <div id="sb-progress-metrics" class="text-muted" style="font-size:12px;margin-top:6px;">0% complete</div>
+    <div style="margin-top:8px;">
+        <div style="font-size:12px;font-weight:600;">Notifications</div>
+        <div id="sb-progress-notes" class="sb-progress-log text-muted">No notifications yet.</div>
+    </div>
+    <div style="margin-top:8px;">
+        <div style="font-size:12px;font-weight:600;">Errors</div>
+        <div id="sb-progress-errors" class="sb-progress-log text-muted">No errors.</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let sbSchemas = [];
+let sbActiveOp = null;
+let sbProgressTimer = null;
+let sbPdmHistoryVisible = false;
+let sbActiveHistoricalPdmId = null;
+
+const SB_STATE_KEY = 'schema-browser.state.v1';
+
+function _sbSafeJson(raw, fallback) {
+    try { const v = JSON.parse(raw); return v !== null && v !== undefined ? v : fallback; } catch (_) { return fallback; }
+}
+
+function persistSbState() {
+    const state = {
+        ds_id: document.getElementById('sb-ds')?.value || '',
+        filter: document.getElementById('sb-filter')?.value || '',
+        pdm_history_visible: sbPdmHistoryVisible,
+        cmp_src_ds: document.getElementById('cmp-src-ds')?.value || '',
+        cmp_tgt_ds: document.getElementById('cmp-tgt-ds')?.value || '',
+        cmp_src_schema: document.getElementById('cmp-src-schema')?.value || '',
+        cmp_tgt_schema: document.getElementById('cmp-tgt-schema')?.value || '',
+        cmp_src_table: document.getElementById('cmp-src-table')?.value || '',
+        cmp_tgt_table: document.getElementById('cmp-tgt-table')?.value || '',
+    };
+    localStorage.setItem(SB_STATE_KEY, JSON.stringify(state));
+}
+
+function restoreSbState(dsSelect) {
+    const state = _sbSafeJson(localStorage.getItem(SB_STATE_KEY), null);
+    if (!state) return;
+    if (state.filter && document.getElementById('sb-filter')) {
+        document.getElementById('sb-filter').value = state.filter;
+    }
+    if (state.pdm_history_visible) {
+        sbPdmHistoryVisible = true;
+        const wrap = document.getElementById('pdm-history-wrap');
+        const btn = document.getElementById('pdm-history-toggle-btn');
+        if (wrap) wrap.style.display = '';
+        if (btn) btn.textContent = 'Hide';
+    }
+    if (state.ds_id && dsSelect) {
+        const hasOption = Array.from(dsSelect.options || []).some(o => String(o.value) === String(state.ds_id));
+        if (hasOption) dsSelect.value = state.ds_id;
+    }
+    ['cmp-src-ds','cmp-tgt-ds'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && state[id.replace(/-/g, '_')]) {
+            const hasOpt = Array.from(el.options || []).some(o => String(o.value) === String(state[id.replace(/-/g, '_')]));
+            if (hasOpt) el.value = state[id.replace(/-/g, '_')];
+        }
+    });
+    ['cmp-src-schema','cmp-tgt-schema','cmp-src-table','cmp-tgt-table'].forEach(id => {
+        const el = document.getElementById(id);
+        const key = id.replace(/-/g, '_');
+        if (el && state[key]) el.value = state[key];
+    });
+}
+
+function _bindSbPersistListeners() {
+    ['sb-filter','cmp-src-schema','cmp-tgt-schema','cmp-src-table','cmp-tgt-table'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', persistSbState);
+    });
+    ['sb-ds','cmp-src-ds','cmp-tgt-ds'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', persistSbState);
+    });
+}
+
+function _fmtSeconds(totalSeconds) {
+    if (totalSeconds === null || totalSeconds === undefined || Number.isNaN(totalSeconds)) return 'n/a';
+    const secs = Math.max(0, Math.round(Number(totalSeconds)));
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+}
+
+function showProgressDialog(title) {
+    const dlg = document.getElementById('sb-progress-dialog');
+    document.getElementById('sb-progress-title').textContent = title || 'Operation Progress';
+    dlg.style.display = 'block';
+}
+
+function hideProgressDialog() {
+    document.getElementById('sb-progress-dialog').style.display = 'none';
+}
+
+function renderProgressState(state) {
+    if (!state) return;
+    const status = state.status || 'running';
+    const current = Number(state.current || 0);
+    const total = Number(state.total || 0);
+    const pct = Number(state.percent_complete || 0);
+    const remaining = state.remaining_units;
+    const eta = state.eta_seconds;
+    const elapsed = state.elapsed_seconds;
+
+    document.getElementById('sb-progress-status').textContent = `Status: ${status}`;
+    document.getElementById('sb-progress-bar').style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    document.getElementById('sb-progress-metrics').textContent =
+        `${pct.toFixed(1)}% | ${current}/${total || '?'} done | Remaining: ${remaining ?? 'n/a'} | ETA: ${_fmtSeconds(eta)} | Elapsed: ${_fmtSeconds(elapsed)}`;
+
+    const notes = (state.notifications || []).slice(-8);
+    const errs = (state.errors || []).slice(-8);
+    document.getElementById('sb-progress-notes').innerHTML = notes.length ? notes.map(n => `<div>${escapeHtml(String(n))}</div>`).join('') : 'No notifications yet.';
+    document.getElementById('sb-progress-errors').innerHTML = errs.length ? errs.map(n => `<div class="text-danger">${escapeHtml(String(n))}</div>`).join('') : 'No errors.';
+}
+
+function stopProgressPolling() {
+    if (sbProgressTimer) {
+        clearInterval(sbProgressTimer);
+        sbProgressTimer = null;
+    }
+}
+
+async function pollProgressNow(opId) {
+    try {
+        const state = await API.getSchemaOperation(opId);
+        renderProgressState(state);
+        const terminal = ['completed', 'failed', 'stopped'].includes((state.status || '').toLowerCase());
+        if (terminal && sbActiveOp && sbActiveOp.id === opId) {
+            if ((state.status || '').toLowerCase() === 'completed') {
+                await loadTree();
+                await loadPdmHistory();
+                const dsId = document.getElementById('sb-ds')?.value;
+                if (dsId) {
+                    await loadSavedPdm(dsId);
+                }
+                document.getElementById('sb-status').textContent = 'Schema operation completed.';
+                showToast('Schema operation completed', 'success');
+            } else if ((state.status || '').toLowerCase() === 'stopped') {
+                document.getElementById('sb-status').textContent = 'Schema operation stopped by user';
+                showToast('Schema operation stopped', 'warning');
+            } else {
+                const lastErr = (state.errors || []).slice(-1)[0] || 'Unknown failure';
+                document.getElementById('sb-status').textContent = 'Schema operation failed: ' + lastErr;
+                showToast('Schema operation failed', 'error');
+            }
+            endSchemaOperation(sbActiveOp);
+            return;
+        }
+        if (terminal) {
+            stopProgressPolling();
+        }
+    } catch (_) {
+        // Ignore transient polling failures.
+    }
+}
+
+function startProgressPolling(op) {
+    stopProgressPolling();
+    showProgressDialog(`Progress: ${op.label}`);
+    pollProgressNow(op.id);
+    sbProgressTimer = setInterval(() => {
+        if (!sbActiveOp || sbActiveOp.id !== op.id) {
+            stopProgressPolling();
+            return;
+        }
+        pollProgressNow(op.id);
+    }, 1000);
+}
+
+function _newSchemaOpId(prefix) {
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function startSchemaOperation(label) {
+    if (sbActiveOp) return null;
+    const op = {
+        id: _newSchemaOpId(label),
+        label,
+        controller: new AbortController(),
+    };
+    sbActiveOp = op;
+    document.getElementById('sb-stop-btn').disabled = false;
+    startProgressPolling(op);
+    return op;
+}
+
+function endSchemaOperation(op) {
+    if (sbActiveOp && op && sbActiveOp.id === op.id) {
+        pollProgressNow(op.id);
+        stopProgressPolling();
+        sbActiveOp = null;
+        document.getElementById('sb-stop-btn').disabled = true;
+    }
+}
+
+async function stopSchemaOperation() {
+    if (!sbActiveOp) return;
+    const op = sbActiveOp;
+    try {
+        op.controller.abort();
+    } catch (_) {}
+    try {
+        await API.stopSchemaOperation(op.id);
+    } catch (_) {}
+    document.getElementById('sb-status').textContent = 'Stop requested. Operation will end shortly.';
+    showToast('Stop requested', 'warning');
+    pollProgressNow(op.id);
+}
+
+async function scanOwnerSchemas() {
+    const dsId = document.getElementById('sb-ds').value;
+    if (!dsId) return showToast('Select a data source', 'error');
+    if (sbActiveOp) return showToast('Another schema operation is already running', 'warning');
+    const confirmMsg = 'This will scan all *_OWNER schemas, extract metadata, save view SQL to KB for training, and save PDM. Continue?';
+    if (!confirm(confirmMsg)) return;
+    document.getElementById('sb-status').innerHTML = '<span class="spinner"></span> Scanning _OWNER schemas...';
+    const op = startSchemaOperation('scan_owner');
+    if (!op) return;
+    try {
+        const result = await API.scanOwnerSchemas(parseInt(dsId), op.id, { signal: op.controller.signal });
+        if (result.status === 'accepted') {
+            document.getElementById('sb-status').textContent = '_OWNER schema scan started in background. You can switch tabs and continue working.';
+            showToast('_OWNER schema scan started in background', 'success');
+            return;
+        }
+    } catch (e) {
+        if (e.name === 'AbortError') {
+            document.getElementById('sb-status').textContent = '_OWNER schema scan canceled';
+            return;
+        }
+        document.getElementById('sb-status').textContent = 'Error: ' + e.message;
+        showToast(e.message, 'error');
+    }
+}
+
+async function initSchemaBrowserPage() {
+    await populateDatasourceSelects();
+    const dsSelect = document.getElementById('sb-ds');
+    if (!dsSelect) return;
+
+    dsSelect.value = '';
+    restoreSbState(dsSelect);
+    _bindSbPersistListeners();
+
+    if (dsSelect.value) {
+        await onSchemaBrowserDsChange();
+    } else {
+        document.getElementById('sb-schema-options').innerHTML =
+            '<div class="text-muted">Select a data source to load schemas</div>';
+        document.getElementById('schema-tree').innerHTML = '<div class="empty-state">Select a data source and click Analyze or Refresh</div>';
+    }
+    await loadPdmHistory();
+    if (sbPdmHistoryVisible) loadPdmHistory();
+}
+
+function getSelectedSchemas() {
+    return Array.from(document.querySelectorAll('.sb-schema-cb:checked')).map(el => el.value);
+}
+
+function downloadPdmPdf() {
+    const dsId = document.getElementById('sb-ds').value;
+    if (!dsId) { showToast('Select a data source first', 'warning'); return; }
+    const selectedSchemas = getSelectedSchemas();
+    const schemasParam = encodeURIComponent(selectedSchemas.join(','));
+    const url = `/api/schemas/pdm-pdf/${dsId}?schemas=${schemasParam}`;
+    showToast('Preparing PDF download…', 'info');
+    fetch(url).then(res => {
+        if (!res.ok) return res.json().then(d => { throw new Error(d.detail || res.statusText); });
+        return res.blob();
+    }).then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const dsName = (document.getElementById('sb-ds').selectedOptions[0]?.text || 'pdm').replace(/\s+/g, '_');
+        a.download = `PDM_${dsName}.pdf`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }).catch(e => showToast('PDF export failed: ' + e.message, 'error'));
+}
+
+function downloadPdmCsv() {
+    const dsId = document.getElementById('sb-ds').value;
+    if (!dsId) { showToast('Select a data source first', 'warning'); return; }
+    const selectedSchemas = getSelectedSchemas();
+    const schemasParam = encodeURIComponent(selectedSchemas.join(','));
+    const url = `/api/schemas/pdm-csv/${dsId}?schemas=${schemasParam}`;
+    showToast('Preparing CSV download...', 'info');
+    fetch(url).then(res => {
+        if (!res.ok) return res.json().then(d => { throw new Error(d.detail || res.statusText); });
+        return res.blob();
+    }).then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        const dsName = (document.getElementById('sb-ds').selectedOptions[0]?.text || 'pdm').replace(/\s+/g, '_');
+        a.download = `PDM_${dsName}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }).catch(e => showToast('CSV export failed: ' + e.message, 'error'));
+}
+
+function renderPdmHistory(historyPayload) {
+    const container = document.getElementById('pdm-history');
+    const grouped = historyPayload?.grouped || {};
+    const groups = Object.keys(grouped || {}).sort();
+    if (!groups.length) {
+        container.innerHTML = '<div class="text-muted">No saved PDM history found yet.</div>';
+        return;
+    }
+
+    container.innerHTML = groups.map(dbType => {
+        const rows = grouped[dbType] || [];
+        return `
+            <div style="margin-bottom:14px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-dark)">
+                <div style="font-weight:600;margin-bottom:8px">${escapeHtml(dbType)} (${rows.length})</div>
+                <div style="overflow:auto;max-height:260px;resize:vertical;border:1px solid var(--border);border-radius:6px">
+                    <table style="width:100%;font-size:12px">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left">Datasource</th>
+                                <th style="text-align:right">Schemas</th>
+                                <th style="text-align:right">Tables</th>
+                                <th style="text-align:right">Columns</th>
+                                <th style="text-align:right">Relationships</th>
+                                <th style="text-align:left">Generated</th>
+                                <th style="text-align:left">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map(row => `
+                                <tr>
+                                    <td>${escapeHtml(row.datasource_name || '')} <span class="text-muted">(ID ${row.datasource_id})</span></td>
+                                    <td style="text-align:right">${row.schemas || 0}</td>
+                                    <td style="text-align:right">${row.tables || 0}</td>
+                                    <td style="text-align:right">${row.columns || 0}</td>
+                                    <td style="text-align:right">${row.relationships || 0}</td>
+                                    <td>${escapeHtml(row.generated_at || '')}</td>
+                                    <td><button class="btn btn-outline btn-sm" onclick="toggleHistoricalPdm(${row.datasource_id})">${sbActiveHistoricalPdmId === row.datasource_id ? 'Hide' : 'View'}</button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function loadPdmHistory() {
+    const container = document.getElementById('pdm-history');
+    container.innerHTML = '<span class="spinner"></span> Loading saved PDM history...';
+    try {
+        const history = await API.listPdmHistory();
+        renderPdmHistory(history);
+    } catch (e) {
+        container.innerHTML = `<span class="text-danger">${escapeHtml(e.message || String(e))}</span>`;
+    }
+}
+
+async function toggleHistoricalPdm(datasourceId) {
+    if (sbActiveHistoricalPdmId === datasourceId) {
+        sbActiveHistoricalPdmId = null;
+        document.getElementById('pdm-summary').innerHTML = 'Generate a PDM or save schema knowledge to local KB to view details.';
+        document.getElementById('pdm-schema-breakdown').innerHTML = '';
+        if (sbPdmHistoryVisible) renderPdmHistory(await API.listPdmHistory());
+        return;
+    }
+    try {
+        const payload = await API.getSavedPdm(parseInt(datasourceId));
+        sbActiveHistoricalPdmId = datasourceId;
+        renderPdmSummary(payload, `Saved PDM snapshot: datasource ${datasourceId}`);
+        if (sbPdmHistoryVisible) renderPdmHistory(await API.listPdmHistory());
+        showToast('Loaded saved PDM snapshot', 'success');
+    } catch (e) {
+        showToast('Failed to load saved PDM: ' + e.message, 'error');
+    }
+}
+
+function renderSchemaOptions(list) {
+    const container = document.getElementById('sb-schema-options');
+    if (!list.length) {
+        container.innerHTML = '<div class="text-muted">No schemas found for this data source</div>';
+        return;
+    }
+    container.innerHTML = list.map(s => `
+        <label class="schema-option-item">
+            <input type="checkbox" class="sb-schema-cb" value="${escapeHtml(s)}" checked onchange="syncSchemaSelectAll()">
+            <span>${escapeHtml(s)}</span>
+        </label>
+    `).join('');
+    syncSchemaSelectAll();
+}
+
+function toggleAllSchemas(checked) {
+    document.querySelectorAll('.sb-schema-cb').forEach(cb => {
+        if (cb.closest('.schema-option-item')?.style.display !== 'none') cb.checked = checked;
+    });
+}
+
+function syncSchemaSelectAll() {
+    const allVisible = Array.from(document.querySelectorAll('.sb-schema-cb')).filter(cb => cb.closest('.schema-option-item')?.style.display !== 'none');
+    const allChecked = allVisible.length > 0 && allVisible.every(cb => cb.checked);
+    document.getElementById('sb-select-all').checked = allChecked;
+}
+
+function filterSchemaOptions() {
+    const needle = (document.getElementById('sb-filter').value || '').trim().toUpperCase();
+    document.querySelectorAll('.schema-option-item').forEach(row => {
+        const txt = row.textContent.trim().toUpperCase();
+        row.style.display = (!needle || txt.includes(needle)) ? '' : 'none';
+    });
+    syncSchemaSelectAll();
+    persistSbState();
+}
+
+async function loadSchemaCatalog() {
+    const dsId = document.getElementById('sb-ds').value;
+    if (!dsId) return;
+    const container = document.getElementById('sb-schema-options');
+    container.innerHTML = '<div class="text-muted"><span class="spinner"></span> Loading schemas...</div>';
+    try {
+        const res = await API.getDatasourceSchemas(parseInt(dsId));
+        sbSchemas = res.schemas || [];
+        renderSchemaOptions(sbSchemas);
+        filterSchemaOptions();
+    } catch (e) {
+        container.innerHTML = `<div class="text-danger">${escapeHtml(e.message)}</div>`;
+        showToast(e.message, 'error');
+    }
+}
+
+async function onSchemaBrowserDsChange() {
+    const dsId = document.getElementById('sb-ds').value;
+    persistSbState();
+    if (!dsId) {
+        sbSchemas = [];
+        document.getElementById('sb-schema-options').innerHTML = '<div class="text-muted">Select a data source to load schemas</div>';
+        document.getElementById('schema-tree').innerHTML = '<div class="empty-state">Select a data source and click Analyze or Refresh</div>';
+        document.getElementById('sb-status').textContent = 'Data source is blank by default. Select one when you want to browse schemas.';
+        return;
+    }
+    await loadSchemaCatalog();
+    await loadTree();
+    if (sbPdmHistoryVisible) {
+        await loadPdmHistory();
+    }
+}
+
+function togglePdmHistorySection(forceVisible = null) {
+    const wrap = document.getElementById('pdm-history-wrap');
+    const btn = document.getElementById('pdm-history-toggle-btn');
+    sbPdmHistoryVisible = forceVisible === null ? !sbPdmHistoryVisible : !!forceVisible;
+    if (wrap) wrap.style.display = sbPdmHistoryVisible ? '' : 'none';
+    if (btn) btn.textContent = sbPdmHistoryVisible ? 'Hide' : 'View';
+    if (sbPdmHistoryVisible) {
+        loadPdmHistory();
+    }
+    persistSbState();
+}
+
+async function loadSavedPdm(dsId) {
+    if (!dsId) return;
+    try {
+        const payload = await API.getSavedPdm(parseInt(dsId));
+        if (payload && (payload.pdm || payload.stats)) {
+            const dsName = (document.getElementById('sb-ds')?.selectedOptions?.[0]?.text || 'DS ' + dsId);
+            renderPdmSummary(payload, `Saved PDM: ${dsName}`);
+        }
+    } catch (e) {
+        console.warn('loadSavedPdm failed:', e.message);
+    }
+}
+
+function renderPdmSummary(payload, title) {
+    const stats = payload?.stats || {};
+    const paths = payload?.paths || {};
+    const pdm = payload?.pdm || {};
+    const rel = (stats.relationships ?? ((pdm.relationships || []).length)) || 0;
+    const schemas = Array.isArray(pdm.schemas) ? pdm.schemas : [];
+
+    const schemaRows = schemas.map(s => {
+        const tables = Array.isArray(s.tables) ? s.tables : [];
+        const tableCount = tables.length;
+        let colCount = 0;
+        let pkCount = 0;
+        let fkCount = 0;
+        let idxCount = 0;
+        let cstCount = 0;
+        for (const t of tables) {
+            colCount += Array.isArray(t.columns) ? t.columns.length : 0;
+            pkCount += Array.isArray(t.primary_keys) ? t.primary_keys.length : 0;
+            fkCount += Array.isArray(t.foreign_keys) ? t.foreign_keys.length : 0;
+            idxCount += Array.isArray(t.indexes) ? t.indexes.length : 0;
+            cstCount += Array.isArray(t.constraints) ? t.constraints.length : 0;
+        }
+        const topTables = tables.slice(0, 5).map(t => escapeHtml(t.name)).join(', ');
+        return `
+            <div class="pdm-schema-card">
+                <div><strong>${escapeHtml(s.schema || '(default)')}</strong></div>
+                <div class="text-muted" style="font-size:12px">Tables: ${tableCount} | Columns: ${colCount} | PK: ${pkCount} | FK: ${fkCount} | Indexes: ${idxCount} | Constraints: ${cstCount}</div>
+                <div class="text-muted" style="font-size:12px">Sample tables: ${topTables || '-'}</div>
+            </div>
+        `;
+    }).join('');
+
+    const pathLabel = document.getElementById('sb-kb-path');
+    if (pathLabel) {
+        if (paths.json_path || paths.markdown_path) {
+            const jsonHref = paths.json_path ? `file:///${paths.json_path.replace(/\\/g, '/')}` : '';
+            const mdHref = paths.markdown_path ? `file:///${paths.markdown_path.replace(/\\/g, '/')}` : '';
+            pathLabel.innerHTML = `
+                KB Path:
+                ${paths.json_path ? `<a href="${encodeURI(jsonHref)}" target="_blank" rel="noopener">JSON</a> <span class="code">${escapeHtml(paths.json_path)}</span>` : ''}
+                ${paths.markdown_path ? `<br><a href="${encodeURI(mdHref)}" target="_blank" rel="noopener">Markdown</a> <span class="code">${escapeHtml(paths.markdown_path)}</span>` : ''}
+            `;
+        } else {
+            pathLabel.textContent = 'KB Path: not generated yet';
+        }
+    }
+
+    document.getElementById('pdm-summary').innerHTML = `
+        <div><strong>${escapeHtml(title)}</strong></div>
+        <div class="mt-16">Schemas: ${stats.schemas || schemas.length || 0}, Tables: ${stats.tables || 0}, Columns: ${stats.columns || 0}, Relationships: ${rel}</div>
+        ${pdm.datasource ? `<div class="text-muted" style="font-size:12px;margin-top:6px">Data Source: ${escapeHtml(pdm.datasource.name || '')} (${escapeHtml(pdm.datasource.db_type || '')}) | DB: ${escapeHtml(pdm.datasource.database || '')}</div>` : ''}
+        ${paths.json_path ? `<div class="mt-16">JSON KB: <span class="code">${escapeHtml(paths.json_path)}</span></div>` : ''}
+        ${paths.markdown_path ? `<div>Markdown KB: <span class="code">${escapeHtml(paths.markdown_path)}</span></div>` : ''}
+    `;
+    document.getElementById('pdm-schema-breakdown').innerHTML = schemaRows || '<div class="text-muted">No schema details loaded yet.</div>';
+}
+
+async function analyzeDs() {
+    const dsId = document.getElementById('sb-ds').value;
+    if (!dsId) return showToast('Select a data source', 'error');
+    if (sbActiveOp) return showToast('Another schema operation is already running', 'warning');
+    const selectedSchemas = getSelectedSchemas();
+    if (!selectedSchemas.length) return showToast('Select at least one schema', 'warning');
+    document.getElementById('sb-status').innerHTML = '<span class="spinner"></span> Analyzing...';
+    const op = startSchemaOperation('analyze');
+    if (!op) return;
+    try {
+        const result = await API.analyzeSchema(parseInt(dsId), {
+            schema_filters: selectedSchemas,
+            save_to_kb: false,
+            operation_id: op.id,
+            background: true,
+        }, { signal: op.controller.signal });
+        if (result.status === 'accepted') {
+            const depth = Number(result.queue_depth || 0);
+            document.getElementById('sb-status').textContent = depth > 0
+                ? `Analysis queued (queue depth ${depth}). You can switch tabs and continue working.`
+                : 'Analysis started in background. You can switch tabs and continue working.';
+            showToast('Schema analysis started in background', 'success');
+            return;
+        }
+    } catch (e) {
+        if (e.name === 'AbortError') {
+            document.getElementById('sb-status').textContent = 'Analysis canceled';
+            return;
+        }
+        document.getElementById('sb-status').textContent = 'Error: ' + e.message;
+        showToast(e.message, 'error');
+    }
+}
+
+async function createPdm() {
+    const dsId = document.getElementById('sb-ds').value;
+    if (!dsId) return showToast('Select a data source', 'error');
+    if (sbActiveOp) return showToast('Another schema operation is already running', 'warning');
+    const selectedSchemas = getSelectedSchemas();
+    if (!selectedSchemas.length) return showToast('Select at least one schema', 'warning');
+    document.getElementById('sb-status').innerHTML = '<span class="spinner"></span> Building PDM...';
+    const op = startSchemaOperation('pdm');
+    if (!op) return;
+    try {
+        const result = await API.generatePdm(parseInt(dsId), selectedSchemas, true, op.id, { signal: op.controller.signal }, true);
+        if (result.status === 'accepted') {
+            const depth = Number(result.queue_depth || 0);
+            document.getElementById('sb-status').textContent = depth > 0
+                ? `PDM build queued (queue depth ${depth}). You can switch tabs and continue working.`
+                : 'PDM build started in background. You can switch tabs and continue working.';
+            showToast('PDM generation started in background', 'success');
+            return;
+        }
+    } catch (e) {
+        if (e.name === 'AbortError') {
+            document.getElementById('sb-status').textContent = 'PDM creation canceled';
+            return;
+        }
+        document.getElementById('sb-status').textContent = 'Error: ' + e.message;
+        showToast(e.message, 'error');
+    }
+}
+
+async function saveLocalKb() {
+    const dsId = document.getElementById('sb-ds').value;
+    if (!dsId) return showToast('Select a data source', 'error');
+    if (sbActiveOp) return showToast('Another schema operation is already running', 'warning');
+    const selectedSchemas = getSelectedSchemas();
+    if (!selectedSchemas.length) return showToast('Select at least one schema', 'warning');
+    document.getElementById('sb-status').innerHTML = '<span class="spinner"></span> Saving to local KB...';
+    const op = startSchemaOperation('kb');
+    if (!op) return;
+    try {
+        const result = await API.saveSchemaKb(parseInt(dsId), selectedSchemas, op.id, { signal: op.controller.signal }, true);
+        if (result.status === 'accepted') {
+            const depth = Number(result.queue_depth || 0);
+            document.getElementById('sb-status').textContent = depth > 0
+                ? `KB save queued (queue depth ${depth}). You can switch tabs and continue working.`
+                : 'KB save started in background. You can switch tabs and continue working.';
+            showToast('KB save started in background', 'success');
+            return;
+        }
+    } catch (e) {
+        if (e.name === 'AbortError') {
+            document.getElementById('sb-status').textContent = 'KB save canceled';
+            return;
+        }
+        document.getElementById('sb-status').textContent = 'Error: ' + e.message;
+        showToast(e.message, 'error');
+    }
+}
+
+async function loadTree() {
+    const dsId = document.getElementById('sb-ds').value;
+    if (!dsId) return;
+    try {
+        const tree = await API.getSchemaTree(parseInt(dsId));
+        const container = document.getElementById('schema-tree');
+        if (!tree.length) { container.innerHTML = '<div class="empty-state">No metadata found. Run Analyze first.</div>'; return; }
+        container.innerHTML = tree.map(schema => `
+            <div class="tree-item">
+                <div class="tree-toggle">${escapeHtml(schema.schema)} (${schema.tables.length} objects)</div>
+                <div class="tree-children">
+                    ${schema.tables.map(t => `
+                        <div class="tree-item">
+                            <div class="tree-toggle">${escapeHtml(t.name)} <span class="badge badge-muted">${t.type}</span></div>
+                            <div class="tree-children">
+                                ${t.columns.map(c => `
+                                    <div class="tree-leaf">
+                                        ${c.is_pk ? '<span class="pk">PK</span> ' : ''}
+                                        ${escapeHtml(c.name)} <span class="text-muted">${escapeHtml(c.data_type)}</span>
+                                        ${c.nullable ? '' : ' <span class="badge badge-warning" style="font-size:9px">NOT NULL</span>'}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function compareSchemas() {
+    try {
+        const data = {
+            source_datasource_id: parseInt(document.getElementById('cmp-src-ds').value),
+            source_schema: document.getElementById('cmp-src-schema').value,
+            source_table: document.getElementById('cmp-src-table').value,
+            target_datasource_id: parseInt(document.getElementById('cmp-tgt-ds').value),
+            target_schema: document.getElementById('cmp-tgt-schema').value,
+            target_table: document.getElementById('cmp-tgt-table').value,
+        };
+        const res = await API.compareSchemas(data);
+        const el = document.getElementById('cmp-result');
+        if (res.error) { el.innerHTML = `<span class="text-danger">${escapeHtml(res.error)}</span>`; return; }
+        el.innerHTML = `
+            <p><strong>${escapeHtml(res.source)}</strong> (${res.source_column_count} cols) vs
+               <strong>${escapeHtml(res.target)}</strong> (${res.target_column_count} cols)</p>
+            ${res.compatible ? '<p class="text-success">Schemas are compatible</p>' : ''}
+            ${res.only_in_source.length ? `<p class="text-danger">Only in source: ${res.only_in_source.join(', ')}</p>` : ''}
+            ${res.only_in_target.length ? `<p class="text-danger">Only in target: ${res.only_in_target.join(', ')}</p>` : ''}
+            ${res.type_mismatches.length ? `<p class="text-warning">Type mismatches: ${res.type_mismatches.map(m => m.column + ': ' + m.source_type + ' → ' + m.target_type).join('; ')}</p>` : ''}
+        `;
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initSchemaBrowserPage();
+});
+</script>
+{% endblock %}

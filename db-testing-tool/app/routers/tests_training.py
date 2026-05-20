@@ -391,3 +391,84 @@ async def list_training_pipeline_rules(target_table: str = "", db: AsyncSession 
         }
         for r in rules
     ]
+
+
+@_tr_router.post("/test-suites/generate")
+async def generate_test_suite_from_sql(
+    target_table: str = Form(...),
+    target_schema: str = Form(...),
+    ddl_sql: str = Form(""),
+    insert_sql: str = Form(""),
+    validation_sql: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generate a test suite folder with DDL, INSERT, and validation test cases."""
+    if not insert_sql.strip():
+        raise HTTPException(status_code=400, detail="insert_sql required")
+    
+    target_table_u = (target_table or "").strip().upper()
+    if not target_table_u:
+        raise HTTPException(status_code=400, detail="target_table required")
+    
+    # Create test folder for the suite
+    suite_name = f"{target_table_u}_FullCoverage"
+    suite_folder = await _ensure_folder(db, suite_name)
+    
+    created_tests = []
+    
+    # DDL test
+    if ddl_sql.strip():
+        ddl_test = TestCase(
+            name=f"{target_table_u}_DDL_Create",
+            test_type="ddl",
+            source_query=ddl_sql,
+            expected_result="table_created",
+            is_active=True,
+            created_at=datetime.utcnow(),
+        )
+        db.add(ddl_test)
+        await db.flush()
+        if suite_folder:
+            await _assign_test_to_folder(db, ddl_test.id, suite_folder.id)
+        created_tests.append({"name": ddl_test.name, "type": "ddl"})
+    
+    # INSERT test
+    insert_test = TestCase(
+        name=f"{target_table_u}_INSERT_Data",
+        test_type="insert",
+        source_query=insert_sql,
+        expected_result="rows_inserted",
+        is_active=True,
+        created_at=datetime.utcnow(),
+    )
+    db.add(insert_test)
+    await db.flush()
+    if suite_folder:
+        await _assign_test_to_folder(db, insert_test.id, suite_folder.id)
+    created_tests.append({"name": insert_test.name, "type": "insert"})
+    
+    # Validation test
+    if validation_sql.strip():
+        val_test = TestCase(
+            name=f"{target_table_u}_Validate",
+            test_type="validation",
+            source_query=validation_sql,
+            expected_result="validation_passed",
+            is_active=True,
+            created_at=datetime.utcnow(),
+        )
+        db.add(val_test)
+        await db.flush()
+        if suite_folder:
+            await _assign_test_to_folder(db, val_test.id, suite_folder.id)
+        created_tests.append({"name": val_test.name, "type": "validation"})
+    
+    await db.commit()
+    return {
+        "suite_id": suite_folder.id if suite_folder else None,
+        "suite_name": suite_name,
+        "target_table": target_table_u,
+        "tests_created": len(created_tests),
+        "tests": created_tests,
+        "status": "created",
+    }

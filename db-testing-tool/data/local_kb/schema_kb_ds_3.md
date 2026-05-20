@@ -1,56 +1,13 @@
 # Local DB Knowledge Base: LH
 
-- Generated At: 2026-04-23T14:01:16.384546+00:00
+- Generated At: 2026-05-15T17:30:30.616285+00:00
 - DB Type: oracle
 - Host: orgds01aplqa
 - Database: gl_cdss001qa_main.rjf.com
-- Schemas: 192
-- Relationships: 184
+- Schemas: 117
+- Relationships: 177
 
 ## PDM Summary
-### Schema AABHISHEK
-- B (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=1
-- GENERIC_FILE_EXTRACTS_PARAMETER_TABLE_16MAY2025 (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=2
-- HIST_LOAD_VALDN_RSLT_LOG_141024 (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=8
-- IMT_PD_DIM_BKP (TABLE), columns=385, pk=-, fk=0, indexes=0, constraints=2
-- IMT_PD_DIM_STEP3_STG (TABLE), columns=382, pk=-, fk=0, indexes=0, constraints=0
-- J$AVY_DTL_FACT_240924 (TABLE), columns=12, pk=-, fk=0, indexes=0, constraints=2
-- J$AVY_FACT_240924 (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=2
-- J$TXN_NEW_BKP_KTLO_BUG_1939802 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- POSITIONS_FACT_29OCT23_BKP (TABLE), columns=156, pk=-, fk=0, indexes=0, constraints=12
-- POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_V2 (TABLE), columns=83, pk=-, fk=0, indexes=0, constraints=11
-- REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_16062022 (TABLE), columns=125, pk=-, fk=0, indexes=0, constraints=26
-- REV_TP_DIM_NEWLOGIC (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=1
-- STG_POS_PAYEE_BKRBO1_CASH_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_BKRBO1_FMI_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_EXTAC_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_INSTBO1_CASH_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_INSTBO1_FMI_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_INTLBO1_CASH_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_INTLBO1_FMI_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_MFD_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_MFD_FMI_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJBNK1_CASH_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJBNK1_FMI_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJBNK1_LIABILITY_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJBNK2_CASH_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJBNK2_FMI_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJBNK2_LIABILITY_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJIG1_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJIG1_ANNFUND_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJIG1_ANNPOLICY_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJIG1_LIFFUND_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJIG1_LIFPOLICY_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_PAYEE_RJTRST1_02102023 (TABLE), columns=191, pk=-, fk=0, indexes=0, constraints=0
-### Schema ACONTY
-- SSDS_T1 (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=0
-### Schema ACROW
-- EXPDP_EOD_AR_DIM (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-- EXP_DATACDSSPD_EOD_AR_DIM_RUN2 (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-- EXP_DATA_CDSSPD_EOD_AR_DIM (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-- EXP_DATA_CDSSPD_EOD_AR_DIM_RUN2 (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-- SYS_EXPORT_TABLE_01 (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-- SYS_EXPORT_TABLE_02 (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
 ### Schema ACTIMIZE_OWNER
 - CDS_CCAL_APA_VW (VIEW), columns=48, pk=-, fk=0, indexes=0, constraints=0
 - CDS_CCAL_BALANCES_VW (VIEW), columns=17, pk=-, fk=0, indexes=0, constraints=0
@@ -64,7 +21,7 @@
 - CDS_CCAL_TXN_VW (VIEW), columns=55, pk=-, fk=0, indexes=0, constraints=0
 - CDS_CCAL_TXRLP_VW (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
 - CDS_CCSI_ACC_AC_AR_OPT_TDG_VW (VIEW), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCSI_ACC_AC_CORE_VW (VIEW), columns=25, pk=-, fk=0, indexes=0, constraints=0
+- CDS_CCSI_ACC_AC_CORE_VW (VIEW), columns=27, pk=-, fk=0, indexes=0, constraints=0
 - CDS_CCSI_ACC_AGRM_AR_VW (VIEW), columns=19, pk=-, fk=0, indexes=0, constraints=0
 - CDS_CCSI_ACC_ANNTY_AC_VW (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - CDS_CCSI_ACC_ANNTY_AR_VW (VIEW), columns=12, pk=-, fk=0, indexes=0, constraints=0
@@ -187,20 +144,6 @@
 - ADAM_ADA_DOC_PKG_JRN_VW (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
 - ADAM_ADA_EXECR_JRN_STG (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
 - ADAM_ADA_EXECR_JRN_VW (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
-### Schema AKHAN5
-- BASELINE_TBL (TABLE), columns=77, pk=-, fk=0, indexes=0, constraints=0
-### Schema AKOLGANOV
-- MY_ALL_VIEWS (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-### Schema AMOGOREANU
-- BLA (TABLE), columns=81, pk=-, fk=0, indexes=0, constraints=0
-- STG_RJTPD_REALIZED_GAIN_LOSS (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-### Schema AMONASTIRNII
-- APS_BRANCH_METADATA (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- APS_FA_METADATA (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- APS_FA_NUMBER_EXTENSION_LOOKUP_DIMENSION (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- APS_FA_NUMBER_EXTENSION_LOOKUP_DIMENSION_ATHENA (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- APS_FA_NUMBER_EXTENSION_LOOKUP_DIMENSION_EDW (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- SCD_1099_FA_DIM (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
 ### Schema AMSBIL_OWNER
 - AMS_BILLING_MONTH (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
 - AMS_CCSI_LIVE_WA_ACCOUNT_DETAILS (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
@@ -321,8 +264,6 @@
 - SSDS_CIRD_PD_VW (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
 - SSDS_CPS_FA_MBR_VW (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
 - SSDS_CPS_FA_VW (VIEW), columns=17, pk=-, fk=0, indexes=0, constraints=0
-### Schema ANAYAK1
-- AR_AMS_CNCL_DST_AC_FACT_24_02_2026 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=9
 ### Schema APP_CAL_OWNER
 - CAL_ACCT_OUTGOING (TABLE), columns=46, pk=-, fk=0, indexes=0, constraints=3
 - CAL_DETAIL_STAGING (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=8
@@ -338,9 +279,6 @@
 - TMP_AFF_DATA (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
 - TMP_DVP_DATA (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
 - TMP_ENTITIES (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-### Schema APP_DBAREPO
-- APEX_REMOTE_BASELINE_QUERY_VW (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- APEX_REMOTE_CLOB_READING_GTT (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
 ### Schema APP_ECMREP_OWNER
 - E$_PRODUCT_PRICING_IDS (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
 - ECM_ADMIN_PRODUCT_EXCEPTIONS (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
@@ -353,14 +291,12 @@
 ### Schema APP_LNEXIS_OWNER
 - RJ_AUT_GTT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
 - RJ_BVD_GTT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-### Schema APP_LNEXIS_USER
-- RJ_BVD_GTT (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=3
 ### Schema APP_MATDEC_OWNER
 - FILL_BOX_LOCATION (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
 - FILL_PARTY_ALT_ID (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
 - FINAL_ACCT_ADDR (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=0
 - FINAL_ACCT_BENEFICIARY (TABLE), columns=28, pk=-, fk=0, indexes=0, constraints=0
-- FINAL_ACCT_BOOKS_AND_RECORDS (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=3
+- FINAL_ACCT_BOOKS_AND_RECORDS (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=3
 - FINAL_ACCT_CAPITAL_ACCESS (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
 - FINAL_ACCT_DIRECT_MUTFUND_POSN (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
 - FINAL_ACCT_HOLDER (TABLE), columns=79, pk=-, fk=0, indexes=0, constraints=0
@@ -404,7 +340,7 @@
 - FINMAX_RJ_TRADING_DATA (TABLE), columns=39, pk=FINMAX_RJ_TRADING_DATA_ID, fk=0, indexes=4, constraints=2
 - MCO_HR_DATA (TABLE), columns=17, pk=HR_ID, fk=0, indexes=3, constraints=6
 - PTP_CONSOLIDATED_WATCHLIST_DATA (TABLE), columns=29, pk=PTP_CONSOLIDATED_WATCHLIST_DATA_ID, fk=0, indexes=1, constraints=2
-- WATCHLIST_DATA (TABLE), columns=38, pk=WATCHLIST_DATA_ID, fk=0, indexes=1, constraints=2
+- WATCHLIST_DATA (TABLE), columns=39, pk=WATCHLIST_DATA_ID, fk=0, indexes=1, constraints=2
 - WATCHLIST_DATA_USER (TABLE), columns=11, pk=-, fk=0, indexes=1, constraints=1
 ### Schema APP_PCGFILETRAN_OWNER
 - ACD_ADM_ACCTS (TABLE), columns=8, pk=ACD_ADM_ACCTS_ID, fk=0, indexes=1, constraints=7
@@ -448,6 +384,7 @@
 - LOG_CUSIP_PRICE_INFO (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
 - RATINGS_CUSIP (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 - TRADEWEBACCOUNTTB (TABLE), columns=1, pk=ACCOUNT_ID, fk=0, indexes=1, constraints=2
+- TRADEWEBCUSIP (TABLE), columns=1, pk=CUSIP_NUMBER, fk=0, indexes=1, constraints=2
 ### Schema APP_SUPPORT_OWNER
 - APPROVED_OBJECT (TABLE), columns=19, pk=APPROVED_OBJECT_ID, fk=0, indexes=2, constraints=13
 - APPROVED_OBJECT_FEEDBACK (TABLE), columns=4, pk=APPROVED_OBJECT_ID, fk=0, indexes=1, constraints=4
@@ -471,176 +408,6 @@
 - STATS_LOG (TABLE), columns=11, pk=-, fk=0, indexes=3, constraints=9
 - STATS_MONITORED_SCHEMA (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=5
 - STATS_SCHEDULE (TABLE), columns=24, pk=-, fk=0, indexes=0, constraints=13
-### Schema APP_VIEW_USER
-- ACCOUNT5807 (VIEW), columns=44, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT7207 (VIEW), columns=44, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT7608 (VIEW), columns=44, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT_MARKET_VALUE5808 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT_MARKET_VALUE6801 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT_MARKET_VALUE7208 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT_PARTY5810 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT_PARTY7219 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT_RELATIONSHIP5826 (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT_RELATIONSHIP7213 (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_RLTNP_SUBDIM9201 (VIEW), columns=18, pk=-, fk=0, indexes=0, constraints=0
-- AR_RLTNP_AGRM_DOC_ATSTN11606 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- AR_RLTNP_AGRM_DOC_ATSTN11610 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- AVY_FCT9401 (VIEW), columns=198, pk=-, fk=0, indexes=0, constraints=0
-- COUNTRY_DIMENSION5824 (VIEW), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- CRN_ENTP_ENT_DIM_V10001 (VIEW), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CRN_ENTP_ENT_DIM_V12009 (VIEW), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CRN_PSN_PST_ADR_CV10002 (VIEW), columns=31, pk=-, fk=0, indexes=0, constraints=0
-- CRN_PSN_PST_ADR_CV12010 (VIEW), columns=31, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ACCOUNT5819 (VIEW), columns=294, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ACCOUNT7403 (VIEW), columns=294, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ARRANGEMENT_DIMENSION10401 (VIEW), columns=377, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ARRANGEMENT_DIMENSION12006 (VIEW), columns=377, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ARRANGEMENT_PARTY_FACT11605 (VIEW), columns=36, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ARRANGEMENT_PARTY_FACT11609 (VIEW), columns=36, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ARRGMT_GRP_SUBDIM10402 (VIEW), columns=80, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ENTITY11612 (VIEW), columns=348, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ENTITY6401 (VIEW), columns=350, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ENTITY8201 (VIEW), columns=347, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_FA_NUMBER11611 (VIEW), columns=27, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_INVESTMENT_PRODUCT8003 (VIEW), columns=374, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PARTY_DIMENSION11604 (VIEW), columns=290, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PARTY_DIMENSION11608 (VIEW), columns=290, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PERSON5822 (VIEW), columns=58, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PERSON7218 (VIEW), columns=58, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PERSON_CV12008 (VIEW), columns=76, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PERSON_CV12207 (VIEW), columns=76, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PERSON_CV12209 (VIEW), columns=73, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PERSON_CV9801 (VIEW), columns=73, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_PERSON_POSTAL_ADDRESS5823 (VIEW), columns=25, pk=-, fk=0, indexes=0, constraints=0
-- DRM_CPS_FINAL_VW5201 (VIEW), columns=35, pk=-, fk=0, indexes=0, constraints=0
-- DRM_CPS_FINAL_VW5601 (VIEW), columns=31, pk=-, fk=0, indexes=0, constraints=0
-- DRM_CPS_FINAL_VW6601 (VIEW), columns=28, pk=-, fk=0, indexes=0, constraints=0
-- DRM_CPS_FINAL_VW7801 (VIEW), columns=28, pk=-, fk=0, indexes=0, constraints=0
-- DRM_FA_CPS_FINAL_VW5202 (VIEW), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- END_OF_DAY_PRICE_VW10201 (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- END_OF_DAY_PRICE_VW10202 (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V3401 (VIEW), columns=185, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V3601 (VIEW), columns=185, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V3602 (VIEW), columns=185, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V3603 (VIEW), columns=185, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V3604 (VIEW), columns=185, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V3605 (VIEW), columns=185, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V3801 (VIEW), columns=185, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V4001 (VIEW), columns=186, pk=-, fk=0, indexes=0, constraints=0
-- FA_NUMBER_MEMBERSHIP5814 (VIEW), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- FINANCIAL_ADVISOR5821 (VIEW), columns=20, pk=-, fk=0, indexes=0, constraints=0
-- FINANCIAL_ADVISOR7404 (VIEW), columns=20, pk=-, fk=0, indexes=0, constraints=0
-- HRS_CLIENT_DATA_V4201 (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- HRS_CLIENT_DATA_V4401 (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- HRS_CLIENT_DATA_V4601 (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- HRS_MARKET_CAP_DATA_V4603 (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- HRS_POSITION_DATA_V4801 (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- HRS_POSITION_DATA_V4803 (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- HRS_POSITION_DATA_V5401 (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- HRS_PRODUCT_DATA_V4402 (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- HRS_PRODUCT_DATA_V4602 (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- HRS_PRODUCT_DATA_V4802 (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- HRS_PRODUCT_DATA_V4804 (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- HRS_PRODUCT_DATA_V5001 (VIEW), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- HRS_PRODUCT_DATA_V8401 (VIEW), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- INVESTMENT_PRODUCT_ALT_NAME8002 (VIEW), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- INVESTMENT_PRODUCT_XREF8801 (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- MANAGED_ACCOUNT5815 (VIEW), columns=36, pk=-, fk=0, indexes=0, constraints=0
-- MANAGED_ACCOUNT7402 (VIEW), columns=36, pk=-, fk=0, indexes=0, constraints=0
-- MONEY_TRANSFERS_FACT10601 (VIEW), columns=91, pk=-, fk=0, indexes=0, constraints=0
-- MONEY_TRANSFERS_FACT8601 (VIEW), columns=89, pk=-, fk=0, indexes=0, constraints=0
-- MONEY_TRANSFERS_FACT9402 (VIEW), columns=89, pk=-, fk=0, indexes=0, constraints=0
-- PARTY5817 (VIEW), columns=102, pk=-, fk=0, indexes=0, constraints=0
-- PARTY7215 (VIEW), columns=102, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_ADDRESS5813 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_ADDRESS6006 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_ADDRESS7401 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_ALT_ID5818 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_ALT_ID7216 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_DIMENSION7001 (VIEW), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_EMAIL5812 (VIEW), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_EMAIL7212 (VIEW), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_PHONE5811 (VIEW), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_PHONE7211 (VIEW), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_RELATIONSHIP5803 (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_RELATIONSHIP6005 (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_RELATIONSHIP7203 (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- PORTFOLIO_PRODUCT_SUBDIMENSION9001 (VIEW), columns=18, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_FACT10801 (VIEW), columns=91, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_FACT11404 (VIEW), columns=91, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_FACT11405 (VIEW), columns=93, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT5804 (VIEW), columns=62, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT6004 (VIEW), columns=62, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT7204 (VIEW), columns=62, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT8001 (VIEW), columns=63, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT_ID5801 (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT_ID6003 (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT_ID7201 (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT_PRICE5802 (VIEW), columns=25, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT_PRICE6002 (VIEW), columns=25, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT_PRICE7202 (VIEW), columns=25, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT_PRICE7601 (VIEW), columns=25, pk=-, fk=0, indexes=0, constraints=0
-- RESTRICTIONS_ALL_FACT11202 (VIEW), columns=58, pk=-, fk=0, indexes=0, constraints=0
-- RESTRICTIONS_ALL_FACT11203 (VIEW), columns=58, pk=-, fk=0, indexes=0, constraints=0
-- RESTRICTIONS_ALL_FACT11402 (VIEW), columns=58, pk=-, fk=0, indexes=0, constraints=0
-- RESTRICTIONS_ALL_FACT_V11001 (VIEW), columns=58, pk=-, fk=0, indexes=0, constraints=0
-- RESTRICTIONS_ALL_FACT_V11401 (VIEW), columns=58, pk=-, fk=0, indexes=0, constraints=0
-- TG_ENTITY5827 (VIEW), columns=288, pk=-, fk=0, indexes=0, constraints=0
-- TG_ENTITY6001 (VIEW), columns=288, pk=-, fk=0, indexes=0, constraints=0
-- TXN_APA_EXTRACT5809 (VIEW), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- TXN_APA_EXTRACT7209 (VIEW), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- TXN_APA_EXTRACT7603 (VIEW), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- TXN_EXEC_EXTRACT5825 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- TXN_EXEC_EXTRACT7217 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- TXN_EXEC_EXTRACT7602 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- TXN_EXTRACT5805 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- TXN_EXTRACT7205 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- TXN_EXTRACT7605 (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- TXN_FIP_EXTRACT5820 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- TXN_FIP_EXTRACT7210 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- TXN_FIP_EXTRACT7607 (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- TXN_MNY_QF_EXTRACT5816 (VIEW), columns=63, pk=-, fk=0, indexes=0, constraints=0
-- TXN_MNY_QF_EXTRACT7214 (VIEW), columns=63, pk=-, fk=0, indexes=0, constraints=0
-- TXN_MNY_QF_EXTRACT7604 (VIEW), columns=63, pk=-, fk=0, indexes=0, constraints=0
-- TXN_RL_EXTRACT5806 (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- TXN_RL_EXTRACT7206 (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- TXN_RL_EXTRACT7606 (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-### Schema ARAJULA
-- AR_DIM_04052024 (TABLE), columns=332, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_FINAL (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_FINAL_V1 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_SHRINKED_FINAL_PARTITIONED_ASHOK (TABLE), columns=359, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_SHRINKED_FINAL_PARTITIONED_ASHOK1 (TABLE), columns=359, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_SHRINK_HASH (TABLE), columns=361, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_STEP2 (TABLE), columns=360, pk=-, fk=0, indexes=0, constraints=0
-- AR_ID_DRIVER (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_ID_DRIVER_V1 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- POSITIONS_FACT_TEST_SP (TABLE), columns=156, pk=-, fk=0, indexes=0, constraints=12
-- TEMP_AR_IDS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- TES_DFLT (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=1
-### Schema AREGUKUMAR
-- BASELINE_STAGING_TABLE (TABLE), columns=77, pk=-, fk=0, indexes=0, constraints=0
-- SQLPROF_STAGING_TABLE (TABLE), columns=77, pk=-, fk=0, indexes=0, constraints=0
-### Schema ASOLOVIOV
-- SRC_STM_DIM_COPY (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=3
-### Schema ATERNA
-- ARRANGEMENT_GROUP (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ARRANGEMENT_GROUP_RELATIONSHIP_SUBDIMENSION_V (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=8
-- COPY_CA_PRTY_API_STG (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- COPY_CA_PRTY_API_STG2 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- COUNTY_CODE_RATE (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- FULL_COPY_CA_PRTY_API_STG (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- FULL_COPY_CA_PRTY_API_STG2 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- ISO_CODE (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- MLP_TAB (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_CL2 (TABLE), columns=5, pk=-, fk=0, indexes=1, constraints=0
-- PARTY_REG (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_SIS_AND_IMP (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_SOURCE_DATA (TABLE), columns=37, pk=-, fk=0, indexes=1, constraints=0
-- PARTY_TAX_FIELDS_VALIDATION (TABLE), columns=25, pk=-, fk=0, indexes=0, constraints=0
-- SHADOW_PARTY2 (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-### Schema AWAISHAMPAYAN
-- MODEL_METADATA (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
 ### Schema BALANCE_OWNER
 - AR_BAL_FACT (TABLE), columns=121, pk=AR_ID,CCY_CD,BAL_DT,AC_ID, fk=0, indexes=3, constraints=9
 - AR_BAL_FACT_BKP_09FEB26 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=8
@@ -648,160 +415,10 @@
 - AR_BAL_FACT_LOG (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=2
 - AR_BAL_FACT_SIDE1 (TABLE), columns=210, pk=AR_ID,CCY_CD,BAL_DT,AC_ID, fk=0, indexes=3, constraints=9
 - AR_RETM_BAL_FACT (TABLE), columns=131, pk=RETM_BAL_DT,AR_RETM_BAL_FACT_ID, fk=0, indexes=2, constraints=10
+- AR_RETM_BAL_FACT_SIDE1 (TABLE), columns=205, pk=-, fk=0, indexes=1, constraints=9
 - ID_AR_BAL_FACT (TABLE), columns=119, pk=CCAL_BAL_ID, fk=0, indexes=2, constraints=9
 - SWP_BAL_DTL_FACT (TABLE), columns=41, pk=SWP_BAL_DTL_FACT_ID,BAL_DT, fk=0, indexes=2, constraints=11
 - TABLES_TO_TRUNCATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-### Schema BGAJIC
-- ACCOUNTS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- ACC_WITH_LE_CUST (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- ACTIVE_PARTIES (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- ALL_LE_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- ALL_NP_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- ARRANGEMENT_DELIVERY_INSTRUCTIONS_V_0416 (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=4
-- ARRANGEMENT_DELIVERY_INSTRUCTIONS_V_0418 (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=4
-- BOTH_LISTS_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_0514_ADRESS_ACC (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_LE_0514 (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_NP_0514_2 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_RAJA_REPORT_0126 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0212 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0213 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_REF_DATA (TABLE), columns=32, pk=-, fk=0, indexes=0, constraints=5
-- CAIS_REF_DATA_0114 (TABLE), columns=32, pk=-, fk=0, indexes=0, constraints=5
-- CAIS_REF_DATA_1204 (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=5
-- COBI_MAC_REF_1204 (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=2
-- DIFF_0805 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- EIN_SHORTNAME_UI (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- EMPLOYEE_NOTSELF_0126 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- EMPLOYEE_SELF_0126 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_0405 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_0409 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_0410 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_0418 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_0420 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_0805 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_1009 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_1024 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_1403 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_DAY_1 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ENTITY_DEPARTMENT_REPORT_V_DELTA_1 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- FIRM_0417 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- FIRM_1403 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- FIRM_ARRANGEMENT_DIMENSION_ALL_SOURCE_V_1204 (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=0
-- FIRM_CDSQA_0417 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- FIRM_CLOSED_FLAGS (TABLE), columns=33, pk=-, fk=0, indexes=0, constraints=0
-- GE_ARRANGEMENT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- GE_CUST (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- LEGAL_ENTITIES (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=2
-- NOTFOUND_1403 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- NOT_RJFS_0508 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- NP_TRUST_ALL_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- NP_TRUST_RPRTD_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- NTIER_AR_LKP_0405 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- NTIER_AR_LKP_0409 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- NTIER_AR_LKP_0410 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- NTIER_AR_LKP_0418 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- NTIER_AR_LKP_1009 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- NTIER_AR_LKP_1403 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- NTIER_AR_LKP_DAY_1 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- NTIER_AR_LKP_DELTA_1 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- OTHBKR_ALL_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- OTHBKR_TRUST_ALL (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- OTHBKR_TRUST_ALL_NO_EMP (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- OTHBKR_TRUST_NP (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_0919 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_0919_AFFECTED (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_DIM_POM (TABLE), columns=23, pk=-, fk=0, indexes=0, constraints=4
-- PARTY_EMPLOYE_0126 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_ID_DAY_1_LE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_ID_DAY_1_NP (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_ON_CLOSED_ACCOUNT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PASSED_EMPLOYEE_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- QUESTIONABLE_LOGIC_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- REST_OF_EMPLOYEE_0212 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- RJFS_0805 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- RJFS_0805_2 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- SSN_INDIVIDUAL_PARTIES (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=2
-- T1 (TABLE), columns=466, pk=-, fk=0, indexes=0, constraints=0
-- TAX_ID_SSDS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- TID_RAJA_REPORT_0120 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TOTAL_EMPLOYEE_0212 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- TOTAL_EMPLOYEE_0213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- TOTAL_EMPLOYEE_NEWLOGIC_0212 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-### Schema BKATUKOTA
-- AA (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_ADMN_FEE_PREF (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_BKP (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CNTL_COPIES_E_PRODUCT_REAL_ESTATE_INVESTMENT_TRUSTS_DESCRIPTIVE_ATTRIBUTES_CURRENT_V (TABLE), columns=173, pk=-, fk=0, indexes=0, constraints=0
-- NGDA_CNTL_COPIES_PRODUCT_REAL_ESTATE_INVESTMENT_TRUSTS_DESCRIPTIVE_ATTRIBUTES_CURRENT_V (TABLE), columns=173, pk=-, fk=0, indexes=0, constraints=0
-### Schema BOM_ODI
-- APP_PROPERTY (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=1
-- BOM_RELACCT_STG (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2A10GHODK2SAD7IFC64PV5N25SJ (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2A3AG709DCTFEK060729M96QQ3P (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2A3RT5E70CQ5RB17S70L6BGKCVM (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2AAQJK76HSB6CNHKJ6GKE8SL0LF (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2ABBGVFGMKRPFLG55685NMT7LJV (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2ACLT9PDUMUT6437B6CQDKEDT7K (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2AF5RKG4FCKI5Q2AG7PA3NH56QR (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2AHFQCCC9Q8UGNG0C7F0JJFRQ88 (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2AJJ9A54LCSETFH5866KF8JLC0S (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2ANHOKC7GS5LNB3OK6D6I32EKRC (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2ANLJCAQBPETIBIUI7UD0L5J14P (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2APIC4D5JQ1MK41BS6JTPPFJVG4 (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- C$_0JOIN2AVHJFUH6KL1CGHIA6F81T7HFC0 (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- CA_CONVERSION_LKP (TABLE), columns=16, pk=CA_LKP_ID, fk=0, indexes=2, constraints=11
-- CA_COUNTRY_FIPS_ISO_MAP (TABLE), columns=9, pk=-, fk=0, indexes=1, constraints=0
-- CA_INSTRUMENT_API_INACT_CUSIP (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- CA_INSTRUMENT_API_STG (TABLE), columns=45, pk=CUSIP, fk=0, indexes=1, constraints=1
-- CA_INSTRUMENT_API_STG_EXCP (TABLE), columns=44, pk=-, fk=0, indexes=0, constraints=0
-- CA_PARTY_SSDS_ALL_API_vw (VIEW), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- CA_PARTY_SSDS_ALL_DELTA_API_VW (VIEW), columns=82, pk=-, fk=0, indexes=0, constraints=0
-- CA_PARTY_SSDS_ALL_DELTA_API_VW1 (VIEW), columns=83, pk=-, fk=0, indexes=0, constraints=0
-- CA_PARTY_SSDS_ALL_DELTA_API_VW2 (VIEW), columns=83, pk=-, fk=0, indexes=0, constraints=0
-- CA_PREF_API_STG (TABLE), columns=24, pk=EMPLOYEE_ID, fk=0, indexes=1, constraints=1
-- CA_PRTY_API_PRE_STG1 (TABLE), columns=119, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_PRE_STG2 (TABLE), columns=119, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG (TABLE), columns=121, pk=ACCOUNT_NUMBER,SOURCE_STM_ID, fk=0, indexes=2, constraints=1
-- CA_PRTY_API_STG_BKP1 (TABLE), columns=117, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_BKP10APR25 (TABLE), columns=111, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_BKP_180226 (TABLE), columns=117, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_BKP_220326 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_BKP_FULL (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_BKP_FULL1 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_BKP_WITHHOLD (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_BKP_WITHHOLD1 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_DUP (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
-- CA_PRTY_API_STG_EXCP (TABLE), columns=111, pk=-, fk=0, indexes=0, constraints=0
-- CA_UNKNOWN_INSTRUMENT_API (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- CA_UNKNOWN_INSTRUMENT_API_ARCH (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- CA_UNKNOWN_INSTRUMENT_API_ARCH_BKP (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- CA_UNKNOWN_INSTRUMENT_API_STG (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- CA_UNKNOWN_INSTRUMENT_API_STG_LAND (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- CA_UNKNOWN_INST_SECURITY_NOT_FOUND (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- FILE_EXTRACTS_PARAMETER_TABLES (TABLE), columns=21, pk=-, fk=0, indexes=1, constraints=0
-- FIS_CONVERSION_LKP (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=10
-- I$_CA_PREF_API_STGA2FU6H08QAT0SI106GBGO6FAB8 (TABLE), columns=25, pk=-, fk=0, indexes=1, constraints=0
-- I$_CA_PREF_API_STGA6PEHPGLDB1J5HRK7GLK5BFGME (TABLE), columns=25, pk=-, fk=0, indexes=1, constraints=0
-- I$_CA_PREF_API_STGA85771406DADSIJ36GVGKU30AN (TABLE), columns=25, pk=-, fk=0, indexes=1, constraints=0
-- I$_CA_PREF_API_STGA9M01HGQNB7CB15J7VCF93NU4J (TABLE), columns=25, pk=-, fk=0, indexes=1, constraints=0
-- I$_CA_PREF_API_STGAD39A9IL2LSJ7G8P7BKKQOLP37 (TABLE), columns=25, pk=-, fk=0, indexes=1, constraints=0
-- J$CA_INSTRUMENT_API_STG (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- J$CA_PREF_API_STG (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- J$CA_PRTY_API_STG (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=1
-- JV$CA_INSTRUMENT_API_STG (VIEW), columns=47, pk=-, fk=0, indexes=0, constraints=0
-- JV$CA_PREF_API_STG (VIEW), columns=27, pk=-, fk=0, indexes=0, constraints=0
-- JV$CA_PRTY_API_STG (VIEW), columns=124, pk=-, fk=0, indexes=0, constraints=0
-- JV$DCA_INSTRUMENT_API_STG (VIEW), columns=47, pk=-, fk=0, indexes=0, constraints=0
-- JV$DCA_PREF_API_STG (VIEW), columns=27, pk=-, fk=0, indexes=0, constraints=0
-- JV$DCA_PRTY_API_STG (VIEW), columns=124, pk=-, fk=0, indexes=0, constraints=0
-- LH_OPTSEG_SRC_VW (VIEW), columns=29, pk=-, fk=0, indexes=0, constraints=0
-- SNP_SUBSCRIBERS (TABLE), columns=6, pk=JRN_TNAME,JRN_SUBSCRIBER, fk=0, indexes=1, constraints=3
-- SSDS_INTRADAY_ACTIVITY_VW (VIEW), columns=29, pk=-, fk=0, indexes=0, constraints=0
-- TBD_CA_INSTRUMENT_API_COUNTRY (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- TBD_CA_PARTY_API_COUNTRY (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- TBD_CA_PRTY_API_STG_28AUG24 (TABLE), columns=111, pk=-, fk=0, indexes=0, constraints=0
-- TBD_CA_PRTY_API_STG_DEL_3326 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=0
 ### Schema CAT_OWNER
 - CAIS_REF_DATA (TABLE), columns=34, pk=-, fk=0, indexes=0, constraints=5
 - COBI_MAC_REF (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=2
@@ -881,7 +498,7 @@
 - J$TXN_NEW_BKP_KTLO_BUG_1939802 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
 - J$TXN_RLTNP (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
 - MLOG$_AC_EXTRACT (TABLE), columns=6, pk=-, fk=0, indexes=1, constraints=0
-- MNY_TXN_QUALFR (TABLE), columns=71, pk=MNY_TXN_QUALFR_ID, fk=0, indexes=2, constraints=17
+- MNY_TXN_QUALFR (TABLE), columns=78, pk=MNY_TXN_QUALFR_ID, fk=0, indexes=2, constraints=20
 - MNY_TXN_QUALFR_BKP_03272026 (TABLE), columns=71, pk=-, fk=0, indexes=0, constraints=16
 - MNY_TXN_QUALFR_OLD (TABLE), columns=71, pk=MNY_TXN_QUALFR_ID, fk=0, indexes=2, constraints=17
 - NNA_CGY (TABLE), columns=8, pk=NNA_CGY_ID, fk=0, indexes=1, constraints=9
@@ -902,7 +519,7 @@
 - TAX_LOT_RULE (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - TRAN_TP_LKP (TABLE), columns=5, pk=TRAN_TP_CD, fk=0, indexes=1, constraints=6
 - TRLR_DSC_LKP (TABLE), columns=6, pk=TRLR_DSC_CD, fk=0, indexes=1, constraints=6
-- TXN (TABLE), columns=63, pk=TXN_ID, fk=0, indexes=4, constraints=23
+- TXN (TABLE), columns=65, pk=TXN_ID, fk=0, indexes=4, constraints=23
 - TXN_072023 (TABLE), columns=57, pk=-, fk=0, indexes=1, constraints=22
 - TXN_082023 (TABLE), columns=57, pk=-, fk=0, indexes=1, constraints=22
 - TXN_092023 (TABLE), columns=57, pk=-, fk=0, indexes=1, constraints=22
@@ -949,6 +566,7 @@
 - TXRLP_EXTRACT_BKP1 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - TXRLP_EXTRACT_STG (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
 ### Schema CCAL_TAXLOT_REPL_OWNER
+- COST_BSS (TABLE), columns=71, pk=AST_LBY_POS_ID,COST_BSS_DTM,CCY_CODE, fk=0, indexes=1, constraints=8
 - COST_BSS_STG (TABLE), columns=71, pk=-, fk=0, indexes=1, constraints=7
 - J$TAXLOT_DTL_CLS (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=1
 - J$TAXLOT_DTL_OPN (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=1
@@ -997,24 +615,72 @@
 - AR_CASH_SWP_FACT_AUDT (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
 - AR_CASH_SWP_OPT (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=3
 - AR_CPTL_ACS_DB_CARDS_FACT (TABLE), columns=37, pk=DB_CARD_ID,EFF_DT, fk=0, indexes=2, constraints=3
-- AR_DIM (TABLE), columns=565, pk=AR_DIM_ID, fk=0, indexes=4, constraints=1
+- AR_DIM (TABLE), columns=571, pk=AR_DIM_ID, fk=0, indexes=4, constraints=1
 - AR_DIM_BKP_19APR (TABLE), columns=332, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_20240215 (TABLE), columns=332, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_20240220 (TABLE), columns=332, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_23APR (TABLE), columns=332, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_30OCT (TABLE), columns=332, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_01 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_02 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_03 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_04 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_05 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_06 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_07 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_08 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_09 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_10 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_11 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2018_12 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_01 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_02 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_03 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_04 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_05 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_06 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_07 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_08 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_09 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_10 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_11 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2017_12 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_01 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_02 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_03 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_04 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_05 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_06 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_07 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_08 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_09 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_10 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_11 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2018_12 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_01 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_02 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_03 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_04 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_05 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_06 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_07 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_08 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_09 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_10 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_11 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2019_12 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_01 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_02 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_03 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_04 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_05 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_06 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_07 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_08 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_09 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_10 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_11 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2020_12 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_01 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_02 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_03 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_04 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_05 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_06 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_07 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_08 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_09 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_10 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_11 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKP_P2021_12 (TABLE), columns=571, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_P2022_01 (TABLE), columns=565, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_P2022_02 (TABLE), columns=565, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_P2022_03 (TABLE), columns=565, pk=-, fk=0, indexes=0, constraints=0
@@ -1031,22 +697,10 @@
 - AR_DIM_BKP_P2024_10 (TABLE), columns=565, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_P2024_11 (TABLE), columns=565, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_P2024_12 (TABLE), columns=565, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_01 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_02 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_03 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_04 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_05 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_06 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_07 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_08 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_09 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_10 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_11 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKP_P2025_12 (TABLE), columns=484, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_RJBRESI (TABLE), columns=465, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_RLBCK_8AUG (TABLE), columns=325, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_DEC2024_BKP (TABLE), columns=364, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_ENTID_PE (TABLE), columns=484, pk=AR_DIM_ID, fk=0, indexes=4, constraints=1
+- AR_DIM_ENTID_PE (TABLE), columns=571, pk=AR_DIM_ID, fk=0, indexes=4, constraints=1
 - AR_DIM_EXN_SUBDIM (TABLE), columns=51, pk=AR_DIM_EXN_SUBDIM_ID,END_DT, fk=0, indexes=3, constraints=10
 - AR_DIM_FA_NUM_TEST_TAB (TABLE), columns=364, pk=AR_DIM_ID, fk=0, indexes=4, constraints=1
 - AR_DIM_FA_NUM_TEST_TAB2 (TABLE), columns=364, pk=AR_DIM_ID, fk=0, indexes=4, constraints=1
@@ -1064,9 +718,10 @@
 - AR_DIM_SHRINKED_FINAL_PARTITIONED_TEST1 (TABLE), columns=359, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_SHRINK_HASH (TABLE), columns=361, pk=-, fk=0, indexes=2, constraints=0
 - AR_DIM_SHRINK_HASH_OLD (TABLE), columns=361, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_SNPST (TABLE), columns=594, pk=-, fk=0, indexes=2, constraints=0
+- AR_DIM_SNPST (TABLE), columns=595, pk=-, fk=0, indexes=2, constraints=0
 - AR_DIM_TEMP (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_TEST_12MARCH (TABLE), columns=332, pk=AR_DIM_ID, fk=0, indexes=4, constraints=1
+- AR_DOC_DLV_SETUP_SUBDIM (TABLE), columns=33, pk=AR_DOC_DLV_SETUP_SUBDIM_ID,EFF_DT, fk=0, indexes=1, constraints=12
 - AR_DRCV_FACT (TABLE), columns=42, pk=AR_DRCIVE_ID, fk=0, indexes=1, constraints=6
 - AR_DRCV_FACT_BKP_20240215 (TABLE), columns=42, pk=-, fk=0, indexes=0, constraints=5
 - AR_FEE_SHD_FACT (TABLE), columns=54, pk=AR_FEE_SHD_ID, fk=0, indexes=2, constraints=5
@@ -1078,6 +733,8 @@
 - AR_GRP_SUBDIM_BKP_MGR_23AUG (TABLE), columns=75, pk=-, fk=0, indexes=0, constraints=10
 - AR_GRP_SUBDIM_BKP_MGR_RT_15SEP (TABLE), columns=75, pk=-, fk=0, indexes=0, constraints=10
 - AR_GRP_SUBDIM_RMV_OVERLAPS_9SEP (TABLE), columns=75, pk=-, fk=0, indexes=0, constraints=10
+- AR_LINKED_ACCOUNTS (TABLE), columns=16, pk=-, fk=0, indexes=3, constraints=2
+- AR_LINKED_ACCOUNTS_XCH (TABLE), columns=16, pk=-, fk=0, indexes=3, constraints=2
 - AR_MF_FACT (TABLE), columns=27, pk=AR_MF_ID,EFF_DT, fk=0, indexes=2, constraints=6
 - AR_MF_PRD_EXG_INSR_FACT (TABLE), columns=59, pk=AR_MF_PRD_EXG_INSR_FACT_ID,END_DT, fk=1, indexes=2, constraints=13
 - AR_MF_PRD_IVSM_INSR_FACT (TABLE), columns=64, pk=AR_MF_PRD_IVSM_INSR_FACT_ID,END_DT, fk=1, indexes=2, constraints=14
@@ -1088,8 +745,9 @@
 - AR_NM_FACT (TABLE), columns=10, pk=-, fk=0, indexes=1, constraints=3
 - AR_NM_FACT_AUDT (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=3
 - AR_OPT_TRD_SETUPS_FACT (TABLE), columns=23, pk=AC_AR_OPT_TDG_SETUP_ID,EFF_DT, fk=0, indexes=2, constraints=5
-- AR_PARTY_FACT (TABLE), columns=41, pk=AR_PARTY_FACT_ID, fk=0, indexes=5, constraints=5
+- AR_PARTY_FACT (TABLE), columns=45, pk=AR_PARTY_FACT_ID, fk=0, indexes=5, constraints=5
 - AR_PARTY_FACT_AUDT (TABLE), columns=38, pk=-, fk=0, indexes=0, constraints=3
+- AR_PREF_DOC_DLV (TABLE), columns=19, pk=AR_PREF_DOC_DLV_ID, fk=0, indexes=3, constraints=1
 - AR_PREF_FACT (TABLE), columns=59, pk=AR_PREF_ID,EFF_DT, fk=0, indexes=2, constraints=6
 - AR_PREF_FACT_AUDT (TABLE), columns=68, pk=-, fk=0, indexes=0, constraints=0
 - AR_TAX_ATTR (TABLE), columns=12, pk=AR_ID, fk=0, indexes=1, constraints=3
@@ -1220,7 +878,7 @@
 - AC_NUM_AR_ID_LKUP_VW (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
 - AMS_CNCL_DST_AC (TABLE), columns=13, pk=AMS_CNCL_DST_AC_ID, fk=1, indexes=2, constraints=2
 - AR (TABLE), columns=37, pk=AR_ID, fk=0, indexes=3, constraints=5
-- AR_ADMN_FEE_PREF (TABLE), columns=15, pk=AR_ADMN_FEE_PREF_ID, fk=0, indexes=2, constraints=5
+- AR_ADMN_FEE_PREF (TABLE), columns=15, pk=AR_ADMN_FEE_PREF_ID, fk=0, indexes=3, constraints=5
 - AR_ALT_NM (TABLE), columns=13, pk=AR_ID,AR_NM_TP_ID, fk=0, indexes=3, constraints=5
 - AR_ALT_NM_AUDT (TABLE), columns=16, pk=AUDT_CRT_DTM,AR_ID,AR_NM_TP_ID, fk=0, indexes=2, constraints=3
 - AR_AMS_CNCL_DST_AC_FACT (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=9
@@ -1464,7 +1122,7 @@
 - AD_AOS_HIST_LOAD_PRE_FINAL_STG (TABLE), columns=540, pk=-, fk=0, indexes=0, constraints=0
 - AD_AR_AC_HIST_LOAD_PRE_FINAL_STG (TABLE), columns=113, pk=-, fk=0, indexes=0, constraints=0
 - AD_AR_DRCV_HIST_LOAD_PRE_FINAL_STG (TABLE), columns=540, pk=-, fk=0, indexes=0, constraints=0
-- AD_AR_GRP_HIST_LOAD_PRE_FINAL_STG (TABLE), columns=540, pk=-, fk=0, indexes=0, constraints=0
+- AD_AR_GRP_HIST_LOAD_PRE_FINAL_STG (TABLE), columns=540, pk=-, fk=0, indexes=1, constraints=0
 - AD_AR_MGN_HIST_LOAD_PRE_FINAL_STG (TABLE), columns=540, pk=-, fk=0, indexes=1, constraints=0
 - AD_AR_PREF_HIST_LOAD_PRE_FINAL_STG (TABLE), columns=540, pk=-, fk=0, indexes=1, constraints=0
 - AGS_FA_NUM_NULL_AR_ID_CTL_TAB (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
@@ -1491,8 +1149,8 @@
 - AR_DIM_AR_PREF_ATTRBS_STG (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_AR_PREF_HIST_LOAD_STG (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_BKP_013023 (TABLE), columns=313, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKR_DEACTV_PRELOAD_STG (TABLE), columns=539, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_BKR_PRELOAD_STG (TABLE), columns=539, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKR_DEACTV_PRELOAD_STG (TABLE), columns=545, pk=-, fk=0, indexes=0, constraints=0
+- AR_DIM_BKR_PRELOAD_STG (TABLE), columns=545, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_COMP_ORA_HASH_TAB (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_EXT_DEACTV_PRELOAD_STG (TABLE), columns=112, pk=-, fk=0, indexes=0, constraints=0
 - AR_DIM_EXT_PRELOAD_STG (TABLE), columns=112, pk=-, fk=0, indexes=0, constraints=0
@@ -1564,6 +1222,7 @@
 - AR_MGN_AC_JRN_VW (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
 - AR_MGN_AC_SMRY (TABLE), columns=26, pk=-, fk=0, indexes=3, constraints=2
 - AR_NM_SMRY (TABLE), columns=12, pk=-, fk=0, indexes=0, constraints=2
+- AR_NON_RMC_GRP_REPLAY (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
 - AR_OPT_TRD_SETUPS_SMRY (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=2
 - AR_PARTY_JRN_STG (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
 - AR_PARTY_JRN_VW (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
@@ -1577,6 +1236,7 @@
 - AR_PREF_FACT_STG_03 (TABLE), columns=52, pk=-, fk=0, indexes=0, constraints=2
 - AR_PREF_FACT_UPD_EOP (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
 - AR_PREF_SMRY (TABLE), columns=28, pk=-, fk=0, indexes=0, constraints=2
+- AR_RMC_GRP_REPLAY (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
 - AR_TAX_ATTR_PRE_STG_RT (TABLE), columns=7, pk=-, fk=0, indexes=1, constraints=0
 - AR_TAX_ATTR_STG (TABLE), columns=8, pk=-, fk=0, indexes=1, constraints=0
 - AR_TAX_OVLY_FACT_STG (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=5
@@ -1613,6 +1273,7 @@
 - CNRNCY_CNTL_CHNGS_INIT_LOAD_SRC_WLTH (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
 - CNRNCY_CNTL_CHNGS_INIT_LOAD_TEL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
 - CNTL_COPIES_CONSUMER_CONFIG (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- CNTL_COPIES_E_ACCOUNT_BENEFICIARIES_FULL_REC_CNT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 - CNTL_COPIES_E_ARRANGEMENT_PARTY_RELATIONSHIP_CURRENT_REC_CNT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 - CNTL_COPIES_E_ARRANGEMENT_RMC_REC_CNT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 - CNTL_COPIES_E_BROKERAGE_ACCOUNTS_AND_CONSULTING_CONTRACTS_AMS_BILLING_EXCLUSION_INSTRUCTIONS_CURRENT_REC_CNT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
@@ -1722,7 +1383,9 @@
 - MISSING_AMS_SETUP_21JAN (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
 - MISSING_AR_DIM (TABLE), columns=161, pk=-, fk=0, indexes=0, constraints=0
 - MISSING_AR_ID_31JULY (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
+- NON_PARTITION_TBL_STATS_STG (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
 - ODI_SCEN_CALL_CONFIG (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=4
+- PARTITION_TBL_STATS_STG (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
 - PARTY_ALT_ID_SMRY (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=7
 - PARTY_ANTCP_FTR_SMRY (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=7
 - PARTY_BSN_PFRL_STG_LOAD_01 (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
@@ -1797,6 +1460,7 @@
 - STAGE_AR_DIM_FIRM_ACCTS_HISTORY (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=0
 - STAGE_AR_DIM_IMPACT_ACCTS_HISTORY (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=0
 - STAGE_AR_DIM_IMPACT_ACCTS_HISTORY_AR_TP (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
+- STG_AML_PARTY_LOAD_01 (TABLE), columns=50, pk=-, fk=0, indexes=0, constraints=0
 - STG_AR_DIM_SNPST_AMS (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
 - STG_AR_DIM_SNPST_AR_AC (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
 - STG_AR_DIM_SNPST_DRCIVE (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
@@ -2075,7 +1739,7 @@
 - CONSTITUENT_TP (TABLE), columns=10, pk=CONSTITUENT_TP_ID, fk=0, indexes=2, constraints=11
 - CORP_ACTN_TP (TABLE), columns=10, pk=CORP_ACTN_TP_ID, fk=0, indexes=2, constraints=10
 - CSS_TYPE_TO_INS_CL (TABLE), columns=9, pk=CSS_PRD_TP,CSS_PRD_SUB_TP, fk=0, indexes=1, constraints=5
-- DBT (TABLE), columns=102, pk=DBT_DTL_ID, fk=0, indexes=4, constraints=11
+- DBT (TABLE), columns=105, pk=DBT_DTL_ID, fk=0, indexes=4, constraints=11
 - DBT_TP (TABLE), columns=9, pk=DBT_TP_ID, fk=0, indexes=2, constraints=10
 - DRVT (TABLE), columns=20, pk=DRVT_DTL_ID, fk=0, indexes=3, constraints=11
 - DRVT_CLSS (TABLE), columns=16, pk=DRVT_CLSS_DTL_ID, fk=0, indexes=3, constraints=11
@@ -2097,7 +1761,7 @@
 - IVSM (TABLE), columns=26, pk=IVSM_DTL_ID, fk=0, indexes=2, constraints=11
 - IVSM_VHCL (TABLE), columns=12, pk=IVSM_VHCL_ID, fk=0, indexes=2, constraints=11
 - IVSM_VHCL_DTL (TABLE), columns=11, pk=IVSM_VHCL_DTL_ID, fk=0, indexes=3, constraints=11
-- J$IMT_PD_CMB_ALCT_SUBDIM_LOG (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=1
+- J$IMT_PD_CMB_ALCT_SUBDIM_LOG (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=1
 - J$IMT_PD_CMB_ALCT_SUBDIM_LOG_HIST (TABLE), columns=11, pk=-, fk=0, indexes=2, constraints=1
 - J$IMT_PD_DIM_LOG (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=1
 - J$IMT_PD_DIM_LOG_HIST (TABLE), columns=11, pk=-, fk=0, indexes=2, constraints=1
@@ -2158,7 +1822,7 @@
 - PD_CL (VIEW), columns=16, pk=-, fk=0, indexes=0, constraints=0
 - PD_CL_FEE (TABLE), columns=10, pk=PD_CL_FEE_ID, fk=0, indexes=2, constraints=11
 - PD_CONSTITUENT (TABLE), columns=16, pk=PD_CONSTITUENT_ID, fk=0, indexes=3, constraints=12
-- PD_CORP_ACTN (TABLE), columns=12, pk=PD_CORP_ACTN_ID, fk=0, indexes=2, constraints=10
+- PD_CORP_ACTN (TABLE), columns=13, pk=PD_CORP_ACTN_ID, fk=0, indexes=2, constraints=10
 - PD_DEDUP_LOG (TABLE), columns=7, pk=PD_ID, fk=0, indexes=1, constraints=7
 - PD_DRVD_ATTR (TABLE), columns=16, pk=PD_DRVD_ATTR_ID, fk=0, indexes=3, constraints=11
 - PD_ESTMTS (TABLE), columns=14, pk=PD_ESTMTS_ID, fk=0, indexes=2, constraints=10
@@ -2170,7 +1834,7 @@
 - PD_FND_OF_FND_CONSTITUENT_EXCH (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=3
 - PD_FRGN_EXG_RATE_OLD (TABLE), columns=11, pk=PD_FRGN_EXG_RATE_ID, fk=0, indexes=3, constraints=10
 - PD_INT_PYOUT_SHD (TABLE), columns=16, pk=PD_PYOUT_SHD_ID, fk=0, indexes=2, constraints=14
-- PD_INT_RATE (TABLE), columns=14, pk=PD_INT_RATE_ID, fk=0, indexes=2, constraints=10
+- PD_INT_RATE (TABLE), columns=15, pk=PD_INT_RATE_ID, fk=0, indexes=2, constraints=10
 - PD_INT_RATE_FRML (TABLE), columns=15, pk=PD_INT_RATE_FRML_ID, fk=0, indexes=2, constraints=10
 - PD_INT_RATE_LMT (TABLE), columns=14, pk=PD_INT_RATE_LMT_ID, fk=0, indexes=2, constraints=10
 - PD_ISSU_FTR (TABLE), columns=11, pk=PD_ISSU_FTR_ID, fk=1, indexes=3, constraints=13
@@ -2211,7 +1875,7 @@
 - RET_PRD_TP (TABLE), columns=12, pk=RET_PRD_TP_ID, fk=0, indexes=2, constraints=12
 - RET_TP (TABLE), columns=10, pk=RET_TP_ID, fk=0, indexes=2, constraints=10
 - RJ_BNK_CD_INT_RATES (TABLE), columns=19, pk=CD_RATES_ID, fk=0, indexes=2, constraints=7
-- RJ_FND_FAM (TABLE), columns=34, pk=RJ_FND_FAM_DTL_ID, fk=0, indexes=2, constraints=12
+- RJ_FND_FAM (TABLE), columns=35, pk=RJ_FND_FAM_DTL_ID, fk=0, indexes=2, constraints=12
 - RJ_FND_FAM_SHR_CLSS_ELIG (TABLE), columns=15, pk=RJ_FND_FAM_SHR_CLSS_ELIG_ID, fk=0, indexes=2, constraints=12
 - RJ_FND_FAM_SHR_CLSS_EXG (TABLE), columns=11, pk=RJ_FND_FAM_SHR_CLSS_EXG_ID, fk=0, indexes=2, constraints=13
 - RJ_SYMB_MAP (TABLE), columns=11, pk=RJ_SYMB_MAP_ID, fk=0, indexes=3, constraints=12
@@ -2494,8 +2158,8 @@
 - FA_NUMBER_MEMBERSHIP_DIM_BKP_04_07 (TABLE), columns=46, pk=-, fk=0, indexes=0, constraints=5
 - FA_NUMBER_MEMBERSHIP_SEMANTIC (TABLE), columns=25, pk=FA_NUMBER,FA_NUMBER_SEQUENCE,EFFECTIVE_DATE, fk=0, indexes=1, constraints=4
 - FA_NUMBER_MEMBERSHIP_SEMANTIC_STG (TABLE), columns=25, pk=FA_NUMBER,FA_NUMBER_SEQUENCE,EFFECTIVE_DATE, fk=0, indexes=1, constraints=4
-- FA_NUMBER_SEMANTIC (TABLE), columns=36, pk=FA_NUMBER,EFFECTIVE_DATE, fk=0, indexes=1, constraints=3
-- FA_NUMBER_SEMANTIC_STG (TABLE), columns=36, pk=FA_NUMBER,EFFECTIVE_DATE, fk=0, indexes=1, constraints=3
+- FA_NUMBER_SEMANTIC (TABLE), columns=38, pk=FA_NUMBER,EFFECTIVE_DATE, fk=0, indexes=1, constraints=3
+- FA_NUMBER_SEMANTIC_STG (TABLE), columns=38, pk=FA_NUMBER,EFFECTIVE_DATE, fk=0, indexes=1, constraints=3
 - HR_DEPARTMENT_HIERARCHY (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - JOB_EARNING_DISTRIBUTION (VIEW), columns=11, pk=-, fk=0, indexes=0, constraints=0
 - JOB_FUNCTIONS (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
@@ -2536,6 +2200,7 @@
 - PSN_BKR_SUBDIM_BKP_APR2026 (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=19
 - PSN_BKR_SUBDIM_BKP_JUN2025 (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=19
 - PSN_BKR_SUBDIM_BKP_MAY2025 (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=19
+- PSN_BKR_SUBDIM_BKP_MAY2026 (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=19
 - SECURITY_MASTER (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=4
 - SECURITY_MASTER_BKP (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
 - SECURITY_MASTER_BKP20231204 (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
@@ -2550,7 +2215,7 @@
 - EMPID_MASTER (TABLE), columns=4, pk=EMPID, fk=0, indexes=1, constraints=4
 - ENT_ROLE (TABLE), columns=18, pk=ENT_ROLE_ID, fk=0, indexes=1, constraints=7
 - EXAM (TABLE), columns=35, pk=EXAM_ID, fk=0, indexes=3, constraints=7
-- FA_NBR (TABLE), columns=36, pk=FA_NUM_ID, fk=0, indexes=8, constraints=7
+- FA_NBR (TABLE), columns=36, pk=FA_NUM_ID, fk=0, indexes=9, constraints=7
 - FA_NBR_MBRSHP (TABLE), columns=22, pk=FA_NBR_MBRSHP_ID, fk=0, indexes=3, constraints=7
 - HR_DEPARTMENT_HIERARCHY (TABLE), columns=14, pk=HR_DEPT_HIER_ID, fk=0, indexes=1, constraints=8
 - JOB_EARNING_DISTRIBUTION (TABLE), columns=20, pk=JOB_ERN_DIST_ID, fk=0, indexes=3, constraints=7
@@ -2581,6 +2246,7 @@
 - STG_PSN_BKR_PRCTC_CNTR_CLUB (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
 - STG_PSN_BKR_SUBDIM (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=18
 - STG_PSN_BKR_SUBDIM_REV_LBAO_PAYEE_AGRTN (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- STG_PSN_BKR_SUBDIM_REV_LBAO_PAYEE_AGRTN1 (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
 - TABLES_TO_TRUNCATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 - TMP_CPS_ASSOCIATE_DIM (TABLE), columns=65, pk=-, fk=0, indexes=1, constraints=0
 - TMP_CPS_FA_NUM_DIM (TABLE), columns=65, pk=-, fk=0, indexes=1, constraints=0
@@ -2588,21 +2254,6 @@
 ### Schema CTACLO_OWNER
 - CTAC_ACCOUNTS_TO_CLOSE (TABLE), columns=1, pk=ARRANGEMENT_ID, fk=0, indexes=1, constraints=1
 - CTAC_ACCOUNTS_TO_CLOSE_REFRESH (TABLE), columns=6, pk=ARRANGEMENT_ID, fk=0, indexes=1, constraints=1
-### Schema DDHARA
-- BASELINE_TBL (TABLE), columns=77, pk=-, fk=0, indexes=0, constraints=0
-### Schema DHALCOMB
-- AR_DIM_BKP_160825 (TABLE), columns=455, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_BKP_160825 (TABLE), columns=75, pk=-, fk=0, indexes=0, constraints=10
-### Schema DJOVICIC
-- FBS_05_07 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- TEST_ACTVE_SOURCE (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-### Schema DKUMAR3
-- ACCOUNT_AR_ID (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- OLD_AR_ID (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PROD_POSITIONS (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- UNDERLYING_PRODUCTS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-### Schema DP_TEST_DV
-- TAB1 (TABLE), columns=25, pk=-, fk=0, indexes=0, constraints=7
 ### Schema DRM_SSDS_OWNER
 - FA_HIER_DRM_CPS (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
 - MGT_HIER_DRM (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
@@ -2610,37 +2261,6 @@
 - PASC_MGT_HIER_DRM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
 - PASS_MGT_HIER_DRM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
 - PERSON_HIER_DRM_CPS (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-### Schema DRM_SSDS_USER
-- NON_OSJ_VW (VIEW), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- PERSONS_ASSIGNED_VW (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- PERSONS_ASSOCIATED_VW (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
-### Schema DSTANKOVIC
-- IMT_PD_DIM_2020_03 (MVIEW), columns=445, pk=IMT_PD_DIM_ID,END_DT,POS_HELD_F, fk=0, indexes=1, constraints=6
-- VALID_DATES (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- VALID_DATES_OLD (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- VALID_DATES_PRV (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- VLD_DTS (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-### Schema DTROTTIER
-- AR_DIM_20220727 (TABLE), columns=106, pk=-, fk=0, indexes=0, constraints=3
-- AR_DIM_20220831 (TABLE), columns=106, pk=-, fk=0, indexes=0, constraints=3
-- AR_DIM_20221006 (TABLE), columns=106, pk=-, fk=0, indexes=0, constraints=3
-- EOD_AR_DIM_20220727 (TABLE), columns=106, pk=-, fk=0, indexes=0, constraints=3
-- EOD_AR_DIM_20220831 (TABLE), columns=106, pk=-, fk=0, indexes=0, constraints=3
-- EOD_AR_DIM_20221006 (TABLE), columns=106, pk=-, fk=0, indexes=0, constraints=3
-- REV_FACT_GRAIN_RESTAT_EOD_20231003_20231005 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=2
-- REV_FACT_GRAIN_RESTAT_NEW_20231003_20231005 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=2
-- REV_FACT_LBAO_RESTAT_EOD_20231003_20231005 (TABLE), columns=106, pk=-, fk=0, indexes=0, constraints=3
-- REV_FACT_LBAO_RESTAT_NEW_20231003_20231005 (TABLE), columns=106, pk=-, fk=0, indexes=0, constraints=3
-- STG_PSN_BKR_GRS_T12_AUA (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- STG_PSN_BKR_GRS_T12_AUA_PROD (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- STG_REV_FACT_PRAC_CNTR_FILL_RESTAT (TABLE), columns=48, pk=-, fk=0, indexes=0, constraints=7
-### Schema DVISWANATHAN1
-- DBA_DATA_FILES_CDSS001QA (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- DBA_SEGMENTS_CDSS001QA (TABLE), columns=31, pk=-, fk=0, indexes=0, constraints=0
-### Schema DZUBENCO
-- CUSIPENDDATE (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- LOAN_POS_DTLS_31_JUL (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=0
-- RTC_BAL_DIM_TEST (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=1
 ### Schema EDW_REPL_OWNER
 - ASSET_FACT (TABLE), columns=31, pk=-, fk=0, indexes=0, constraints=1
 - ETY_DIM (TABLE), columns=14, pk=ETY_DIM_ID, fk=0, indexes=1, constraints=2
@@ -2677,7 +2297,7 @@
 - ECOM_POLICIES (TABLE), columns=10, pk=ECOM_POLICY_ID, fk=0, indexes=1, constraints=6
 - ECOM_TEAMS (TABLE), columns=10, pk=ECOM_TEAM_ID, fk=0, indexes=1, constraints=6
 - ENTERPRISE_ACCOUNT_DIM (TABLE), columns=122, pk=ENTERPRISE_ACCOUNT_DIM_ID, fk=0, indexes=2, constraints=1
-- ENTERPRISE_ENTITY_DIM (TABLE), columns=569, pk=ENTERPRISE_ENTITY_DIM_ID, fk=0, indexes=5, constraints=6
+- ENTERPRISE_ENTITY_DIM (TABLE), columns=569, pk=ENTERPRISE_ENTITY_DIM_ID, fk=0, indexes=6, constraints=6
 - ENTERPRISE_ENTITY_DIM_BKP_20240303 (TABLE), columns=542, pk=-, fk=0, indexes=0, constraints=5
 - ENTERPRISE_ENTITY_DIM_GLUE (TABLE), columns=560, pk=-, fk=0, indexes=0, constraints=5
 - ENTERPRISE_ENTITY_RETAIL_DIM (TABLE), columns=70, pk=ENTERPRISE_ENTITY_RETAIL_DIM_ID, fk=0, indexes=2, constraints=1
@@ -2736,6 +2356,7 @@
 - MSTR_LOCATION_DIM_SEMANTIC_STG (TABLE), columns=135, pk=LOCATION_DIMENSION_ID, fk=0, indexes=1, constraints=1
 ### Schema ENTERPRISE_SEMANTIC_OWNER
 - ACCOUNT_BENEFICIARIES_CURRENT_V (VIEW), columns=41, pk=-, fk=0, indexes=0, constraints=0
+- ACCOUNT_BENEFICIARIES_FULL_V (VIEW), columns=41, pk=-, fk=0, indexes=0, constraints=0
 - ACCOUNT_FEE_SCHEDULES_CURRENT_V (VIEW), columns=24, pk=-, fk=0, indexes=0, constraints=0
 - ACTIVITY_DETAIL_FACT_CROSS_DOMAIN_V (VIEW), columns=615, pk=-, fk=0, indexes=0, constraints=0
 - ACTIVITY_DETAIL_FACT_V (VIEW), columns=170, pk=-, fk=0, indexes=0, constraints=0
@@ -2745,12 +2366,13 @@
 - ACTIVITY_FEE_FACT_V (VIEW), columns=64, pk=-, fk=0, indexes=0, constraints=0
 - ALL_SOURCE_ACCOUNTS_CURRENT_V (VIEW), columns=297, pk=-, fk=0, indexes=0, constraints=0
 - AMS_BILLING_EXCLUSION_INSTRUCTIONS_CURRENT_V (VIEW), columns=16, pk=-, fk=0, indexes=0, constraints=0
+- ARRANGEMENT_BENEFICIARY_SUBDIMENSION_HIST_V (VIEW), columns=49, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_CURRENT_V (VIEW), columns=356, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_FULL_V (VIEW), columns=356, pk=-, fk=0, indexes=0, constraints=0
-- ARRANGEMENT_PARTY_RELATIONSHIP_CURRENT_V (VIEW), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- ARRANGEMENT_SNAPSHOT_V (VIEW), columns=356, pk=-, fk=0, indexes=0, constraints=0
+- ARRANGEMENT_PARTY_RELATIONSHIP_CURRENT_V (VIEW), columns=20, pk=-, fk=0, indexes=0, constraints=0
+- ARRANGEMENT_SNAPSHOT_V (VIEW), columns=357, pk=-, fk=0, indexes=0, constraints=0
 - AS_WAS_POSITION_FACT_V (VIEW), columns=116, pk=-, fk=0, indexes=0, constraints=0
-- BROKERAGE_ACCOUNTS_AND_CONSULTING_CONTRACTS_CURRENT_V (VIEW), columns=190, pk=-, fk=0, indexes=0, constraints=0
+- BROKERAGE_ACCOUNTS_AND_CONSULTING_CONTRACTS_CURRENT_V (VIEW), columns=223, pk=-, fk=0, indexes=0, constraints=0
 - CASH_SWEEP_OPTIONS_CURRENT_V (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - CIRD_PARTY_DESCRIPTIVE_ATTRIBUTES_CURRENT_V (VIEW), columns=21, pk=-, fk=0, indexes=0, constraints=0
 - CLIENT_ANTICIPATED_FEATURES_CURRENT_V (VIEW), columns=7, pk=-, fk=0, indexes=0, constraints=0
@@ -2769,13 +2391,17 @@
 - DEBIT_CARD_HOLDERS_CURRENT_V (VIEW), columns=25, pk=-, fk=0, indexes=0, constraints=0
 - DOCUMENT_DELIVERY_ADDITIONAL_ADDRESS_CURRENT_V (VIEW), columns=22, pk=-, fk=0, indexes=0, constraints=0
 - DOCUMENT_DELIVERY_ADDITIONAL_ADDRESS_FULL_V (VIEW), columns=22, pk=-, fk=0, indexes=0, constraints=0
+- DOCUMENT_DELIVERY_ADDITIONAL_ADDRESS_SNAPSHOT_V (VIEW), columns=22, pk=-, fk=0, indexes=0, constraints=0
 - DOCUMENT_DELIVERY_CURRENT_V (VIEW), columns=22, pk=-, fk=0, indexes=0, constraints=0
 - DOCUMENT_DELIVERY_FULL_V (VIEW), columns=22, pk=-, fk=0, indexes=0, constraints=0
 - DOCUMENT_DELIVERY_SNAPSHOT_V (VIEW), columns=22, pk=-, fk=0, indexes=0, constraints=0
 - ENTERPRISE_ENTITY_DEPARTMENT_FLAT_HIERARCHY_CURRENT_V (VIEW), columns=64, pk=-, fk=0, indexes=0, constraints=0
-- ENTERPRISE_ENTITY_HIERARCHY_CURRENT_V (VIEW), columns=358, pk=-, fk=0, indexes=0, constraints=0
+- ENTERPRISE_ENTITY_HIERARCHY_CURRENT_V (VIEW), columns=359, pk=-, fk=0, indexes=0, constraints=0
+- ENTERPRISE_ENTITY_HIERARCHY_CURRENT_V_MED (VIEW), columns=358, pk=-, fk=0, indexes=0, constraints=0
 - ENTERPRISE_ENTITY_ORGANIZATION_HIERARCHY_CURRENT_V (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
+- ENTERPRISE_ENTITY_ORGANIZATION_HIERARCHY_CURRENT_V_MED (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
 - ENTERPRISE_ENTITY_RETAIL_HIERARCHY_CURRENT_V (VIEW), columns=66, pk=-, fk=0, indexes=0, constraints=0
+- ENTERPRISE_ENTITY_RETAIL_HIERARCHY_CURRENT_V_MED (VIEW), columns=66, pk=-, fk=0, indexes=0, constraints=0
 - ENTERPRISE_ENTITY_RISK_HIERARCHY_CURRENT_V (VIEW), columns=38, pk=-, fk=0, indexes=0, constraints=0
 - ENTERPRISE_LOB_HIERARCHY_CURRENT_V (VIEW), columns=32, pk=-, fk=0, indexes=0, constraints=0
 - ENTERPRISE_LOCATION_HIERARCHY_CURRENT_V (VIEW), columns=110, pk=-, fk=0, indexes=0, constraints=0
@@ -2899,25 +2525,6 @@
 - TABLES_TO_TRUNCATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 - TRANS_TYPE_DIM (TABLE), columns=15, pk=TRANS_TYPE_DIM_ID, fk=0, indexes=1, constraints=2
 - TRANS_TYPE_DIM_ARCHIVE (TABLE), columns=18, pk=TRANS_TYPE_DIM_ARCHIVE_ID,TRANS_TYPE_DIM_ID,BATCH_DATE, fk=0, indexes=1, constraints=3
-### Schema FMARRIOTT
-- IMP_RITM11155617_CDSS001QA_JOB (TABLE), columns=112, pk=-, fk=0, indexes=8, constraints=0
-### Schema GANANTHARAMAN
-- GTST_NEW_OLD_DIM_ID (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- GTST_RSTN_PD (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=8
-### Schema GBONYATA
-- SAMPLE_AR (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_AR_FIFTH (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_AR_FIFTH_LAG (TABLE), columns=335, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_AR_FIFTH_RESULTS (TABLE), columns=329, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_AR_FOURTH (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_AR_FOURTH_RESULTS (TABLE), columns=328, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_AR_SECOND (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_AR_THIRD (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_PD (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_PD_DIST (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- SAMPLE_PD_HASH (TABLE), columns=388, pk=-, fk=0, indexes=0, constraints=2
-- SAMPLE_PD_LAG (TABLE), columns=391, pk=-, fk=0, indexes=0, constraints=2
-- SAMPLE_PD_RESULTS (TABLE), columns=383, pk=-, fk=0, indexes=0, constraints=0
 ### Schema GG_REPL_OWNER
 - AQ$QT$_OGG$RESDA_26 (VIEW), columns=32, pk=-, fk=0, indexes=0, constraints=0
 - AQ$QT$_OGG$RESDA_26_R (VIEW), columns=7, pk=-, fk=0, indexes=0, constraints=0
@@ -3477,192 +3084,10 @@
 - SYS_IOT_OVER_2150172 (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
 - SYS_IOT_OVER_6720782 (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
 - SYS_IOT_OVER_6720811 (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-### Schema GG_REPL_USER
-- GGS_HB_VW (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
-### Schema GWENDT
-- CDS_CCAL_APA (VIEW), columns=31, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCAL_APA_1 (TABLE), columns=31, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCAL_APA_2 (VIEW), columns=31, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCAL_FIP (VIEW), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCAL_FIP_3 (VIEW), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCAL_MFD_HIST_TXN_5 (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCAL_TXN (VIEW), columns=38, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCAL_TXN_1 (VIEW), columns=38, pk=-, fk=0, indexes=0, constraints=0
-- CDS_CCAL_TXRLP_4 (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- IMPDP_CHG1290144 (TABLE), columns=111, pk=-, fk=0, indexes=8, constraints=0
-- KU$VAT_5261466 (TABLE), columns=31, pk=-, fk=0, indexes=0, constraints=0
-- KU$VAT_5261511 (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- KU$VAT_5261516 (TABLE), columns=38, pk=-, fk=0, indexes=0, constraints=0
-- SYS_EXPORT_TABLE_01 (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-- SYS_EXPORT_TABLE_02 (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-- SYS_EXPORT_TABLE_03 (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-- SYS_EXPORT_TABLE_04 (TABLE), columns=111, pk=-, fk=0, indexes=7, constraints=0
-### Schema HBUKOLT
-- #Tableau_1164_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_1192_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_1792_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_1919_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_1974_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_2557_sid_410070821_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_2710_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_2737_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_285_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_36_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_4010_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_559_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_5_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_62_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_7054_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_733_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_7534_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_8_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_979_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-- #Tableau_9_sid_4294967295_2_Connect_CheckCreateTempTableCapConnect_CheckCreateTempTableCap (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-### Schema HKALAL
-- AR_DIM_BEFORE_FA_NUM_FIX (TABLE), columns=403, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_BKP_FA_NUM_NULL (TABLE), columns=75, pk=-, fk=0, indexes=0, constraints=10
-- AR_GRP_SUBDIM_BKP_MGR_19AUG (TABLE), columns=75, pk=-, fk=0, indexes=0, constraints=10
 ### Schema HRSECU_OWNER
 - CLIENT_DATA (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - MARKET_CAP (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=1
 - PRODUCT (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=3
-### Schema IBELOPAVLOVIC
-- AC_PARTY_0514_2 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_1 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- AR_529_PLAN (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_NO_OWNR_N (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=2
-- AR_NULL (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_OWNERI (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_OWNER_N (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- AR_OWNER_Y (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- AR_PARTY_NO_ADRES (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- AR_SA_VISE (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- AR_SA_VISE_PART (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- AR_VISAK (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- ATKC_0709 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- ATKC_0715 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_0120_REPORT (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_0121_ADRESS (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_0522_ADRESS (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_0522_CUST (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_0805_ADRESS (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_RAJA_0114 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_0121 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_0127_REPORT (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_0128_REPORT (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_0512 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_0805_REPORT (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0801 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0805 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0918 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RJFS_REPORT_0801 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RJFS_REPORT_0805 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CASTOMER_INCO (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- CASTOMER_REJ (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- CLOSED_PARTY (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CUSTOMER_0422 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- CUST_0604 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CUST_0604_NOV (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CUST_1_FDID (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CUST_WITH_ONLY_ONE_FDID (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- END_FDID_ONE_PARTY_01 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- FAIL_61 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- FDID_1 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- FDID_1_CUST (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- FDID_BEZ_ADRESE_NA_CAIS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- FDID_DVP_1201 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- FDID_DVP_1205 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- FDID_INDI_NO_ADD (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- FDID_LTID (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- FDID_NO_ADRESE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- FDID_PARTY (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- FDID_VISE (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- FDID_WITH_ONLY_ONE_CUST (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- GFSI_0715 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- GFSI_REPORT_0715 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- JESTE_OWNR_N (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- MOJI_PARTY_OWNERI (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- NEW_FDID_0325_0327 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- NIJE_OWNR_Y (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- NOVI_0604 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NP_LIST (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- NP_LIST_NOT (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- ONE_FDID_ONE_PARTY (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- OVI (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- OVI2 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- OVO_1 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- OVO_123 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=2
-- OVO_3 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=2
-- OVO_4 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- OVO_AR_ID (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- OVO_AR_ID2 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- OVO_SADA (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- OW_N (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- PARTY_1 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- PARTY_ALT_POM (TABLE), columns=23, pk=-, fk=0, indexes=0, constraints=4
-- PARTY_DIM_POM (TABLE), columns=292, pk=-, fk=0, indexes=0, constraints=5
-- POSLEDNJE_EFFE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- PRIM_F_Y (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=1
-- PRIM_Y (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- RAJA_0715 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- RAJA_CAIS_REPORT_0729 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- RJFS_0715 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- RJFS_TIDS_REPORT_0729 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- SHORT_NMAC_NRJ_NPARTY (TABLE), columns=32, pk=-, fk=0, indexes=0, constraints=5
-- SHORT_NMAC_NRJ_PARTY (TABLE), columns=32, pk=-, fk=0, indexes=0, constraints=5
-- SOLESSN_SCENARIO (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=3
-- SSN_PARTY_0512 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- TAX_Y (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- TID_0120_REPORT (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_0514 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- TRUSTS_WITHOUT_MATCHING_IP_0422 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- VISE_OWNERA (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-### Schema IBOJIC
-- AR_ID_0418 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_ID_0805 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CAIS_DELTA_RAJA_REPORT_0327 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_DELTA_RAJA_REPORT_1201 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0120 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0514 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0604 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0609 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0613 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0617 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0620 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0623 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0624 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0625 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0910 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_0911 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_1117 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RAJA_REPORT_1203 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- CAIS_RJFS_REPORT_0514 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- FDID_0326 (TABLE), columns=32, pk=-, fk=0, indexes=0, constraints=0
-- FEEDBACK_RAJA_0620 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- FEEDBACK_TID_RAJA_0620 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- LTID (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- LTID_0520 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_FIRSTNAME (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_LTID (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- NEW_LTID_0430 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- OCC_FILE (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- OCC_FILE_1 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_DELTA_RAJA_REPORT_1201 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0120 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0514 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0604 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0609 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0613 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0617 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0620 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0623 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0624 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0625 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0910 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_0911 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_1117 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RAJA_REPORT_1203 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- TID_RJFS_REPORT_0514 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
 ### Schema IDP_CLOUD_STG_OWNER
 - APS_BRANCH_LOOKUP_DIMENSION_STG (TABLE), columns=28, pk=-, fk=0, indexes=0, constraints=5
 - APS_FA_NUMBER_EXTENSION_LOOKUP_DIMENSION_STG (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=4
@@ -3670,21 +3095,6 @@
 - APS_LEGACY_PRODUCT_GENERAL_LEDGER_BUCKET_MAP_LOOKUP_DIMENSION_STG (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=2
 - APS_PAY_PERIOD_LOOKUP_DIMENSION_STG (TABLE), columns=32, pk=-, fk=0, indexes=0, constraints=6
 - APS_PRODUCT_LOOKUP_DIMENSION_STG (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=1
-### Schema IKOROSTELEV
-- APA (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- AVY (TABLE), columns=12, pk=-, fk=0, indexes=0, constraints=0
-- AVY1 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- CLOSED_LOT (TABLE), columns=84, pk=-, fk=0, indexes=0, constraints=11
-- CLS_TAX_LOTS_NON_BKR_FACT (TABLE), columns=84, pk=-, fk=0, indexes=0, constraints=11
-- LIABILITY_BALANCE_FACT (TABLE), columns=76, pk=-, fk=0, indexes=0, constraints=10
-- LIABILITY_BALANCE_FACT1 (TABLE), columns=76, pk=-, fk=0, indexes=0, constraints=10
-- LIABILITY_BALANCE_FACT2 (TABLE), columns=76, pk=-, fk=0, indexes=0, constraints=10
-- MNY_TXN_QUALFR_LOG (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- MNY_XFERS_FACT (TABLE), columns=92, pk=MNY_TXN_QUALFR_ID, fk=0, indexes=1, constraints=2
-- OPN_TAX_LOTS_NON_BKR (TABLE), columns=67, pk=-, fk=0, indexes=0, constraints=6
-- OPN_TAX_LOTS_NON_BKR_FACT (TABLE), columns=67, pk=-, fk=0, indexes=0, constraints=10
-- OPN_TAX_LOTS_NON_BKR_RECON (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=1
-- TAXLOT_QA_V_OPN_TAX_LOTS_NONBKR_S (TABLE), columns=67, pk=-, fk=0, indexes=0, constraints=6
 ### Schema INFOR_OWNER
 - AC_EXTRACT_SUBSET (TABLE), columns=4, pk=-, fk=0, indexes=2, constraints=0
 - ADA_ASSC_SUBSET (TABLE), columns=2, pk=-, fk=0, indexes=1, constraints=0
@@ -3723,145 +3133,11 @@
 - TDM_RSTN_NAMED_LIST_VALUE_SUBSET (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 - TEL_ADR_BKP (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
 - TEMP_TDM_ADA_ID (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-### Schema INFOR_USER
-- DBA_TABLES_BKP (TABLE), columns=84, pk=-, fk=0, indexes=0, constraints=2
-- DBA_TAB_PARTITIONS_BKP (TABLE), columns=53, pk=-, fk=0, indexes=0, constraints=0
-### Schema ISTOJANOVIC
-- AC_AR_IDS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AC_AR_IDS_TO_UPDATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- AC_AR_UPDATE (TABLE), columns=57, pk=-, fk=0, indexes=0, constraints=2
-- ADA_AR_ASSC_FACT_LOCAL_SAVE (TABLE), columns=60, pk=-, fk=0, indexes=0, constraints=9
-- ADA_DOC_ASSC_FACT_LOCAL_SAVE (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=9
-- ADA_DOC_PKG_EXECR_FACT_LOCAL_SAVE (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=14
-- ADA_DOC_PKG_FACT_LOCAL_SAVE (TABLE), columns=46, pk=-, fk=0, indexes=0, constraints=7
-- ADA_DOC_PKG_RCPNT_FACT_LOCAL_SAVE (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=12
-- ADA_EXECR_PARTY_FACT_LOCAL_SAVE (TABLE), columns=53, pk=-, fk=0, indexes=0, constraints=6
-- ADA_PARTY_ASSC_FACT_LOCAL_SAVE (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=9
-- ANNOTATIONS_GROUPS$ (TABLE), columns=3, pk=GROUP_ID, fk=0, indexes=2, constraints=2
-- ANNOTATIONS_GROUP_MEMBERS$ (TABLE), columns=7, pk=-, fk=1, indexes=1, constraints=2
-- ANNOTATIONS_PREBUILT$ (TABLE), columns=3, pk=-, fk=0, indexes=1, constraints=4
-- ANNOTATIONS_USAGE$ (TABLE), columns=17, pk=-, fk=0, indexes=1, constraints=3
-- AR_DIM_LOCAL (TABLE), columns=359, pk=-, fk=0, indexes=0, constraints=0
-- AR_FEE_SHD_EFF_DT_NULL (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- AR_FEE_SHD_UPDATE (TABLE), columns=33, pk=-, fk=0, indexes=0, constraints=1
-- AR_GRP_RLTNP_UPDATE_FOR_CECL (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=10
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL_20240213 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL_20251215 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL_20260121 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL_20260130 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL_20260206 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL_ROLLBACK (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL_SAVE (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_LOCAL_SAVE_20250130 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_HIST_AR_ID_STG_LOCAL (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_HIST_AR_ID_STG_LOCAL_20240213 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_HIST_AR_ID_STG_LOCAL_ROLLBACK (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_IDS_98986623 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_ID_PROCESSED (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- AR_PARTY_JRN_STG_LOCAL_2 (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- AR_PARTY_JRN_STG_LOCAL_3 (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- AR_PARTY_JRN_STG_LOCAL_SAVE (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- AR_PREF_FIX_DATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- AR_SUBSET_TEST (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- AR_TDG_SETUP_CDS (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=1
-- AR_UPDATE (TABLE), columns=37, pk=-, fk=0, indexes=0, constraints=3
-- AR_XREF_UPDATE (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=6
-- BALA (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- BSN_PRFL_UPDATE (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- BSN_PRFL_X_AR_RLTNP_ID_TO_PROCESS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- CCAL_REPL_OWNER.EV_TP (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- CDS_LOAN_AR_EXTRACT (TABLE), columns=172, pk=-, fk=0, indexes=0, constraints=0
-- CIRD_EV_MRKR_20250520 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=4
-- CIRD_RT_PD_JRN_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- CIRD_RT_PD_JRN_LOCAL_20250703 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- CNSMR_MRKR_LOG_20250516 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=4
-- CNSMR_MRKR_LOG_LOCAL (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=4
-- DBT_PD_IDS_FOR_MAT_DT (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- DRVT_UPDATE (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=9
-- FA_NUM_MBRSH (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- GENERIC_FILE_EXTRACTS_PARAMETER_TABLE_LOCAL_20250823 (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=2
-- IMT_PD_CALL_ANCM_FACT_ACTN_DT_LOCAL (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=8
-- IMT_PD_DIM_BACKUP_ADRIANE_UPDATE (TABLE), columns=388, pk=-, fk=0, indexes=0, constraints=0
-- IMT_PD_DIM_CA_TO_UPDATE (TABLE), columns=385, pk=-, fk=0, indexes=0, constraints=2
-- IMT_PD_DIM_MAT_DT_LOCAL (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=2
-- J$ADA_ASSC_PROCESSED (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$ADA_ASSC_PROCESSED_Y (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$ADA_DOC_ASSC_LOCAL (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$ADA_DOC_ASSC_PROCESSED (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_SRC_CHNGS_LOG_ANNUITIES (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_SRC_CHNGS_LOG_LOCAL (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_SRC_CHNGS_LOG_LOCAL_20240801 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_SRC_CHNGS_LOG_LOCAL_20240827 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_SRC_CHNGS_LOG_LOCAL_EXTERNAL (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_SRC_CHNGS_LOG_LOCAL_EXTERNAL_2 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_SRC_CHNGS_LOG_LOCAL_EXTERNAL_20240827 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$AVY_DTL_FACT_LOCAL_20240531 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- J$AVY_DTL_FACT_LOCAL_20240729 (TABLE), columns=12, pk=-, fk=0, indexes=0, constraints=2
-- J$AVY_FEES_FACT_LOCAL_20240729 (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=2
-- J$CIRD_RT_PD_JRN_LOCAL (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$CIRD_RT_PD_JRN_LOCAL_2 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$CNRNCY_CNTL_AUDT_DUPLICATES (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- J$PARTY_BSN_PRFL_X_AR_RLTNP_LOCAL (TABLE), columns=12, pk=-, fk=0, indexes=0, constraints=0
-- J$PARTY_BSN_PRFL_X_AR_RLTNP_LOCAL_2 (TABLE), columns=12, pk=-, fk=0, indexes=0, constraints=0
-- J$PARTY_SRC_OF_WEALTH_BSN_OWN_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$PARTY_SRC_OF_WEALTH_LOCAL (TABLE), columns=12, pk=-, fk=0, indexes=0, constraints=0
-- J$PKG_DLV_EMAIL_ADR_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$PKG_DLV_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$PKG_DLV_PST_ADR_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$PNDG_AVY_LOCAL (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=2
-- J$TAXLOT_DTL_CLS_LOCAL (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=1
-- J$TAXLOT_DTL_OPN_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=1
-- J$TAXLOT_DTL_OPN_LOCAL_20250904 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=1
-- JRN_STG_LOCAL (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- LALA (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- LOADED_AR_IDS (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- MBS_UPDATE (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=9
-- METADATA_ANNOTATIONS_GROUPS (VIEW), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- METADATA_ANNOTATIONS_GROUP_MEM (VIEW), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- METADATA_ANNOTATIONS_USAGE (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- METADATA_PREBUILT_ANNOTATIONS (VIEW), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_AR_IDS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_AR_IDS_IN_AR_DIM (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_AR_IDS_IN_AR_DIM_2 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_AR_IDS_IN_AR_DIM_3 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_AR_IDS_IN_AR_DIM_MAX_END_DT (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_BSN_PRFL_IDS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- MISSING_BSN_PRFL_X_AR_RLTNP_IDS (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- MSTR_LOCATION_DIM_UPDATE (TABLE), columns=147, pk=-, fk=0, indexes=0, constraints=6
-- NGDW_HIST_TAB_CONFIG_PSN_LOCAL (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=2
-- NON_ACTIVE_PD_ALT_NM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-- OWN_UPDATE (TABLE), columns=32, pk=-, fk=0, indexes=0, constraints=9
-- PARTY_END_DT_FIX (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=2
-- PARTY_PREF_SUBDIM_END_DT_FIX (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=3
-- PARTY_PREF_SUBDIM_END_DT_FIX_2 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=4
-- PARTY_PREF_SUBDIM_END_DT_FIX_3 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=4
-- PARTY_PREF_SUBDIM_TO_FIX (TABLE), columns=76, pk=-, fk=0, indexes=0, constraints=12
-- PARTY_SRC_WLTH_JRN_STG_LOCAL (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- PD_ALT_NM_ISIN_LENGTH_ISSUE (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=11
-- PD_ALT_NM_UPDATE (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=11
-- PD_EXTRACT_DUPLICATES (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PD_FRGN_EXG_RATE_UPDATE (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- PD_ID_FOR_UNDERLYING_PD_ID (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- PD_MASTER_IMT_PD_DIM_DIFF (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PD_MASTER_LOCAL_20251023 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PD_MASTER_UPDATE (TABLE), columns=47, pk=-, fk=0, indexes=0, constraints=10
-- PERSON_20251103 (TABLE), columns=76, pk=-, fk=0, indexes=0, constraints=6
-- PKG_UPDATE (TABLE), columns=118, pk=-, fk=0, indexes=0, constraints=9
-- PRIMARY_ADDRESS_COUNTRY_CODE_TEST_RECORDS (TABLE), columns=292, pk=-, fk=0, indexes=0, constraints=4
-- PROBA (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- PROCESSED_BSN_PRFL_X_AR_RLTNP_ID (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- TARGET_COLUMNS (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- TAXLOT_DTL_CLS_UPDATE (TABLE), columns=74, pk=-, fk=0, indexes=0, constraints=8
-- VALID_DATES (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- VALID_DATES_2 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
 ### Schema KANGAROO_FILL_OWNER
 - PRACTICE_CENTER_CLUBS (TABLE), columns=5, pk=-, fk=0, indexes=1, constraints=2
 - PRCTC_CNTR_CLUBS (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
 - PRCTC_CNTR_CLUBS_ARCHIVE (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
 - TABLES_TO_TRUNCATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-### Schema KMOHAN1
-- FA_LVL_ASSET_FACT_TEST (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=1
 ### Schema LDW_OWNER
 - LGDW_ACCT_DIM (TABLE), columns=98, pk=-, fk=0, indexes=1, constraints=0
 - LGDW_ACCT_PROD_AGG_CL_ENT_FACT (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=4
@@ -3909,11 +3185,14 @@
 - STG_LBY_BAL_FACT_FA_ATTR (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
 - STG_LBY_BAL_FACT_MRGN_ARGRP_SUBDIM_ATTRS (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
 - STG_LBY_BAL_FACT_MRGN_BKR_AR_ID (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
+- STG_LBY_BAL_FACT_OTH_MRGN_ARGRP_SUBDIM_ATTRS (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
+- STG_LBY_BAL_FACT_OTH_MRGN_BKR_AR_ID (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
 - STG_LBY_BAL_FACT_SBL_ARGRP_SUBDIM_ATTRS (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
 - STG_LBY_BAL_FACT_SBL_BKR_AR_ID (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
 - STG_LBY_FA_MEMBERSHIP_DTLS (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=0
 - STG_LBY_FA_NUM_MEMBERSHIP (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
 - STG_LBY_MRGN_FA_MEMBERSHIP_DTLS (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=0
+- STG_LBY_OTH_MRGN_FA_MEMBERSHIP_DTLS (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=0
 - STG_LBY_SBL_FA_MEMBERSHIP_DTLS (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=0
 - TABLES_TO_TRUNCATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 ### Schema LOAN_EXTRACT_REPL_OWNER
@@ -3983,8 +3262,8 @@
 - LGL_ENT (TABLE), columns=14, pk=PARTY_ID, fk=0, indexes=1, constraints=7
 - LGL_ENT_HIST (TABLE), columns=17, pk=PARTY_ID, fk=0, indexes=1, constraints=7
 - LIQ_CURR_HIST_CTL (TABLE), columns=6, pk=-, fk=0, indexes=2, constraints=0
-- LOAN_AC (TABLE), columns=73, pk=AC_ID, fk=0, indexes=2, constraints=8
-- LOAN_AC_HIST (TABLE), columns=78, pk=AC_ID, fk=0, indexes=2, constraints=6
+- LOAN_AC (TABLE), columns=74, pk=AC_ID, fk=0, indexes=2, constraints=8
+- LOAN_AC_HIST (TABLE), columns=79, pk=AC_ID, fk=0, indexes=2, constraints=6
 - LOAN_AR (TABLE), columns=72, pk=AR_ID, fk=0, indexes=1, constraints=1
 - LOAN_AR_HIST (TABLE), columns=74, pk=AR_ID, fk=0, indexes=1, constraints=1
 - LOAN_CL_VAL_XREF (TABLE), columns=14, pk=SOURCE_CODE,CL_ID, fk=0, indexes=1, constraints=1
@@ -4013,197 +3292,6 @@
 - RTL_LOAN_AR_HIST (TABLE), columns=14, pk=AR_ID, fk=0, indexes=1, constraints=6
 ### Schema MATCON_STG_OWNER
 - SANCTIONED_SEC_LIST_STG (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-### Schema MCAMERON1
-- UPDATES_GTT (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-### Schema MDRAGOVIC
-- AR_DIM_31_MAR (TABLE), columns=539, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_31_MAR_2 (TABLE), columns=539, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_MAR_LNK (TABLE), columns=539, pk=-, fk=0, indexes=0, constraints=0
-- DATES_T12 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=2
-- EOD_FA_ENT (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- EOD_FA_ENTITY (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- INSERT_AR_OWN_PAYEE_LBY_BAL_FACT (TABLE), columns=63, pk=-, fk=0, indexes=0, constraints=14
-- LINKED_2 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=3
-- PAYEE_AGG (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=2
-- POS_AGG_S_AND_F (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-### Schema MJOVICIC
-- FA_NUM_MEMBERSHIP_GROUPED (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- FA_NUM_MEMBERSHIP_GROUPED_PAYEE (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- J$EOD_POS_BCKUP (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- MNY_TXN_QUALFR_ID_TEST (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- PAYEE_FA_LVL_POSS_FACT_EXPECTED (TABLE), columns=149, pk=-, fk=0, indexes=0, constraints=4
-- POSITIONS_FACT_TEST (TABLE), columns=261, pk=-, fk=0, indexes=0, constraints=0
-- POSITIONS_FACT_TEST_BKRBO1 (TABLE), columns=300, pk=-, fk=0, indexes=0, constraints=0
-- POS_FACT_LIKE (TABLE), columns=256, pk=-, fk=0, indexes=0, constraints=5
-- POS_FACT_LIKE_1_BKRBO1 (TABLE), columns=294, pk=-, fk=0, indexes=0, constraints=0
-- POS_FACT_LIKE_2_BKRBO1 (TABLE), columns=294, pk=-, fk=0, indexes=0, constraints=0
-- POS_FACT_LIKE_BKRBO1 (TABLE), columns=0, pk=-, fk=0, indexes=0, constraints=0
-### Schema MKOVACEVIC
-- ACCOUNTS_IN_LOPR_QA_MISSING_FROM_ACTIVITY_FACT_FOR_0205 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNTS_IN_POSITION_DATA_BOTH_PROD_AND_QA_0205 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNTS_IN_POSITION_DATA_PROD_NOT_IN_QA_0205_1 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- ACCOUNT_MISSING_FROM_AR_DIM (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=0
-- ACT (TABLE), columns=237, pk=-, fk=0, indexes=0, constraints=27
-- ARMNG (TABLE), columns=46, pk=-, fk=0, indexes=0, constraints=5
-- AR_ID (TABLE), columns=565, pk=-, fk=0, indexes=0, constraints=0
-- BOT_SYMBOL_AND_UNDERLYING_NULL_0206 (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- BRANCH (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- BRANCH_DIFFERENCE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- BRANCH_DIFFERENCE_0206 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- BRANCH_DIFFERENCE_2 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- BRANCH_DIFFERENCE_8 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- COUNTRY_CODE_MAPPING (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- DELETES_FROM_QA_NOT_IN_PROD_0205_CUSIP_IS_NULL (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- DELETES_FROM_QA_NOT_IN_PROD_0205_CUSIP_NOT_NULL (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_BRANCH_0206 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_BRANCH_0206_2 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_BRANCH_0206_3 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_BRANCH_0206_4 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_BRANCH_0206_8 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_TAX_ID_0206 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_TAX_ID_0206_2 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_TAX_ID_0206_3 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_TAX_ID_0206_4 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_TAX_ID_0206_7 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DIFFERENT_UNIQUE_KEY_TAX_ID_0206_8 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DUMMY_INST (TABLE), columns=445, pk=-, fk=0, indexes=0, constraints=5
-- DUPLICATES_0206 (TABLE), columns=22, pk=-, fk=0, indexes=0, constraints=0
-- DUPLICATES_06_05 (TABLE), columns=24, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_ADDRESS_LOPR_0205 (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_ADDRESS_LOPR_0206 (TABLE), columns=24, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_ADDRESS_LOPR_0206_2 (TABLE), columns=24, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_ADDRESS_LOPR_0206_7 (TABLE), columns=24, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_LOPR_0205 (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_LOPR_0206 (TABLE), columns=26, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_LOPR_0206_2 (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_LOPR_0206_7 (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_LOPR_0206_8 (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_LOPR_1 (TABLE), columns=21, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_TAX_LOPR_0205_1 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_TAX_LOPR_0206 (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_TAX_LOPR_0206_2 (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_ACCOUNT_TAX_LOPR_0206_7 (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_BRANCH_LOPR_0205 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_BRANCH_LOPR_0206 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_BRANCH_LOPR_0206_2 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_BRANCH_LOPR_0206_3 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_BRANCH_LOPR_0206_7 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_CURRENT_OPTION_POSITION_ACCOUNTS_LOPR_0205 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_CURRENT_OPTION_POSITION_ACCOUNTS_LOPR_0205_1 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_CURRENT_OPTION_POSITION_ACCOUNTS_LOPR_0206 (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_CURRENT_OPTION_POSITION_ACCOUNTS_LOPR_0206_2 (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_CURRENT_OPTION_POSITION_ACCOUNTS_LOPR_0206_7 (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_CURRENT_OPTION_POSITION_ACCOUNTS_LOPR_0206_8 (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_CURRENT_OPTION_POSITION_ACCOUNTS_LOPR_0207_1 (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_FA_LOPR_0205 (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_FA_LOPR_0206 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_FA_LOPR_0206_2 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_FA_LOPR_0206_7 (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_FA_LOPR_0206_8 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_MONEY_MANAGER_LOPR_0205 (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_MONEY_MANAGER_LOPR_0206 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_MONEY_MANAGER_LOPR_0206_2 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- EXTRACT_MONEY_MANAGER_LOPR_0206_7 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- FELL_OF_ICG_0206 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ACCOUNT_DATA_PROD_VS_QA (TABLE), columns=53, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0204_QA_DOWNLOADED_ON_0211 (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0205_PROD (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0205_QA_DOQNLOADED_ON_0225 (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0206_PROD (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0206_QA (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0206_QA_2 (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0206_QA_3 (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0206_QA_7 (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0206_QA_8 (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0207_PROD (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0207_QA_1 (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0210_PROD (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0211_PROD (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0212_PROD (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0213_PROD (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_DAILY_SUBMISSION_REPORT_OUTPUT_0214_PROD (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0205 (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0205_PROD (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0206_PROD (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0206_QA (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0206_QA_2 (TABLE), columns=41, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0206_QA_3 (TABLE), columns=42, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0206_QA_7 (TABLE), columns=42, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0206_QA_8 (TABLE), columns=42, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0207_PROD (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0207_QA_1 (TABLE), columns=42, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0210_PROD (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0211_PROD (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0213_PROD (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_ACCOUNT_RECON_NEW_0214_PROD (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0205 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0205_PROD (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0206_PROD (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0206_QA (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0206_QA_2 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0206_QA_3 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0206_QA_7 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0207_PROD (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0210_PROD (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0211_PROD (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0213_PROD (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_ICG_REPORT_OUTPUT_NEW_0214_PROD (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_PROD_ACCOUNT_DATA_0205 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_PROD_ADDRESS_DATA_0205 (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-- LOPR_QA_TAX_ID_MAPPING (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- MAC_TO_PARTY_0325 (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_CUSIP_0205 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- MISSING_SECURITY_DATA_0206 (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- NON_ICG_ACCOUNTS_0206 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- NON_ICG_ACCOUNTS_0206_1 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- NOTAPPLICABLE_EMPLOYEE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- NO_MISSING_SECURITY_DATA_0206 (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- OCC_FILE_0206 (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=0
-- ONLY_SEC_0206 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_POSTAL_POM (TABLE), columns=33, pk=-, fk=0, indexes=0, constraints=4
-- POM (TABLE), columns=445, pk=-, fk=0, indexes=0, constraints=5
-- POS (TABLE), columns=194, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_DATA_0206 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_DATA_0206_QA (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_DATA_0207 (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_DATA_FOR_0205_PROD (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_DATA_FOR_0205_QA_1 (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_DATA_PROD_NOT_IN_QA_0205 (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_DATA_QA_0206 (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- POSITION_INFO_0205 (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- POS_BOX (TABLE), columns=33, pk=-, fk=0, indexes=0, constraints=0
-- PRODUCT_DATA_0205 (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- QA_DATASET_0206 (TABLE), columns=19, pk=-, fk=0, indexes=0, constraints=0
-- QA_PROD_MATCH_0206 (TABLE), columns=57, pk=-, fk=0, indexes=0, constraints=0
-- RJ_SECURITY_DATA_0206 (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- RJ_SECURITY_MASTER_DATA_NEW_0205_2 (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- RJ_SECURITY_MASTER_DATA_NEW_0205_AFTER_REFRESH (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- RJ_SECURITY_MASTER_DATA_NEW_0206 (TABLE), columns=23, pk=-, fk=0, indexes=0, constraints=0
-- RJ_SECURITY_MASTER_DATA_NEW_0206_2 (TABLE), columns=23, pk=-, fk=0, indexes=0, constraints=0
-- RJ_SECURITY_MASTER_DATA_NEW_0206_7 (TABLE), columns=23, pk=-, fk=0, indexes=0, constraints=0
-- RJ_SECURITY_MASTER_DATA_NEW_0207_1 (TABLE), columns=23, pk=-, fk=0, indexes=0, constraints=0
-- RJ_TRADE_0206 (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=0
-- RJ_TRADE_DATA_0206 (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-- RJ_TRADE_QUERY_0205 (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-- RJ_TRADE_REPORSITORY_NEW_0205 (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- RJ_TRADE_REPORSITORY_NEW_0206 (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- RJ_TRADE_REPORSITORY_NEW_0206_2 (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- RJ_TRADE_REPORSITORY_NEW_0206_7 (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=0
-- TAX_DATA_0206 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=1
-- TAX_DATA_0206_1 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=1
-- TAX_DIFFERENCE_2 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- TAX_DIFFERENCE_8 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- TAX_ID_DIFFERENCE_0206 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-- TAX_QUERY_FROM_LIGHTHOUSE (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- THRESHOLD_CHECK_0206 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- THRESHOLD_CHECK_0206_1 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- THRESHOLD_INFO_0206 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- UNDERLYING_PRODUCT_SYMBOL (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- VALID_ACCOUNTS_0205_3 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-### Schema MMANDIS
-- MY_ALL_TABLES (TABLE), columns=84, pk=-, fk=0, indexes=0, constraints=2
-- TITLEIST_ADDEPAR_HOUSEHOLD_GRP (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- VENDOR_EXTRACT_CUSTOM_RUN_SCHEDULE (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
 ### Schema MNYMVMT_OWNER
 - MM_PAYEE_PAYER_SETUP_FACT (TABLE), columns=41, pk=MM_PAYEE_PAYER_SETUP_ID, fk=0, indexes=3, constraints=10
 - MM_PIP_FACT (TABLE), columns=83, pk=MM_PIP_FACT_ID, fk=0, indexes=2, constraints=12
@@ -4254,14 +3342,6 @@
 - M_PIP_FACT_STG (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
 ### Schema MODL_REPL_OWNER
 - MODL (TABLE), columns=18, pk=MODL_ID, fk=0, indexes=1, constraints=12
-### Schema MSTANOJEVIC
-- PD_EXTRACT_DUPLICATES (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-### Schema MSULEIC
-- CIRD_RT_PD_JRN_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- VALID_DATES (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-### Schema NAFTENEV
-- CLIENT_ACCOUNT_V_BACKUP_TEST (TABLE), columns=28, pk=-, fk=0, indexes=0, constraints=0
-- S3_CA (TABLE), columns=31, pk=-, fk=0, indexes=0, constraints=0
 ### Schema NGDWAR_OWNER
 - AC_DIM (TABLE), columns=41, pk=AC_DIM_ID, fk=0, indexes=3, constraints=6
 - ALCT_FACT (TABLE), columns=6, pk=-, fk=3, indexes=0, constraints=8
@@ -4329,6 +3409,7 @@
 - J$NNA_LINKED_BKR_AR_OWN_PAYEE_FACT (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
 - NGDW_HIST_TAB_CONFIG (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=2
 - NGDW_HIST_TAB_CONFIG_BKP (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=2
+- NGDW_HIST_TAB_CONFIG_BKP_APR26 (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=2
 - NGDW_PD_SMY_SUB_PARTITION_NM (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=1
 - NGDW_PROCESS_CNTRL_TBL (TABLE), columns=7, pk=CNTRL_ID,PROCESS_CNTRL_KEY, fk=0, indexes=1, constraints=8
 - NGDW_REV_AGRTN_HIST_CONFIG (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=2
@@ -4496,25 +3577,6 @@
 - NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_RST_STG (TABLE), columns=51, pk=-, fk=0, indexes=0, constraints=7
 - NNA_SUMMARY_AGRTN_BY_OWN_PAYEE_DSPL_CGY_FACT_RST_STG (TABLE), columns=350, pk=-, fk=0, indexes=0, constraints=336
 - STG_NNA_LINKED_BKR_AR_OWN_PAYEE_FACT (TABLE), columns=82, pk=STG_NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_ID,NNA_DT, fk=0, indexes=2, constraints=28
-### Schema NPONOMARENKO
-- AR_MGN_AC_JRN_STG_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- AR_MGN_AC_JRN_STG_LOCAL_1 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- FEE_BASED_ACCOUNTS_CURRENT_V_BACKUP (VIEW), columns=44, pk=-, fk=0, indexes=0, constraints=0
-- J$AMS_CNCL_DST_AC_LOCAL (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- J$AMS_CNCL_DST_AC_LOCAL_1 (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- J$AMS_CNCL_DST_AC_LOCAL_2 (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_PREF_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_PREF_LOCAL_1 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_PREF_LOCAL_2 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_PREF_LOCAL_3 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_TDG_CFRM_DLV_LOCAL (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_TDG_CFRM_DLV_LOCAL_1 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_TDG_CFRM_DLV_LOCAL_2 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_TDG_CFRM_DLV_LOCAL_3 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$CNRNCY_CNTL_AUDT_LOCAL_9 (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- J$LOAN_AR_LOCAL_6 (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-### Schema ODI_PROD_BOM
-- BOM_RELACCT_STG (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
 ### Schema ODI_STG_OWNER
 - APPLICATION_PROPERTY (TABLE), columns=4, pk=APPLICATION_PROPERTY_NAME, fk=0, indexes=1, constraints=2
 - DIMENSION_TABLE_DATA_EXTRACT_LOAD_CONFIG (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=1
@@ -4543,23 +3605,6 @@
 - VALIDATION_RESULTS_CUSTOM (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=3
 - VALIDATION_RESULTS_LOG (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=3
 - VALIDATION_RESULTS_LOG_CUSTOM (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=3
-### Schema ODRUZHININ
-- CLIENT_TRADES_DISCREP (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2500 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2501 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2501_ALL (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2502 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2502_15 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2502_16 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2502_17 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2502_18 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2502_19 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2503 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- OLEG_2503_01 (TABLE), columns=43, pk=-, fk=0, indexes=0, constraints=0
-- T1 (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- T1_RCS (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=1
-- TCLIENT (TABLE), columns=63, pk=-, fk=0, indexes=0, constraints=1
-- TCLIENT_ACCOUNT (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=1
 ### Schema OPPOR_OWNER
 - ACTIVITY_FACT_METADATA (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_RETIREMENT_BALANCE_FACT_V (VIEW), columns=128, pk=-, fk=0, indexes=0, constraints=0
@@ -4626,11 +3671,6 @@
 - SSDS_MRKR_OPPOR_EXTRCT (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=4
 - SSDS_OPPOR_ACTIVITY_FACT_V (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
 - SSDS_OPPOR_EMP_CHNG_VW (VIEW), columns=13, pk=-, fk=0, indexes=0, constraints=0
-### Schema OPTIM_SRC
-- AR_DIM (TABLE), columns=478, pk=-, fk=0, indexes=3, constraints=0
-- POSITIONS_FACT_ADD_ACCTS (TABLE), columns=194, pk=-, fk=0, indexes=0, constraints=0
-- TD6Z2 (TABLE), columns=5, pk=-, fk=0, indexes=2, constraints=0
-- TSPRA (TABLE), columns=5, pk=AR_DIM_ID, fk=0, indexes=1, constraints=1
 ### Schema PCGCRM_REPL_OWNER
 - A_LOOKUP (TABLE), columns=17, pk=K_LOOKUP, fk=0, indexes=2, constraints=14
 - A_STANDARDSETTINGS (TABLE), columns=51, pk=K_STANDARDSETTINGS, fk=0, indexes=3, constraints=30
@@ -4688,8 +3728,6 @@
 - STG_DC_PSN_TO_FANUM_MAPPING (TABLE), columns=35, pk=-, fk=0, indexes=0, constraints=0
 - TEAM_BY_ENT_CODE (TABLE), columns=31, pk=PSN_ACS_GRP_ID,MBR_ACS_ID_CODE,MBR_LOGIN_TYPE,BSN_ENT_TP_CODE,BSN_ENT_VAL,PRDCT_ENT_CODE,RSLT_ENT_CODE,EXCL_BSN_ENT_VAL, fk=0, indexes=5, constraints=8
 - USR_ACS_FA_NUM_MAP (TABLE), columns=15, pk=LOGIN_ID,FA_CODE, fk=0, indexes=3, constraints=3
-### Schema PMOKURALA1
-- VALIDATION_QUERIES (TABLE), columns=8, pk=VALIDATION_ID, fk=0, indexes=3, constraints=9
 ### Schema POSITIONS_OWNER
 - AR_MKT_VAL_FACT (TABLE), columns=18, pk=AR_ID,MKT_VAL_DT, fk=0, indexes=1, constraints=7
 - AR_MKT_VAL_FACT_LOG (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=2
@@ -4753,8 +3791,8 @@
 - POSITIONS_BOX_LO_FACT (TABLE), columns=33, pk=EOD_POS_DTL_ID,POS_DT, fk=2, indexes=1, constraints=13
 - POSITIONS_BOX_LO_FACT_AUDT (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=3
 - POSITIONS_DATA_FIX (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- POSITIONS_FACT (TABLE), columns=194, pk=POS_DT,AST_LBY_POS_ID,POS_CCY_CD, fk=1, indexes=4, constraints=14
-- POSITIONS_FACT_AUDT (TABLE), columns=197, pk=-, fk=0, indexes=0, constraints=3
+- POSITIONS_FACT (TABLE), columns=299, pk=POS_DT,AST_LBY_POS_ID,POS_CCY_CD, fk=1, indexes=4, constraints=14
+- POSITIONS_FACT_AUDT (TABLE), columns=302, pk=-, fk=0, indexes=0, constraints=3
 - POSITIONS_FACT_AUDT_BKP (TABLE), columns=133, pk=-, fk=0, indexes=0, constraints=3
 - POSITIONS_FACT_AUDT_DMS_UPDATES (TABLE), columns=134, pk=-, fk=0, indexes=0, constraints=3
 - POSITIONS_FACT_AUDT_SIDE1 (TABLE), columns=302, pk=-, fk=0, indexes=0, constraints=3
@@ -4770,10 +3808,10 @@
 - POSITIONS_FACT_PART (TABLE), columns=31, pk=-, fk=0, indexes=0, constraints=0
 - POSITIONS_FACT_RECON (TABLE), columns=6, pk=-, fk=0, indexes=1, constraints=0
 - POSITIONS_FACT_RECON_DELTA (TABLE), columns=4, pk=-, fk=0, indexes=1, constraints=0
-- POSITIONS_FACT_SIDE1 (TABLE), columns=299, pk=-, fk=0, indexes=0, constraints=0
+- POSITIONS_FACT_SIDE1 (TABLE), columns=299, pk=-, fk=0, indexes=0, constraints=15
 - POSITIONS_FACT_STG_EXCH (TABLE), columns=194, pk=POS_DT,AST_LBY_POS_ID,POS_CCY_CD, fk=0, indexes=4, constraints=16
-- POSITIONS_FACT_STG_EXCH_SIDE1 (TABLE), columns=299, pk=-, fk=0, indexes=0, constraints=0
-- POSITIONS_RESTMT_HIST_FACT (TABLE), columns=196, pk=POSITIONS_RESTMT_HIST_FACT_ID, fk=0, indexes=3, constraints=17
+- POSITIONS_FACT_STG_EXCH_SIDE1 (TABLE), columns=299, pk=-, fk=0, indexes=0, constraints=15
+- POSITIONS_RESTMT_HIST_FACT (TABLE), columns=301, pk=POSITIONS_RESTMT_HIST_FACT_ID, fk=0, indexes=3, constraints=17
 - POSITIONS_RESTMT_HIST_FACT_SIDE1 (TABLE), columns=301, pk=POSITIONS_RESTMT_HIST_FACT_ID, fk=0, indexes=3, constraints=17
 - POSITION_AGGREGATION_BY_LINKED_ARRANGEMENT_OWNER_PAYEE_CLASSIFICATION_FACT_V_TEMP (TABLE), columns=91, pk=-, fk=0, indexes=0, constraints=7
 - POSS_AGRTN_BY_AR_OWN_PAYEE_PRD_VW (VIEW), columns=119, pk=-, fk=0, indexes=0, constraints=0
@@ -4846,6 +3884,50 @@
 - EOD_POS_CCAL_BKRBO1_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
 - EOD_POS_CCAL_BKRBO1_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
 - EOD_POS_CCAL_BKRBO1_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_EXTAC (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_EXTAC_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_EXTAC_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_EXTAC_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_INSTBO1 (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_INSTBO1_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_INSTBO1_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_INSTBO1_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_INTLBO1 (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_INTLBO1_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_INTLBO1_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_INTLBO1_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_MFD (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_MFDCF (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_MFDCF_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_MFDCF_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_MFDCF_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_MFD_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_MFD_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_MFD_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJBNK1 (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJBNK1_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJBNK1_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJBNK1_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJBNK2 (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJBNK2_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJBNK2_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJBNK2_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJIG1 (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJIG1CF (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJIG1CF_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJIG1CF_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJIG1CF_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJIG1_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJIG1_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJIG1_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJTRST1 (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJTRST1CF (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJTRST1CF_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJTRST1CF_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJTRST1CF_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJTRST1_EXT_CTRL (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJTRST1_EXT_CTRL_TGT (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- EOD_POS_CCAL_RJTRST1_EXT_DATA (TABLE), columns=132, pk=-, fk=0, indexes=0, constraints=0
 - GL_ACCT_DIM_STG (TABLE), columns=90, pk=-, fk=0, indexes=0, constraints=0
 - HIER_ASSET_CL_LKUP_VW (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
 - HIER_CL_LKUP_VW (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
@@ -4885,8 +3967,8 @@
 - STG_PAYEE_FA_LVL_POSS_REPORTING_CLASS_FOR_INSTRUMENTS (TABLE), columns=37, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_AGRTN_ADV_ENTCL_CLNT_ARID (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_AGRTN_ADV_ENTCL_CLNT_NET_WORTH (TABLE), columns=13, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_AGRTN_ADV_ENTCL_CLNT_RPT_ARID (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=1
-- STG_POS_AGRTN_ADV_ENTCL_PARTY_CLNT_TYPE (TABLE), columns=18, pk=-, fk=0, indexes=0, constraints=0
+- STG_POS_AGRTN_ADV_ENTCL_CLNT_RPT_ARID (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=1
+- STG_POS_AGRTN_ADV_ENTCL_PARTY_CLNT_TYPE (TABLE), columns=32, pk=-, fk=0, indexes=1, constraints=0
 - STG_POS_AGRTN_ADV_ENTCL_RPT_ARID_ATTR (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_AGRTN_BY_AR_OWN_PAYEE_ALCT_FACT (TABLE), columns=120, pk=-, fk=0, indexes=0, constraints=8
 - STG_POS_AGRTN_BY_AR_OWN_PAYEE_CL_FACT (TABLE), columns=125, pk=-, fk=0, indexes=0, constraints=8
@@ -4907,13 +3989,17 @@
 - STG_POS_PAYEE_INTLBO1_CASH (TABLE), columns=229, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_INTLBO1_FMI (TABLE), columns=229, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_LVL_BKRBO1 (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
+- STG_POS_PAYEE_LVL_EXTAC (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_LVL_INSTBO1 (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_LVL_INTLBO1 (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_LVL_MFD (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
+- STG_POS_PAYEE_LVL_MFDCF (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_LVL_RJBNK1 (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_LVL_RJBNK2 (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_LVL_RJIG1 (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
+- STG_POS_PAYEE_LVL_RJIG1CF (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_LVL_RJTRST1 (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
+- STG_POS_PAYEE_LVL_RJTRST1CF (TABLE), columns=330, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_MFD (TABLE), columns=229, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_MFD_FMI (TABLE), columns=229, pk=-, fk=0, indexes=0, constraints=0
 - STG_POS_PAYEE_RJBNK1_CASH (TABLE), columns=229, pk=-, fk=0, indexes=0, constraints=0
@@ -5101,12 +4187,6 @@
 - MNY_MGR_ADR (TABLE), columns=17, pk=MNY_MGR_ADR_ID, fk=0, indexes=2, constraints=11
 - MNY_MGR_DTL (TABLE), columns=25, pk=MNY_MGR_DTL_ID, fk=0, indexes=2, constraints=11
 - TAX_OPTIMIZATION_ST (TABLE), columns=10, pk=TAX_OPTIMIZATION_ST_ID,TAX_OPTIMIZATION_ST_CD,EFF_FM_DT, fk=0, indexes=1, constraints=11
-### Schema PYARRAMREDDY
-- AR_DIM_GG_TEST (TABLE), columns=359, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_TEST1 (TABLE), columns=332, pk=-, fk=0, indexes=0, constraints=0
-- DT_PRD_CLCN_SUB_DIM_0211 (TABLE), columns=36, pk=-, fk=0, indexes=0, constraints=36
-- DT_PRD_CLCN_SUB_DIM_BKP_0211 (TABLE), columns=36, pk=-, fk=0, indexes=0, constraints=36
-- POSITIONS_FACT_GG_TEST (TABLE), columns=156, pk=-, fk=0, indexes=0, constraints=12
 ### Schema RANKING_OWNER
 - ADV_RANK_METRIC_FACT (TABLE), columns=97, pk=ADV_RANK_METRIC_FACT_ID,RANK_DT, fk=0, indexes=2, constraints=22
 - ADV_RANK_METRIC_FACT_EXCH (TABLE), columns=97, pk=ADV_RANK_METRIC_FACT_ID,RANK_DT, fk=0, indexes=2, constraints=22
@@ -5114,6 +4194,7 @@
 ### Schema REFERENCE_REPL_OWNER
 - AIG_PRODUCTS (TABLE), columns=57, pk=CUSIP, fk=0, indexes=1, constraints=7
 - AR_GRP (TABLE), columns=16, pk=AR_GRP_ID, fk=0, indexes=2, constraints=8
+- AR_GRP_05052026 (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=7
 - AR_GRP_TP (TABLE), columns=11, pk=AR_GRP_TP_ID, fk=0, indexes=3, constraints=11
 - AR_GRP_XREF (TABLE), columns=13, pk=ORIG_SRC_STM_AR_GRP_ID,ORIG_PVDR_SRC_STM_ID,XREF_ID_TP_ID, fk=1, indexes=2, constraints=6
 - AR_GRP_X_AR (TABLE), columns=17, pk=AR_GRP_ID,AR_ID,EFF_DT, fk=0, indexes=4, constraints=9
@@ -5215,7 +4296,7 @@
 - J$POSTAL_ADR_PARTY_DRCIVE_AUDT (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - J$PST_ADR_AUDT (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
 - J$TEL_ADR_AUDT (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- LGL_ENT (TABLE), columns=48, pk=PARTY_ID, fk=0, indexes=1, constraints=6
+- LGL_ENT (TABLE), columns=49, pk=PARTY_ID, fk=0, indexes=1, constraints=6
 - LGL_ENT_AUDT (TABLE), columns=49, pk=PARTY_ID,AUDT_CRT_DTM, fk=0, indexes=1, constraints=8
 - LGL_ENT_AUDT_VW (VIEW), columns=41, pk=-, fk=0, indexes=0, constraints=0
 - PARTY (TABLE), columns=55, pk=PARTY_ID, fk=0, indexes=3, constraints=13
@@ -5374,39 +4455,10 @@
 - STG_REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_NEW2025 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=26
 - STG_REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_NEW_112 (TABLE), columns=117, pk=-, fk=0, indexes=0, constraints=26
 - TABLES_TO_TRUNCATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-### Schema REVENUE_OWNER_BKP
-- REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT (TABLE), columns=113, pk=REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_ID, fk=0, indexes=3, constraints=27
 ### Schema REVENUE_STG_OWNER
 - STG_REV_AGRTN_BY_ENT_FACT (TABLE), columns=96, pk=-, fk=0, indexes=0, constraints=78
 - STG_REV_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_CL_FACT (TABLE), columns=141, pk=-, fk=0, indexes=0, constraints=96
 - TABLES_TO_TRUNCATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-### Schema RGAJULA
-- J$TAXLOT_DTL_OPN_5NOV2025 (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=1
-### Schema RJ_DBA
-- AUDIT_LOGON_LOG (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- CHAINED_ROWS (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- DATAPUMP_LOG (TABLE), columns=14, pk=LOG_ID, fk=0, indexes=1, constraints=2
-- INDEX_FRAGMENTATION (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- INVOICES_TEST_RR (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=2
-- TEMP_CHAINED_ROWS (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- TEMP_INDEX_STATS (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- USER_LOCK_TABLE (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-### Schema RPATLOLLA
-- ADDITIONAL_ACCNTS (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=2
-- CAIS_REF_DATA (TABLE), columns=32, pk=-, fk=0, indexes=0, constraints=5
-### Schema RPEREVOZNIK
-- EMP_EXT_ACC (TABLE), columns=39, pk=-, fk=0, indexes=0, constraints=0
-- S3_CLENT_ACCOUNT (TABLE), columns=31, pk=-, fk=0, indexes=0, constraints=0
-- S3_CLIENT_TEST (TABLE), columns=62, pk=-, fk=0, indexes=0, constraints=0
-- S3_CLIENT_TRADE_V_TEST (TABLE), columns=44, pk=-, fk=0, indexes=0, constraints=0
-- S3_EMPLOYEE_ACCOUNTS_V1 (TABLE), columns=39, pk=-, fk=0, indexes=0, constraints=0
-- S3_EMPLOYEE_ACCOUNT_TEST (TABLE), columns=39, pk=-, fk=0, indexes=0, constraints=0
-- S3_EMPLOYEE_TRADES_TST (TABLE), columns=35, pk=-, fk=0, indexes=0, constraints=0
-- S3_WATCHLIST_UPDATE (TABLE), columns=73, pk=-, fk=0, indexes=0, constraints=0
-- S3_WATCHLIST_V1 (TABLE), columns=73, pk=-, fk=0, indexes=0, constraints=0
-- T_RCS (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=1
-### Schema RRAUSHAN
-- HARSHAL_INSERT_TEST (TABLE), columns=359, pk=-, fk=0, indexes=0, constraints=0
 ### Schema SCRATCH_TS_OWNER
 - AR_DIM (TABLE), columns=332, pk=AR_DIM_ID, fk=0, indexes=4, constraints=1
 - DATE_DIM (TABLE), columns=69, pk=DT_DIM_ID, fk=0, indexes=3, constraints=6
@@ -5450,8 +4502,8 @@
 - ENT_SEG_AGRTN_METRICS_FACT (TABLE), columns=30, pk=ENT_SEG_AGRTN_METRICS_FACT_ID,SEG_DT, fk=0, indexes=2, constraints=10
 - ENT_SEG_AGRTN_METRICS_FACT_EXCH (TABLE), columns=30, pk=ENT_SEG_AGRTN_METRICS_FACT_ID,SEG_DT, fk=0, indexes=2, constraints=10
 - LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT (TABLE), columns=275, pk=LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_ID,SEG_DT,PAYEE_FA_EMPE_ID, fk=0, indexes=1, constraints=58
-- LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_BY_DATE (TABLE), columns=275, pk=LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_ID,SEG_DT,PAYEE_FA_EMPE_ID, fk=0, indexes=1, constraints=58
-- LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_EXCH (TABLE), columns=275, pk=LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_ID,SEG_DT,PAYEE_FA_EMPE_ID, fk=0, indexes=1, constraints=58
+- LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_BY_DATE (TABLE), columns=275, pk=LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_ID,SEG_DT,PAYEE_FA_EMPE_ID, fk=0, indexes=2, constraints=58
+- LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_EXCH (TABLE), columns=275, pk=LINKED_BKR_AR_OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_ID,SEG_DT,PAYEE_FA_EMPE_ID, fk=0, indexes=2, constraints=58
 - OWN_PAYEE_SEG_METRICS_FACT (TABLE), columns=231, pk=OWN_PAYEE_SEG_METRICS_FACT_ID,SEG_DT,PAYEE_FA_EMPE_ID, fk=0, indexes=4, constraints=46
 - OWN_PAYEE_SEG_METRICS_FACT_BY_DATE (TABLE), columns=231, pk=OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_ID,SEG_DT,PAYEE_FA_EMPE_ID, fk=0, indexes=4, constraints=46
 - OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_EXCH (TABLE), columns=231, pk=OWN_PAYEE_SEG_METRICS_FACT_BY_DATE_ID,SEG_DT,PAYEE_FA_EMPE_ID, fk=0, indexes=4, constraints=46
@@ -5466,16 +4518,6 @@
 - STG_ENT_AGRTN_METRICS_FACT_PAYEE (TABLE), columns=57, pk=-, fk=0, indexes=0, constraints=5
 - STG_ENT_FA_AGRTN_METRICS_FACT_OWN (TABLE), columns=51, pk=-, fk=0, indexes=0, constraints=6
 - STG_ENT_FA_AGRTN_METRICS_FACT_PAYEE (TABLE), columns=59, pk=-, fk=0, indexes=0, constraints=6
-### Schema SFORD
-- TEMP1 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
-### Schema SGANGADHARAN
-- ENTERPRISE_ENTITY_DIM_SEMANTIC (TABLE), columns=568, pk=ENTERPRISE_ENTITY_DIM_ID, fk=0, indexes=1, constraints=2
-- ENTERPRISE_ENTITY_RETAIL_DIM_SEMANTIC (TABLE), columns=65, pk=ENTERPRISE_ENTITY_RETAIL_DIM_ID, fk=0, indexes=1, constraints=2
-- ENTERPRISE_ENTITY_RISK_DIM_SEMANTIC (TABLE), columns=48, pk=ENTERPRISE_ENTITY_RISK_DIM_ID, fk=0, indexes=1, constraints=2
-- ENTITY_DEPT_FLAT_HIER_SEMANTIC (TABLE), columns=130, pk=ENTITY_DEPARTMENT_FLAT_HIERARCHY_ID, fk=0, indexes=1, constraints=1
-- ENTITY_DEPT_ORG_REF_SEMANTIC (TABLE), columns=43, pk=ENTITY_DEPARTMENT_ORGANIZATION_REFERENCE_ID, fk=0, indexes=1, constraints=1
-- MSTR_LOB_DIM_SEMANTIC (TABLE), columns=106, pk=LOB_DIM_ID, fk=0, indexes=1, constraints=2
-- MSTR_LOCATION_DIM_SEMANTIC (TABLE), columns=157, pk=LOCATION_DIM_ID, fk=0, indexes=1, constraints=1
 ### Schema SHARBO_OWNER
 - BATCH_METADATA (TABLE), columns=14, pk=BATCH_ID, fk=0, indexes=1, constraints=2
 - EXPORT_FILE_METRIC (TABLE), columns=5, pk=-, fk=0, indexes=1, constraints=1
@@ -5494,17 +4536,7 @@
 - STAG_SH_POSN (TABLE), columns=21, pk=ARRANGEMENT_ID,CCAL_PD_ID,ASSET_LIABILITY_POSITION_ID, fk=0, indexes=2, constraints=8
 - STAG_SH_SEC_MSTR (TABLE), columns=27, pk=PD_ID, fk=0, indexes=1, constraints=6
 ### Schema SILVER_CCSI_OWNER
-- LOAN_ARRANGEMENT_DIMENSION (TABLE), columns=24, pk=-, fk=0, indexes=0, constraints=0
-### Schema SPANDEM
-- QUALIFIED_ACCOUNT_LIST (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-### Schema SQURESHI
-- IMT_PD_DIM_BKP (TABLE), columns=386, pk=-, fk=0, indexes=0, constraints=2
-- TEMP1234 (TABLE), columns=417, pk=-, fk=0, indexes=0, constraints=0
-### Schema SSAHU
-- AR_PREF_BOND_DISP_JRN (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- AR_PREF_FACT_BOND_DISP (TABLE), columns=55, pk=-, fk=0, indexes=0, constraints=5
-- AR_PREF_JRN (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- J$AR_SRC_CHNGS_LOG (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
+- LOAN_ARRANGEMENT_DIMENSION (TABLE), columns=25, pk=-, fk=0, indexes=0, constraints=0
 ### Schema SSDS_CUSTOM_CONSUMER_DAL_OWNER
 - RJM_ACTIVITY_FACT_V (VIEW), columns=213, pk=-, fk=0, indexes=0, constraints=0
 - RJM_ACTIVITY_FEE_FACT_V (VIEW), columns=78, pk=-, fk=0, indexes=0, constraints=0
@@ -5561,7 +4593,7 @@
 - ARRANGEMENT_DIMENSION_V (VIEW), columns=459, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_DIRECTIVES_SUBDIMENSION_V (VIEW), columns=32, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_DOCUMENT_CODE_V (VIEW), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- ARRANGEMENT_DOCUMENT_DELIVERY_SETUP_SUBDIMENSION_V (VIEW), columns=37, pk=-, fk=0, indexes=0, constraints=0
+- ARRANGEMENT_DOCUMENT_DELIVERY_SETUP_SUBDIMENSION_V (VIEW), columns=39, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_DOCUMENT_PREFERENCE_SETUP_SUBDIMENSION_V (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_FEE_SCHEDULE_SUBDIMENSION_V (VIEW), columns=51, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_GROUP_RELATIONSHIP_SUBDIMENSION_V (VIEW), columns=18, pk=-, fk=0, indexes=0, constraints=0
@@ -5590,7 +4622,7 @@
 - ARRANGEMENT_TRADING_COMMISSION_DEVIATIONS_SUBDIMENSION_V (VIEW), columns=21, pk=-, fk=0, indexes=0, constraints=0
 - ARRANGEMENT_TRADING_CONFIRM_DELIVERY_SUBDIMENSION_V (VIEW), columns=31, pk=-, fk=0, indexes=0, constraints=0
 - ASOF_ARRANGEMENT_DIMENSION_V (VIEW), columns=458, pk=-, fk=0, indexes=0, constraints=0
-- ASOF_ARRANGEMENT_DOCUMENT_DELIVERY_SETUP_SUBDIMENSION_V (VIEW), columns=33, pk=-, fk=0, indexes=0, constraints=0
+- ASOF_ARRANGEMENT_DOCUMENT_DELIVERY_SETUP_SUBDIMENSION_V (VIEW), columns=36, pk=-, fk=0, indexes=0, constraints=0
 - ASOF_ARRANGEMENT_GROUP_RELATIONSHIP_SUBDIMENSION_V (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
 - ASOF_ARRANGEMENT_GROUP_SUBDIMENSION_V (VIEW), columns=81, pk=-, fk=0, indexes=0, constraints=0
 - ASOF_ARRANGEMENT_MANAGED_ACCOUNT_SUBDIMENSION_V (VIEW), columns=37, pk=-, fk=0, indexes=0, constraints=0
@@ -5679,7 +4711,7 @@
 - CLIENT_TXN_RL_EXTRACT_V (VIEW), columns=7, pk=-, fk=0, indexes=0, constraints=0
 - CLOSED_TAX_LOTS_FACT_LOG_V (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
 - CLOSED_TAX_LOTS_FACT_V (VIEW), columns=102, pk=-, fk=0, indexes=0, constraints=0
-- CLOSED_TAX_LOTS_NON_BROKERAGE_FACT_V (VIEW), columns=83, pk=-, fk=0, indexes=0, constraints=0
+- CLOSED_TAX_LOTS_NON_BROKERAGE_FACT_V (VIEW), columns=84, pk=-, fk=0, indexes=0, constraints=0
 - CODE_SET_V (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
 - CODE_SET_VALUE_V (VIEW), columns=12, pk=-, fk=0, indexes=0, constraints=0
 - CONSULTING_ARRANGEMENT_EXTERNAL_ASSET_FACT_V (VIEW), columns=25, pk=-, fk=0, indexes=0, constraints=0
@@ -5709,7 +4741,7 @@
 - CURRENT_ARRANGEMENT_DIMENSION_EXTENSION_SUBDIMENSION_V (VIEW), columns=48, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_DIMENSION_V (VIEW), columns=459, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_DIRECTIVES_SUBDIMENSION_V (VIEW), columns=32, pk=-, fk=0, indexes=0, constraints=0
-- CURRENT_ARRANGEMENT_DOCUMENT_DELIVERY_SETUP_SUBDIMENSION_V (VIEW), columns=37, pk=-, fk=0, indexes=0, constraints=0
+- CURRENT_ARRANGEMENT_DOCUMENT_DELIVERY_SETUP_SUBDIMENSION_V (VIEW), columns=39, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_DOCUMENT_PREFERENCE_SETUP_SUBDIMENSION_V (VIEW), columns=15, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_FEE_SCHEDULE_SUBDIMENSION_V (VIEW), columns=51, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_GROUP_RELATIONSHIP_SUBDIMENSION_V (VIEW), columns=18, pk=-, fk=0, indexes=0, constraints=0
@@ -5724,6 +4756,7 @@
 - CURRENT_ARRANGEMENT_OPTION_TRADING_SETUPS_SUBDIMENSION_V (VIEW), columns=20, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_PARTY_FACT_V (VIEW), columns=36, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_PERFORMANCE_BREAK_FACT_V (VIEW), columns=29, pk=-, fk=0, indexes=0, constraints=0
+- CURRENT_ARRANGEMENT_RELATIONSHIP_GROUP_SUBDIMENSION_V (VIEW), columns=12, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_TAX_OVERLAY_FACT_V (VIEW), columns=34, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_TRADING_COMMISSION_DEVIATIONS_SUBDIMENSION_V (VIEW), columns=21, pk=-, fk=0, indexes=0, constraints=0
 - CURRENT_ARRANGEMENT_TRADING_CONFIRM_DELIVERY_SUBDIMENSION_V (VIEW), columns=31, pk=-, fk=0, indexes=0, constraints=0
@@ -5972,6 +5005,7 @@
 - LIABILITY_RATING_LOOKUP_DIMENSION_V (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - LIABILITY_REMARK_CATEGORY_LOOKUP_DIMENSION_V (VIEW), columns=7, pk=-, fk=0, indexes=0, constraints=0
 - LIGHTHOUSE_DAILY_BATCH_MONITORING_SLA_REPORT_V (VIEW), columns=4, pk=-, fk=0, indexes=0, constraints=0
+- LINKED_BROKERAGE_ARRANGEMENT_OWNER_PAYEE_SEGMENTATION_METRICS_FACT_BY_DATE_V (VIEW), columns=275, pk=-, fk=0, indexes=0, constraints=0
 - LINKED_BROKERAGE_ARRANGEMENT_OWNER_PAYEE_SEGMENTATION_METRICS_FACT_V (VIEW), columns=275, pk=-, fk=0, indexes=0, constraints=0
 - LOAN_ACCOUNT_HISTORY_V (VIEW), columns=76, pk=-, fk=0, indexes=0, constraints=0
 - LOAN_ACCOUNT_V (VIEW), columns=73, pk=-, fk=0, indexes=0, constraints=0
@@ -6017,7 +5051,7 @@
 - MONEY_MOVEMENT_PERIODIC_INVESTMENT_PLAN_FACT_V (VIEW), columns=69, pk=-, fk=0, indexes=0, constraints=0
 - MONEY_MOVEMENT_PROFILE_FACT_V (VIEW), columns=54, pk=-, fk=0, indexes=0, constraints=0
 - MONEY_MOVEMENT_SYSTEMATIC_WITHDRAWAL_PLAN_FACT_V (VIEW), columns=90, pk=-, fk=0, indexes=0, constraints=0
-- MONEY_TRANSFERS_FACT_V (VIEW), columns=91, pk=-, fk=0, indexes=0, constraints=0
+- MONEY_TRANSFERS_FACT_V (VIEW), columns=98, pk=-, fk=0, indexes=0, constraints=0
 - NET_NEW_ASSET_AGGREGATION_BY_ENTITY_DISPLAY_CATEGORY_FACT_V (VIEW), columns=195, pk=-, fk=0, indexes=0, constraints=0
 - NET_NEW_ASSET_AGGREGATION_BY_LINKED_BROKERAGE_ARRANGEMENT_OWNER_PAYEE_DISPLAY_CATEGORY_FACT_BY_DATE_V (VIEW), columns=378, pk=-, fk=0, indexes=0, constraints=0
 - NET_NEW_ASSET_AGGREGATION_BY_LINKED_BROKERAGE_ARRANGEMENT_OWNER_PAYEE_DISPLAY_CATEGORY_FACT_V (VIEW), columns=378, pk=-, fk=0, indexes=0, constraints=0
@@ -6033,6 +5067,7 @@
 - OPEN_TAX_LOTS_FACT_V (VIEW), columns=82, pk=-, fk=0, indexes=0, constraints=0
 - OPEN_TAX_LOTS_NON_BROKERAGE_FACT_V (VIEW), columns=67, pk=-, fk=0, indexes=0, constraints=0
 - OWNER_PAYEE_LIABILITY_BALANCE_FACT_V (VIEW), columns=27, pk=-, fk=0, indexes=0, constraints=0
+- OWNER_PAYEE_SEGMENTATION_METRICS_FACT_BY_DATE_V (VIEW), columns=231, pk=-, fk=0, indexes=0, constraints=0
 - OWNER_PAYEE_SEGMENTATION_METRICS_FACT_V (VIEW), columns=231, pk=-, fk=0, indexes=0, constraints=0
 - PARTY_ACCOUNT_TRIGGERING_EVENT_ALL_SOURCE_V (VIEW), columns=9, pk=-, fk=0, indexes=0, constraints=0
 - PARTY_ALTERNATE_IDENTIFICATION_SUBDIMENSION_ALL_SOURCE_V (VIEW), columns=10, pk=-, fk=0, indexes=0, constraints=0
@@ -6357,6 +5392,7 @@
 - AVY_FACT_EXCH (TABLE), columns=209, pk=-, fk=0, indexes=0, constraints=27
 - AVY_FACT_LOG (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
 - AVY_FACT_NEW_V1 (TABLE), columns=209, pk=-, fk=0, indexes=0, constraints=27
+- AVY_FACT_SIDE (TABLE), columns=369, pk=TXN_ID, fk=0, indexes=6, constraints=28
 - AVY_FEES_FACT (TABLE), columns=88, pk=FIP_ID, fk=17, indexes=4, constraints=38
 - AVY_FEES_FACT_AUDT (TABLE), columns=57, pk=-, fk=0, indexes=0, constraints=3
 - AVY_FEES_FACT_BKP_2024215 (TABLE), columns=83, pk=-, fk=0, indexes=0, constraints=20
@@ -6374,7 +5410,7 @@
 - LGCY_MKT_TP_DIM (TABLE), columns=8, pk=LGCY_MKT_TP_DIM_ID, fk=0, indexes=1, constraints=4
 - LGCY_TRD_CPCTY_TP_DIM (TABLE), columns=8, pk=LGCY_TRD_CPCTY_TP_DIM_ID, fk=0, indexes=1, constraints=4
 - MNY_TXN_QUALFR_LOG (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- MNY_XFERS_FACT (TABLE), columns=92, pk=SD_DT,MNY_TXN_QUALFR_ID, fk=0, indexes=2, constraints=6
+- MNY_XFERS_FACT (TABLE), columns=100, pk=SD_DT,MNY_TXN_QUALFR_ID, fk=0, indexes=2, constraints=6
 - MNY_XFERS_FACT_AUDT (TABLE), columns=45, pk=-, fk=0, indexes=0, constraints=3
 - PNDG_ACH_FACT (TABLE), columns=66, pk=PNDG_ACH_FACT_ID,PNDG_END_DTM, fk=0, indexes=2, constraints=13
 - PNDG_ACH_FACT_LOG (TABLE), columns=11, pk=-, fk=0, indexes=1, constraints=1
@@ -6393,6 +5429,11 @@
 - AVY_DTL_FACT_STEP2_STG_HIST (TABLE), columns=220, pk=-, fk=0, indexes=0, constraints=0
 - AVY_DTL_FACT_STEP2_STG_HIST_PART (TABLE), columns=220, pk=-, fk=0, indexes=0, constraints=0
 - AVY_DTL_FACT_STG_1 (TABLE), columns=70, pk=-, fk=0, indexes=0, constraints=16
+- AVY_FACT_SIDE_STEP1_STG_1 (TABLE), columns=123, pk=-, fk=0, indexes=0, constraints=0
+- AVY_FACT_SIDE_STEP2_STG_1 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
+- AVY_FACT_SIDE_STEP3_STG_1 (TABLE), columns=297, pk=-, fk=0, indexes=0, constraints=0
+- AVY_FACT_SIDE_STEP4_STG_1 (TABLE), columns=302, pk=-, fk=0, indexes=0, constraints=0
+- AVY_FACT_SIDE_STEP5_STG_1 (TABLE), columns=371, pk=-, fk=0, indexes=0, constraints=2
 - AVY_FACT_STEP1_STG_1 (TABLE), columns=89, pk=-, fk=0, indexes=0, constraints=0
 - AVY_FACT_STEP1_STG_HIST (TABLE), columns=68, pk=-, fk=0, indexes=0, constraints=0
 - AVY_FACT_STEP2_STG_1 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
@@ -6468,203 +5509,11 @@
 - TABLES_TO_TRUNCATE (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=0
 - TXN_APA_STG_1 (TABLE), columns=62, pk=-, fk=0, indexes=0, constraints=0
 - TXN_LIST (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=1
-### Schema TSOLOVIOV
-- A (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=4
-- BKP (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=2
-- FACT_BKP (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=11
-- TD (TABLE), columns=194, pk=-, fk=0, indexes=0, constraints=12
-- TEST_D (TABLE), columns=115, pk=-, fk=0, indexes=0, constraints=9
 ### Schema TSTRAD_OWNER
 - RJ_POSITION_V (VIEW), columns=14, pk=-, fk=0, indexes=0, constraints=0
-### Schema VAKKIRAJU
-- ALLOCATION_HIERARCHY (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ALLOCATION_HIERARCHY_VW (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- ALLOCATION_NAME_MATRIX (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=2
-- ALLOCATION_NAME_MATRIX_VW (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CMB_ALCT_DELETE_STATUS (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- DIM_REF_LVL_1 (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- DIM_REF_LVL_1_VW (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=0
-- DIM_REF_LVL_2 (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=1
-- DIM_REF_LVL_2_VW (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=1
-- ERR$_NNA_LINKED_BKR_AR_OWN_PAYEE_RAW_FACT (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- HIER_CL_LKUP_VW (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- NNA_LINKED_BKR_AR_OWN_PAYEE_RAW_FACT (TABLE), columns=74, pk=-, fk=0, indexes=0, constraints=4
-- POS_AGRTN_BY_AR_OWN_PAYEE_ALCT_FACT (TABLE), columns=115, pk=-, fk=0, indexes=0, constraints=6
-- POS_AGRTN_BY_AR_OWN_PAYEE_ALCT_FACT_EXCH (TABLE), columns=119, pk=-, fk=0, indexes=0, constraints=13
-- POS_AGRTN_BY_AR_OWN_PAYEE_ALCT_FACT_T (TABLE), columns=128, pk=-, fk=0, indexes=0, constraints=15
-- POS_AGRTN_BY_AR_OWN_PAYEE_ALCT_FACT_V2 (TABLE), columns=120, pk=-, fk=0, indexes=0, constraints=14
-- POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_EXCH (TABLE), columns=94, pk=-, fk=0, indexes=0, constraints=12
-- PRE_STG_PAYEE_FA_LVL_POSS_FACT (TABLE), columns=136, pk=-, fk=0, indexes=0, constraints=14
-- PSN_BKR_SUBDIM_BKP (TABLE), columns=29, pk=-, fk=0, indexes=0, constraints=19
-- REV_FACT_CUSIP_FILL_STG (TABLE), columns=3, pk=-, fk=0, indexes=0, constraints=0
-- STG_IMT_PD_ALCT_FACT (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=3
-- STG_PAYEE_ALCT_FA_LVL_POSS_PDID (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=1
-- STG_PAYEE_FA_LVL_POSS_ALCT_FIRM_REPORTING (TABLE), columns=37, pk=-, fk=0, indexes=0, constraints=5
-- STG_POS_AGRTN_BY_AR_OWN_PAYEE_ALCT_FACT (TABLE), columns=120, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_AGRTN_BY_PAYEE_ALCT_LVL_FACT_REPORTING_MODEL (TABLE), columns=116, pk=-, fk=0, indexes=0, constraints=0
-- STG_POS_AGRTN_BY_PAYEE_ALCT_LVL_FACT_REPORTING_MODEL1 (TABLE), columns=114, pk=-, fk=0, indexes=0, constraints=5
-- TEST_CAL (TABLE), columns=8, pk=-, fk=0, indexes=0, constraints=0
-- VAR_COLLECT (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=0
-### Schema VMOGILI
-- YOUR_TABLE_NAME (TABLE), columns=5, pk=-, fk=0, indexes=0, constraints=4
-### Schema VSTOJIC
-- PARTY_ALT_ID_POM (TABLE), columns=23, pk=-, fk=0, indexes=0, constraints=4
-- PARTY_DIM_POM (TABLE), columns=312, pk=-, fk=0, indexes=0, constraints=5
-### Schema VV1
-- IMT_PD_DIM_DUPS_BKP (TABLE), columns=445, pk=-, fk=0, indexes=0, constraints=5
-### Schema WSPEARS
-- STGTAB_SQLPROF_0081HKJC5XZNN (TABLE), columns=77, pk=-, fk=0, indexes=0, constraints=0
-### Schema YIVANOV
-- AFV_GTT (TABLE), columns=54, pk=-, fk=0, indexes=0, constraints=0
-- ARRANGEMENT_DIMENSION_V (VIEW), columns=449, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_B (TABLE), columns=475, pk=-, fk=0, indexes=1, constraints=0
-- AR_DIM_FA_NUMBER_STATS_MV (MVIEW), columns=2, pk=-, fk=0, indexes=1, constraints=0
-- AR_DIM_GTT (TABLE), columns=439, pk=-, fk=0, indexes=0, constraints=0
-- AR_DIM_SNAP (TABLE), columns=480, pk=-, fk=0, indexes=0, constraints=0
-- CHAINED_ROWS (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- CLOSED_TAX_LOTS_FACT_V (VIEW), columns=103, pk=-, fk=0, indexes=0, constraints=0
-- CLS_TAX_LOTS_FACT (TABLE), columns=102, pk=-, fk=0, indexes=0, constraints=15
-- IMT_PD_RTG_FACT (TABLE), columns=17, pk=-, fk=0, indexes=1, constraints=7
-- IMT_PD_RTG_FACT_ED (TABLE), columns=20, pk=-, fk=0, indexes=0, constraints=8
-- INVESTMENT_PRODUCT_RATING_SUBDIMENSION_V (VIEW), columns=18, pk=-, fk=0, indexes=0, constraints=0
-- JAMES_QUERY_DATA (TABLE), columns=26, pk=-, fk=0, indexes=0, constraints=1
-- ORIG_QUERY_DATA (TABLE), columns=28, pk=-, fk=0, indexes=0, constraints=0
-- PARTY_DIM_ADVANCED (TABLE), columns=291, pk=-, fk=0, indexes=0, constraints=4
-- PARTY_DIM_HCC (TABLE), columns=291, pk=-, fk=0, indexes=0, constraints=4
-- PARTY_DIM_PART (TABLE), columns=291, pk=-, fk=0, indexes=0, constraints=4
-- ROWS2RECREATE (TABLE), columns=7, pk=-, fk=0, indexes=0, constraints=0
-- T1 (TABLE), columns=79, pk=-, fk=0, indexes=0, constraints=10
-- TEST_QUERY_LOG (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-### Schema ZZIVKOVIC
-- APS_AWS (TABLE), columns=15, pk=-, fk=0, indexes=0, constraints=0
-- APS_BRANCH_METADATA (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- APS_BRUNCH_METADATA_11DEC (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- APS_BUCKET_METADATA (TABLE), columns=4, pk=-, fk=0, indexes=0, constraints=0
-- APS_DATABASE_LEGACY_PRODUCT (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- APS_EXPORT_LEGACY_PRODUCT (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- APS_LEGACY_PRODUCT_BUSINESS_DEF (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- APS_LEGACY_PRODUCT_MAP_METADATA (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- APS_LEGACY_PRODUCT_MAP_METADATA_2 (TABLE), columns=6, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_AR_ID_STG_BKP_29JUL (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- AR_GRP_SUBDIM_BKP (TABLE), columns=75, pk=-, fk=0, indexes=0, constraints=10
-- AR_MGN_AC_FACT_306859 (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=5
-- AVY_DTL_FACT_BKP16OCT2025 (TABLE), columns=237, pk=-, fk=0, indexes=0, constraints=17
-- BACKUP_REVENUE_FACT_INACTIVE (TABLE), columns=122, pk=-, fk=0, indexes=0, constraints=0
-- BKP_AR_MGN_AC_FACT_RESULT (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=5
-- BKP_NNA_J$_RESULT (TABLE), columns=11, pk=-, fk=0, indexes=0, constraints=0
-- BKP_NNA_MAIN_HIST_RESULT (TABLE), columns=83, pk=-, fk=0, indexes=0, constraints=27
-- BKP_NNA_MAIN_RESULT (TABLE), columns=86, pk=-, fk=0, indexes=0, constraints=27
-- BKR_AR_ID_PERFORMACE500 (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- BKR_AR_ID_WITH_T (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- CL_FACT_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- CL_FACT_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- EDW_GL_BUCKET_DIM (TABLE), columns=10, pk=-, fk=0, indexes=0, constraints=0
-- EDW_NNA_FACT_NEXT_GEN_FILL_RST_BKP (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=11
-- EDW_NNA_FACT_NEXT_GEN_FILL_RST_BKP_2 (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=11
-- ENT_CL_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- ENT_CL_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- ENT_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- ENT_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- JOURNAL_AR_SRC_CHNGS_LOG (TABLE), columns=9, pk=-, fk=0, indexes=0, constraints=0
-- MISC_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- MISC_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NNA_AGG_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NNA_AGG_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NNA_AR_MGN_AC_FACT_BKP (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=5
-- NNA_CGY_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NNA_CGY_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NNA_ENT_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NNA_ENT_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NNA_FACT_17_18_RST_BKP (TABLE), columns=86, pk=-, fk=0, indexes=0, constraints=27
-- NNA_FACT_17_18_RST_BKP2 (TABLE), columns=86, pk=-, fk=0, indexes=0, constraints=27
-- NNA_FILL_RST_18FEB (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=11
-- NNA_FILL_RST_4NOV (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=11
-- NNA_HIST_REF_BKP (TABLE), columns=83, pk=-, fk=0, indexes=0, constraints=27
-- NNA_LINKED_BKR_AR_OWN_PAYEE_ADJ_FACT_AVY_BKP30MAR (TABLE), columns=74, pk=-, fk=0, indexes=0, constraints=25
-- NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_306859 (TABLE), columns=86, pk=-, fk=0, indexes=0, constraints=27
-- NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_BKP17MAR2025 (TABLE), columns=86, pk=-, fk=0, indexes=0, constraints=27
-- NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_BKP21MAR2025 (TABLE), columns=86, pk=-, fk=0, indexes=0, constraints=27
-- NNA_MAIN_FACT_LOG_BKP24JUN (TABLE), columns=17, pk=-, fk=0, indexes=0, constraints=0
-- NNA_PAYEE_FACT_ADJ_BKP (TABLE), columns=81, pk=-, fk=0, indexes=0, constraints=26
-- NNA_PAYEE_FACT_BKP (TABLE), columns=86, pk=-, fk=0, indexes=0, constraints=27
-- NNA_PAYEE_FACT_RAW_BKP (TABLE), columns=82, pk=-, fk=0, indexes=0, constraints=26
-- NNA_SMY_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- NNA_SMY_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- OWN_FA_NUM_DPL (TABLE), columns=1, pk=-, fk=0, indexes=0, constraints=1
-- PERFORMACE500_AR_GRP_STG_BKP15JUL (TABLE), columns=16, pk=-, fk=0, indexes=0, constraints=7
-- PERFORMACE500_AR_GRP_SUBDIM_BKP15JUL (TABLE), columns=75, pk=-, fk=0, indexes=0, constraints=10
-- PERFORMACE500_NNA_MAIN_BKP15JUL (TABLE), columns=86, pk=-, fk=0, indexes=0, constraints=27
-- RAW_FACT_BKP03JAN2025 (TABLE), columns=82, pk=-, fk=0, indexes=0, constraints=26
-- REVENUE_AR_MGN_AC_FACT_BKP (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=5
-- REVENUE_AR_MGN_AC_FACT_BKP_2 (TABLE), columns=40, pk=-, fk=0, indexes=0, constraints=5
-- REVENUE_PAYEE_FACT_BKP (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=26
-- REVENUE_PAYEE_FACT_BKP_19AUG (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=26
-- REVENUE_PAYEE_FACT_BKP_2 (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=26
-- REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_16JUN2022BKP (TABLE), columns=121, pk=-, fk=0, indexes=0, constraints=26
-- REV_FACT_GRAIN_RESTAT_BKP18JUN (TABLE), columns=14, pk=-, fk=0, indexes=0, constraints=5
-- REV_FACT_PRAC_CNTR_FILL_RESTAT_BKP12AUG (TABLE), columns=70, pk=-, fk=0, indexes=0, constraints=4
-- SMY_TABLE_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- SMY_VIEW_COMM (TABLE), columns=2, pk=-, fk=0, indexes=0, constraints=0
-- TESTTT (TABLE), columns=27, pk=-, fk=0, indexes=0, constraints=11
 
 ## LDM Relationships
 - CCAL_REPL_OWNER.APA_OLD.EXEC_ID -> CCAL_REPL_OWNER.TXN_OLD.TXN_ID
-- CCSI_REPL_OWNER.AMS_CNCL_DST_AC.AST_AC_SETUP_ID -> CCSI_REPL_OWNER.AST_AC_SETUP.AST_AC_SETUP_ID
-- CCSI_REPL_OWNER.BKR_AR_LGCY_ATTR.AR_ID -> CCSI_REPL_OWNER.AR.AR_ID
-- CIRD_REPL_OWNER.DRVT_ULYG.DRVT_CLSS_ID -> CIRD_REPL_OWNER.DRVT_CLSS_KEY.DRVT_CLSS_ID
-- CIRD_REPL_OWNER.PD_ISSU_FTR.ISSU_FTR_ID -> CIRD_REPL_OWNER.ISSU_FTR.ISSU_FTR_ID
-- POSITIONS_OWNER.AST_VAL_FACT.VAL_TP_DIM_ID -> POSITIONS_OWNER.VAL_TP_DIM.VAL_TP_DIM_ID
-- POSITIONS_OWNER.AST_VAL_FACT.AST_LBY_POS_TP_DIM_ID -> POSITIONS_OWNER.AST_LBY_POS_TP_DIM.AST_LBY_POS_TP_DIM_ID
-- POSITIONS_OWNER.POSITIONS_BOX_LO_FACT.BOX_LO_DIM_ID -> POSITIONS_OWNER.BOX_LO_DIM.BOX_LO_DIM_ID
-- POSITIONS_OWNER.POSITIONS_BOX_LO_FACT.AST_LBY_POS_TP_DIM_ID -> POSITIONS_OWNER.AST_LBY_POS_TP_DIM.AST_LBY_POS_TP_DIM_ID
-- POSITIONS_OWNER.POSITIONS_FACT.AST_LBY_POS_TP_DIM_ID -> POSITIONS_OWNER.AST_LBY_POS_TP_DIM.AST_LBY_POS_TP_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.POS_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
-- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.ACG_TP_DIM_ID -> COMMON_OWNER.ACG_TP_DIM.ACG_TP_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.BKR_AR_DIM_ID -> CCSI_OWNER.AR_DIM_OLD_ALL_DATA.AR_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.PAYEE_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_DIM.FA_NUMBER_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.FA_NUM_MBR_DIM_ID -> CPS_OWNER.FA_NUMBER_MEMBERSHIP_DIM.FA_NUMBER_MEMBERSHIP_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.OWN_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_DIM.FA_NUMBER_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_OLD.POS_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_OLD.OWN_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_MEMBERSHIP_DIM.FA_NUMBER_MEMBERSHIP_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_OLD.PAYEE_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_MEMBERSHIP_DIM.FA_NUMBER_MEMBERSHIP_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_OLD.ACG_TP_DIM_ID -> COMMON_OWNER.ACG_TP_DIM.ACG_TP_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.PAYEE_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_DIM.FA_NUMBER_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.OWN_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_DIM.FA_NUMBER_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.ACG_TP_DIM_ID -> COMMON_OWNER.ACG_TP_DIM.ACG_TP_DIM_ID
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.POS_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
-- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.FA_NUM_MBR_DIM_ID -> CPS_OWNER.FA_NUMBER_MEMBERSHIP_DIM.FA_NUMBER_MEMBERSHIP_DIM_ID
-- REFERENCE_REPL_OWNER.AR_GRP_XREF.AR_GRP_ID -> REFERENCE_REPL_OWNER.AR_GRP.AR_GRP_ID
-- REFERENCE_REPL_OWNER.PARTY_PRFL.CCY_CODE -> REFERENCE_REPL_OWNER.CCY.CCY_CODE
-- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.LGCY_TRD_CPCTY_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.LGCY_MKT_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_MKT_TP_DIM.LGCY_MKT_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.SRC_PCS_TP_DIM_ID -> TRANSACTIONS_OWNER.SRC_PCS_TP_DIM.SRC_PCS_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.LGCY_CNCL_CMPLN_SRC_DIM_ID -> TRANSACTIONS_OWNER.LGCY_CNCL_CMPLN_SRC_TP_DIM.LGCY_CNCL_CMPLN_SRC_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.SRC_ENTR_CNL_TP_DIM_ID -> TRANSACTIONS_OWNER.SRC_ENTR_CNL_TP_DIM.SRC_ENTR_CNL_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.TRD_SLCT_TP_DIM_ID -> TRANSACTIONS_OWNER.TRD_SLCT_TP_DIM.TRD_SLCT_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.LGCY_CNCL_CMPLN_RSN_DIM_ID -> TRANSACTIONS_OWNER.LGCY_CNCL_CMPLN_RSN_TP_DIM.LGCY_CNCL_CMPLN_RSN_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.LGCY_TRD_CPCTY_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.ACG_TP_DIM_ID -> COMMON_OWNER.ACG_TP_DIM.ACG_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.LGCY_MKT_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_MKT_TP_DIM.LGCY_MKT_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.SRC_PCS_TP_DIM_ID -> TRANSACTIONS_OWNER.SRC_PCS_TP_DIM.SRC_PCS_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.AR_DIM_ID -> CCSI_OWNER.AR_DIM_OLD_ALL_DATA.AR_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.LGCY_CNCL_CMPLN_RSN_DIM_ID -> TRANSACTIONS_OWNER.LGCY_CNCL_CMPLN_RSN_TP_DIM.LGCY_CNCL_CMPLN_RSN_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.FIP_TP_DIM_ID -> TRANSACTIONS_OWNER.FIP_TP_DIM.FIP_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.FIP_ORIG_CCY_DIM_ID -> CIRD_OWNER.CCY_DIM.CCY_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.SBC_CCY_DIM_ID -> CIRD_OWNER.CCY_DIM.CCY_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.SRC_ENTR_CNL_TP_DIM_ID -> TRANSACTIONS_OWNER.SRC_ENTR_CNL_TP_DIM.SRC_ENTR_CNL_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.SBC_CALC_DATE_DIM_ID -> COMMON_OWNER.DATE_DIM.DT_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.TRD_SLCT_TP_DIM_ID -> TRANSACTIONS_OWNER.TRD_SLCT_TP_DIM.TRD_SLCT_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.SRC_STM_DIM_ID -> COMMON_OWNER.SRC_STM_DIM.SRC_STM_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.CASH_POS_TP_DIM_ID -> COMMON_OWNER.CASH_POS_TP_DIM.CASH_POS_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.EXG_DIM_ID -> CIRD_OWNER.EXG_DIM.EXG_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.LGCY_CNCL_CMPLN_SRC_DIM_ID -> TRANSACTIONS_OWNER.LGCY_CNCL_CMPLN_SRC_TP_DIM.LGCY_CNCL_CMPLN_SRC_TP_DIM_ID
-- TRANSACTIONS_OWNER.AVY_FEES_FACT.AR_DIM_ID -> CCSI_OWNER.AR_DIM_REDEF.AR_DIM_ID
-- CCAL_REPL_OWNER.APA.EXEC_ID -> CCAL_REPL_OWNER.TXN.TXN_ID
-- CCAL_REPL_OWNER.CL_VAL.CL_VAL_ID -> CCAL_REPL_OWNER.APA.APA_TP_ID
-- CCAL_REPL_OWNER.TXN.SRC_TAX_CODE_ID -> CCAL_REPL_OWNER.TXN_SRC_TAX_CODE_LKUP.SRC_TAX_CODE_ID
-- CCAL_REPL_OWNER.TXN.TXN_ID -> TRANSACTIONS_OWNER.AVY_FACT.TXN_ID
-- TRANSACTIONS_OWNER.AVY_FACT.TXN_ID -> CCAL_REPL_OWNER.TXN.TXN_ID
-- TRANSACTIONS_OWNER.AVY_FACT.TXN_SRC_TAX_CD -> CCAL_REPL_OWNER.TXN_SRC_TAX_CODE_LKUP.SRC_TAX_CODE
 - CCSI_OWNER.AR_AC_SUBDIM.AR_DIM_ID -> CCSI_OWNER.AR_DIM_OLD_ALL_DATA.AR_DIM_ID
 - CCSI_OWNER.AR_MF_PRD_EXG_INSR_FACT.AR_DIM_ID -> CCSI_OWNER.AR_DIM_OLD_ALL_DATA.AR_DIM_ID
 - CCSI_OWNER.AR_MF_PRD_IVSM_INSR_FACT.AR_DIM_ID -> CCSI_OWNER.AR_DIM_OLD_ALL_DATA.AR_DIM_ID
@@ -6676,6 +5525,8 @@
 - CCSI_OWNER.PROSP_PARTY_EMAIL_ADR_FACT.PROSP_PARTY_DIM_ID -> CCSI_OWNER.PROSP_PARTY_DIM.PROSP_PARTY_DIM_ID
 - CCSI_OWNER.PROSP_PARTY_PST_ADR_FACT.PROSP_PARTY_DIM_ID -> CCSI_OWNER.PROSP_PARTY_DIM.PROSP_PARTY_DIM_ID
 - CCSI_OWNER.PROSP_PARTY_TEL_FACT.PROSP_PARTY_DIM_ID -> CCSI_OWNER.PROSP_PARTY_DIM.PROSP_PARTY_DIM_ID
+- CCSI_REPL_OWNER.AMS_CNCL_DST_AC.AST_AC_SETUP_ID -> CCSI_REPL_OWNER.AST_AC_SETUP.AST_AC_SETUP_ID
+- CCSI_REPL_OWNER.BKR_AR_LGCY_ATTR.AR_ID -> CCSI_REPL_OWNER.AR.AR_ID
 - CCSI_STG_REPL_OWNER.AR_GRP_XREF_STG_PRE.AR_GRP_ID -> CCSI_STG_REPL_OWNER.AR_GRP_STG.AR_GRP_ID
 - CIRD_OWNER.EXG_RATES_FACT.TO_CCY_PD_DIM_ID -> CIRD_OWNER.IMT_PD_DIM_REDEF01072023.IMT_PD_DIM_ID
 - CIRD_OWNER.EXG_RATES_FACT.FM_CCY_PD_DIM_ID -> CIRD_OWNER.IMT_PD_DIM_REDEF01072023.IMT_PD_DIM_ID
@@ -6694,9 +5545,9 @@
 - CIRD_OWNER.IMT_PD_PYOUT_FACT.PYMT_TP_DIM_ID -> CIRD_OWNER.PYMT_TP_DIM.PYMT_TP_DIM_ID
 - CIRD_OWNER.IMT_PD_PYOUT_FACT.EXG_DIM_ID -> CIRD_OWNER.EXG_DIM.EXG_DIM_ID
 - CIRD_OWNER.IMT_PD_PYOUT_FACT.IMT_PD_DIM_ID -> CIRD_OWNER.IMT_PD_DIM_REDEF01072023.IMT_PD_DIM_ID
-- CIRD_OWNER.IMT_PD_PYOUT_SHD_FACT.FRQ_DIM_ID -> CIRD_OWNER.FRQ_DIM.FRQ_DIM_ID
 - CIRD_OWNER.IMT_PD_PYOUT_SHD_FACT.PYMT_TP_DIM_ID -> CIRD_OWNER.PYMT_TP_DIM.PYMT_TP_DIM_ID
 - CIRD_OWNER.IMT_PD_PYOUT_SHD_FACT.IMT_PD_DIM_ID -> CIRD_OWNER.IMT_PD_DIM_REDEF01072023.IMT_PD_DIM_ID
+- CIRD_OWNER.IMT_PD_PYOUT_SHD_FACT.FRQ_DIM_ID -> CIRD_OWNER.FRQ_DIM.FRQ_DIM_ID
 - CIRD_OWNER.IMT_PD_RTG_FACT.RTG_DIM_ID -> CIRD_OWNER.RTG_DIM.RTG_DIM_ID
 - CIRD_OWNER.IMT_PD_RTG_FACT.IMT_PD_DIM_ID -> CIRD_OWNER.IMT_PD_DIM_REDEF01072023.IMT_PD_DIM_ID
 - CIRD_OWNER.IMT_PD_RTG_FACT_OLD.RTG_DIM_ID -> CIRD_OWNER.RTG_DIM.RTG_DIM_ID
@@ -6705,29 +5556,30 @@
 - CIRD_OWNER.PRTFL_PD_DTL_FACT.LEAF_PD_DIM_ID -> CIRD_OWNER.IMT_PD_DIM_REDEF01072023.IMT_PD_DIM_ID
 - CIRD_OWNER.PRTFL_PD_FACT.IMT_PD_DIM_ID -> CIRD_OWNER.IMT_PD_DIM_REDEF01072023.IMT_PD_DIM_ID
 - CIRD_OWNER.PRTFL_PD_FACT.CSTNT_PD_DIM_ID -> CIRD_OWNER.IMT_PD_DIM_REDEF01072023.IMT_PD_DIM_ID
+- CIRD_REPL_OWNER.DRVT_ULYG.DRVT_CLSS_ID -> CIRD_REPL_OWNER.DRVT_CLSS_KEY.DRVT_CLSS_ID
+- CIRD_REPL_OWNER.PD_ISSU_FTR.ISSU_FTR_ID -> CIRD_REPL_OWNER.ISSU_FTR.ISSU_FTR_ID
 - COMMON_OWNER.DT_PRD_CLCN_SUB_DIM.DT_DIM_ID -> COMMON_OWNER.DATE_DIM.DT_DIM_ID
-- ISTOJANOVIC.ANNOTATIONS_GROUP_MEMBERS$.GROUP_ID -> ISTOJANOVIC.ANNOTATIONS_GROUPS$.GROUP_ID
-- NGDWAR_OWNER.ALCT_FACT.HIER_DIM_ID -> NGDWAR_OWNER.HIER_DIM.HIER_DIM_ID
 - NGDWAR_OWNER.ALCT_FACT.AST_CL_DIM_ID -> NGDWAR_OWNER.ASSET_CLASS_DIM.AST_CL_DIM_ID
 - NGDWAR_OWNER.ALCT_FACT.PD_DIM_ID -> NGDWAR_OWNER.PD_DIM.PD_DIM_ID
-- NGDWAR_OWNER.ASSET_FACT.AC_DIM_ID -> NGDWAR_OWNER.AC_DIM.AC_DIM_ID
+- NGDWAR_OWNER.ALCT_FACT.HIER_DIM_ID -> NGDWAR_OWNER.HIER_DIM.HIER_DIM_ID
 - NGDWAR_OWNER.ASSET_FACT.FA_DIM_ID -> NGDWAR_OWNER.FA_DIM.FA_DIM_ID
 - NGDWAR_OWNER.ASSET_FACT.PD_DIM_ID -> NGDWAR_OWNER.PD_DIM.PD_DIM_ID
 - NGDWAR_OWNER.ASSET_FACT.FA_NUM_DIM_ID -> NGDWAR_OWNER.FA_NUM_DIM.FA_NUM_DIM_ID
+- NGDWAR_OWNER.ASSET_FACT.AC_DIM_ID -> NGDWAR_OWNER.AC_DIM.AC_DIM_ID
 - NGDWAR_OWNER.CLIENT_REL_AGG.FA_NUM_DIM_ID -> NGDWAR_OWNER.FA_NUM_DIM.FA_NUM_DIM_ID
 - NGDWAR_OWNER.CLIENT_REL_AGG.CAR_AGE_BAND_DIM_ID -> NGDWAR_OWNER.SEG_RANGE_DIM.SEG_RANGE_DIM_ID
 - NGDWAR_OWNER.CLIENT_REL_AGG.FA_DIM_ID -> NGDWAR_OWNER.FA_DIM.FA_DIM_ID
 - NGDWAR_OWNER.CLIENT_REL_AGG.CAR_ASSET_BAND_DIM_ID -> NGDWAR_OWNER.SEG_RANGE_DIM.SEG_RANGE_DIM_ID
 - NGDWAR_OWNER.CLIENT_REL_AGG.ACCT_ASSET_BAND_DIM_ID -> NGDWAR_OWNER.SEG_RANGE_DIM.SEG_RANGE_DIM_ID
 - NGDWAR_OWNER.ENT_HIER_BRDG.PRN_ENT_ID -> NGDWAR_OWNER.ENT_DIM.ENT_DIM_ID
-- NGDW_OWNER.SEG_BAND.SEG_PRFL_ID -> NGDW_OWNER.SEG_PRFL.SEG_PRFL_ID
 - NGDW_OWNER.SEG_BAND.SEG_BAND_RULE_ID -> NGDW_OWNER.SEG_BAND_RULE.SEG_BAND_RULE_ID
+- NGDW_OWNER.SEG_BAND.SEG_PRFL_ID -> NGDW_OWNER.SEG_PRFL.SEG_PRFL_ID
 - NGDW_OWNER.SEG_BAND_RULE.SEG_DRVR_CD -> NGDW_OWNER.SEG_DRVR.SEG_DRVR_CD
-- NGDW_OWNER.SEG_PRFL.SEG_PRFL_TP_CD -> NGDW_OWNER.SEG_PRFL_TP.SEG_PRFL_TP_CD
 - NGDW_OWNER.SEG_PRFL.SEG_LVL_CD -> NGDW_OWNER.SEG_LVL.SEG_LVL_CD
 - NGDW_OWNER.SEG_PRFL.SEG_DRVR_CD -> NGDW_OWNER.SEG_DRVR.SEG_DRVR_CD
-- NNA_OWNER.NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_100724.NNA_RULE_DIM_ID -> NNA_OWNER.NNA_RULE_DIM.NNA_RULE_DIM_ID
+- NGDW_OWNER.SEG_PRFL.SEG_PRFL_TP_CD -> NGDW_OWNER.SEG_PRFL_TP.SEG_PRFL_TP_CD
 - NNA_OWNER.NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_100724.NNA_CGY_DIM_ID -> NNA_OWNER.NNA_CGY_DIM.NNA_CGY_DIM_ID
+- NNA_OWNER.NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_100724.NNA_RULE_DIM_ID -> NNA_OWNER.NNA_RULE_DIM.NNA_RULE_DIM_ID
 - NNA_OWNER.NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_NEW.NNA_RULE_DIM_ID -> NNA_OWNER.NNA_RULE_DIM.NNA_RULE_DIM_ID
 - NNA_OWNER.NNA_LINKED_BKR_AR_OWN_PAYEE_FACT_NEW.NNA_CGY_DIM_ID -> NNA_OWNER.NNA_CGY_DIM.NNA_CGY_DIM_ID
 - NNA_OWNER.NNA_LINKED_BKR_AR_OWN_PAYEE_RAW_FACT.NNA_RULE_DIM_ID -> NNA_OWNER.NNA_RULE_DIM.NNA_RULE_DIM_ID
@@ -6741,54 +5593,100 @@
 - PCGCRM_REPL_OWNER.BX_CONTACT_CUSTOMFIELD.K_CONTACT -> PCGCRM_REPL_OWNER.B_CONTACT.K_CONTACT
 - PERFORMANCE_OWNER.AR_PERF_BRK_FACT.AR_PERF_BRK_TP_DIM_ID -> PERFORMANCE_OWNER.AR_PERF_BRK_TP_LKUP_DIM.AR_PERF_BRK_TP_DIM_ID
 - PID_REFERENCE_REPL_OWNER.PARTY_PRFL.PARTY_ID -> PID_REFERENCE_REPL_OWNER.PARTY.PARTY_ID
+- POSITIONS_OWNER.AST_VAL_FACT.AST_LBY_POS_TP_DIM_ID -> POSITIONS_OWNER.AST_LBY_POS_TP_DIM.AST_LBY_POS_TP_DIM_ID
+- POSITIONS_OWNER.AST_VAL_FACT.VAL_TP_DIM_ID -> POSITIONS_OWNER.VAL_TP_DIM.VAL_TP_DIM_ID
+- POSITIONS_OWNER.POSITIONS_BOX_LO_FACT.BOX_LO_DIM_ID -> POSITIONS_OWNER.BOX_LO_DIM.BOX_LO_DIM_ID
+- POSITIONS_OWNER.POSITIONS_BOX_LO_FACT.AST_LBY_POS_TP_DIM_ID -> POSITIONS_OWNER.AST_LBY_POS_TP_DIM.AST_LBY_POS_TP_DIM_ID
+- POSITIONS_OWNER.POSITIONS_FACT.AST_LBY_POS_TP_DIM_ID -> POSITIONS_OWNER.AST_LBY_POS_TP_DIM.AST_LBY_POS_TP_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.POS_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
+- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.ACG_TP_DIM_ID -> COMMON_OWNER.ACG_TP_DIM.ACG_TP_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.BKR_AR_DIM_ID -> CCSI_OWNER.AR_DIM_OLD_ALL_DATA.AR_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.PAYEE_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_DIM.FA_NUMBER_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.FA_NUM_MBR_DIM_ID -> CPS_OWNER.FA_NUMBER_MEMBERSHIP_DIM.FA_NUMBER_MEMBERSHIP_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_ALCT_FACT_OLD.OWN_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_DIM.FA_NUMBER_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_OLD.POS_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_OLD.OWN_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_MEMBERSHIP_DIM.FA_NUMBER_MEMBERSHIP_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_OLD.PAYEE_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_MEMBERSHIP_DIM.FA_NUMBER_MEMBERSHIP_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_ALCT_FACT_OLD.ACG_TP_DIM_ID -> COMMON_OWNER.ACG_TP_DIM.ACG_TP_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.PAYEE_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_DIM.FA_NUMBER_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.OWN_FA_NUM_DIM_ID -> CPS_OWNER.FA_NUMBER_DIM.FA_NUMBER_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.ACG_TP_DIM_ID -> COMMON_OWNER.ACG_TP_DIM.ACG_TP_DIM_ID
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.POS_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
+- POSITIONS_OWNER.POS_AGRTN_BY_OWN_PAYEE_CL_FACT_OLD.FA_NUM_MBR_DIM_ID -> CPS_OWNER.FA_NUMBER_MEMBERSHIP_DIM.FA_NUMBER_MEMBERSHIP_DIM_ID
 - PRACEN_NOTF_OWNER.NOTF.STATE_TP_ID -> PRACEN_NOTF_OWNER.NOTF_STATE_TP.STATE_TP_ID
 - PRACEN_NOTF_OWNER.NOTF.NOTF_CAT_DIM_ID -> PRACEN_NOTF_OWNER.NOTF_CATEGORY_DIM.NOTF_CAT_DIM_ID
 - PRACEN_NOTF_OWNER.NOTF_FILE.NOTF_ID -> PRACEN_NOTF_OWNER.NOTF.NOTF_ID
 - PRACEN_NOTF_OWNER.NOTF_PROCESS_LOG.NOTF_ID -> PRACEN_NOTF_OWNER.NOTF.NOTF_ID
-- PRACEN_NOTF_OWNER.NOTF_STAT.NOTF_FILE_ID -> PRACEN_NOTF_OWNER.NOTF_FILE.NOTF_FILE_ID
 - PRACEN_NOTF_OWNER.NOTF_STAT.NOTF_ID -> PRACEN_NOTF_OWNER.NOTF.NOTF_ID
+- PRACEN_NOTF_OWNER.NOTF_STAT.NOTF_FILE_ID -> PRACEN_NOTF_OWNER.NOTF_FILE.NOTF_FILE_ID
 - PRACEN_NOTF_OWNER.NOTF_STAT_FA_LIST.NOTF_ID -> PRACEN_NOTF_OWNER.NOTF.NOTF_ID
-- PRACEN_NOTF_OWNER.NOTF_STG_FILE_WRK.NOTF_FILE_ID -> PRACEN_NOTF_OWNER.NOTF_FILE.NOTF_FILE_ID
 - PRACEN_NOTF_OWNER.NOTF_STG_FILE_WRK.NOTF_ID -> PRACEN_NOTF_OWNER.NOTF.NOTF_ID
+- PRACEN_NOTF_OWNER.NOTF_STG_FILE_WRK.NOTF_FILE_ID -> PRACEN_NOTF_OWNER.NOTF_FILE.NOTF_FILE_ID
 - PRACEN_OWNER.PP_CAR_SPVSR_ASGNM_OVWRT.SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_FA_SPVSR_ASGNM_OVWRT.SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_SPVSR_ALL_ASGNM.L2_SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_SPVSR_ALL_ASGNM.VRSN_ID -> PRACEN_OWNER.PP_SPVSR_ASGNM_VRSN.VRSN_ID
 - PRACEN_OWNER.PP_SPVSR_ALL_ASGNM.L1_SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
+- PRACEN_OWNER.PP_SPVSR_EXPLC_ASGNM.L1_SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_SPVSR_EXPLC_ASGNM.VRSN_ID -> PRACEN_OWNER.PP_SPVSR_ASGNM_VRSN.VRSN_ID
 - PRACEN_OWNER.PP_SPVSR_EXPLC_ASGNM.L2_SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
-- PRACEN_OWNER.PP_SPVSR_EXPLC_ASGNM.L1_SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_SPVSR_RL_DIM.SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_SPVSR_SMY_AGG_FACT.FA_DIM_ID -> PRACEN_OWNER.FA_DIM.FA_DIM_ID
 - PRACEN_OWNER.PP_SPVSR_SMY_AGG_FACT.L2_SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_SPVSR_SMY_AGG_FACT.RSPL_SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_SPVSR_SMY_AGG_FACT.L1_SPVSR_DIM_ID -> PRACEN_OWNER.PP_SPVSR_DIM.SPVSR_DIM_ID
 - PRACEN_OWNER.PP_TRGR_SPVSR_ASGNM.TRGR_ID -> PRACEN_OWNER.PP_TRGR.TRGR_ID
+- REFERENCE_REPL_OWNER.AR_GRP_XREF.AR_GRP_ID -> REFERENCE_REPL_OWNER.AR_GRP.AR_GRP_ID
+- REFERENCE_REPL_OWNER.PARTY_PRFL.CCY_CODE -> REFERENCE_REPL_OWNER.CCY.CCY_CODE
 - REVENUE_OWNER.REV_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_CL_FACT_BKP0123.REV_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
 - REVENUE_OWNER.REV_AGRTN_BY_LINKED_BKR_AR_OWN_PAYEE_MULTI_PRD_FACT.REV_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
-- REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.LGCY_TRD_CPCTY_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_DIM_ID
-- REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.LGCY_MKT_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_MKT_TP_DIM.LGCY_MKT_TP_DIM_ID
-- REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.GL_BCKT_DIM_ID -> REVENUE_OWNER.GL_BCKT_DIM.GL_BCKT_DIM_ID
-- REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.TD_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
 - REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.REV_TP_DIM_ID -> REVENUE_OWNER.REV_TP_DIM.REV_TP_DIM_ID
 - REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.SD_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
 - REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.REV_DT_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
 - REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.BKR_AR_DIM_ID -> CCSI_OWNER.AR_DIM_OLD_ALL_DATA.AR_DIM_ID
+- REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.LGCY_TRD_CPCTY_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_DIM_ID
+- REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.LGCY_MKT_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_MKT_TP_DIM.LGCY_MKT_TP_DIM_ID
+- REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.GL_BCKT_DIM_ID -> REVENUE_OWNER.GL_BCKT_DIM.GL_BCKT_DIM_ID
+- REVENUE_OWNER.REV_BY_LINKED_BKR_AR_OWN_PAYEE_FACT_0925.TD_NUM -> COMMON_OWNER.DATE_DIM.DT_NUM
 - SSDS_UTIL_OWNER.CNSMR_MRKR_LOG.CNSMR_MRKR_CONFIG_ID -> SSDS_UTIL_OWNER.CNSMR_MRKR_CONFIG.CNSMR_MRKR_CONFIG_ID
+- SSDS_UTIL_OWNER.CNSMR_MRKR_X_CNSMR.COMM_TYP_ID -> SSDS_UTIL_OWNER.COMM_TYP.COMM_TYP_ID
 - SSDS_UTIL_OWNER.CNSMR_MRKR_X_CNSMR.CNSMR_MRKR_CONFIG_ID -> SSDS_UTIL_OWNER.CNSMR_MRKR_CONFIG.CNSMR_MRKR_CONFIG_ID
 - SSDS_UTIL_OWNER.CNSMR_MRKR_X_CNSMR.CNSMR_ID -> SSDS_UTIL_OWNER.CNSMR.CNSMR_ID
-- SSDS_UTIL_OWNER.CNSMR_MRKR_X_CNSMR.COMM_TYP_ID -> SSDS_UTIL_OWNER.COMM_TYP.COMM_TYP_ID
 - SSDS_UTIL_OWNER.CNSMR_MRKR_X_VALDN_RSLT.VALDN_RSLT_REV_ID -> SSDS_UTIL_OWNER.VALDN_RSLT_REV.VALDN_RSLT_REV_ID
 - SSDS_UTIL_OWNER.CNSMR_MRKR_X_VALDN_RSLT.CNSMR_MRKR_CONFIG_ID -> SSDS_UTIL_OWNER.CNSMR_MRKR_CONFIG.CNSMR_MRKR_CONFIG_ID
 - SSDS_UTIL_OWNER.PRC_X_TBL.EXEC_PRC_ID -> SSDS_UTIL_OWNER.EXEC_PRC.EXEC_PRC_ID
 - SSDS_UTIL_OWNER.PRC_X_TBL.TBL_INFO_ID -> SSDS_UTIL_OWNER.TBL_INFO.TBL_INFO_ID
-- SSDS_UTIL_OWNER.PRC_X_VALDN.VALDN_TASK_ID -> SSDS_UTIL_OWNER.VALDN_TASK.VALDN_TASK_ID
 - SSDS_UTIL_OWNER.PRC_X_VALDN.EXEC_PRC_ID -> SSDS_UTIL_OWNER.EXEC_PRC.EXEC_PRC_ID
+- SSDS_UTIL_OWNER.PRC_X_VALDN.VALDN_TASK_ID -> SSDS_UTIL_OWNER.VALDN_TASK.VALDN_TASK_ID
 - SSDS_UTIL_OWNER.VALDN_RSLT_REV.VALDN_TASK_ID -> SSDS_UTIL_OWNER.VALDN_TASK.VALDN_TASK_ID
 - SSDS_UTIL_OWNER.VALDN_RSLT_SMRY_LOG.VALDN_TASK_EXEC_LOG_ID -> SSDS_UTIL_OWNER.VALDN_TASK_EXEC_LOG.VALDN_TASK_EXEC_LOG_ID
 - SSDS_UTIL_OWNER.VALDN_RSLT_SMRY_LOG.VALDN_RSLT_REV_ID -> SSDS_UTIL_OWNER.VALDN_RSLT_REV.VALDN_RSLT_REV_ID
 - SSDS_UTIL_OWNER.VALDN_TASK_ACRSS_DB_LOG.VALDN_LOG_ACRSS_DB_ID -> SSDS_UTIL_OWNER.VALDN_LOG_ACRSS_DB.VALDN_LOG_ACRSS_DB_ID
 - SSDS_UTIL_OWNER.VALDN_TASK_ACRSS_DB_LOG.VALDN_TASK_ID -> SSDS_UTIL_OWNER.VALDN_TASK.VALDN_TASK_ID
 - SSDS_UTIL_OWNER.VALDN_TASK_EXEC_LOG.VALDN_TASK_ID -> SSDS_UTIL_OWNER.VALDN_TASK.VALDN_TASK_ID
-- SSDS_UTIL_OWNER.VALDN_TASK_RSLT_LOG.COL_TYP_ID -> SSDS_UTIL_OWNER.COL_TYP.COL_TYP_ID
 - SSDS_UTIL_OWNER.VALDN_TASK_RSLT_LOG.VALDN_TASK_EXEC_LOG_ID -> SSDS_UTIL_OWNER.VALDN_TASK_EXEC_LOG.VALDN_TASK_EXEC_LOG_ID
+- SSDS_UTIL_OWNER.VALDN_TASK_RSLT_LOG.COL_TYP_ID -> SSDS_UTIL_OWNER.COL_TYP.COL_TYP_ID
+- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.SRC_ENTR_CNL_TP_DIM_ID -> TRANSACTIONS_OWNER.SRC_ENTR_CNL_TP_DIM.SRC_ENTR_CNL_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.TRD_SLCT_TP_DIM_ID -> TRANSACTIONS_OWNER.TRD_SLCT_TP_DIM.TRD_SLCT_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.LGCY_CNCL_CMPLN_SRC_DIM_ID -> TRANSACTIONS_OWNER.LGCY_CNCL_CMPLN_SRC_TP_DIM.LGCY_CNCL_CMPLN_SRC_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.LGCY_CNCL_CMPLN_RSN_DIM_ID -> TRANSACTIONS_OWNER.LGCY_CNCL_CMPLN_RSN_TP_DIM.LGCY_CNCL_CMPLN_RSN_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.LGCY_MKT_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_MKT_TP_DIM.LGCY_MKT_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.SRC_PCS_TP_DIM_ID -> TRANSACTIONS_OWNER.SRC_PCS_TP_DIM.SRC_PCS_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FACT_28FEB2025.LGCY_TRD_CPCTY_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.LGCY_TRD_CPCTY_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.ACG_TP_DIM_ID -> COMMON_OWNER.ACG_TP_DIM.ACG_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.LGCY_MKT_TP_DIM_ID -> TRANSACTIONS_OWNER.LGCY_MKT_TP_DIM.LGCY_MKT_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.SRC_PCS_TP_DIM_ID -> TRANSACTIONS_OWNER.SRC_PCS_TP_DIM.SRC_PCS_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.AR_DIM_ID -> CCSI_OWNER.AR_DIM_OLD_ALL_DATA.AR_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.LGCY_CNCL_CMPLN_RSN_DIM_ID -> TRANSACTIONS_OWNER.LGCY_CNCL_CMPLN_RSN_TP_DIM.LGCY_CNCL_CMPLN_RSN_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.FIP_TP_DIM_ID -> TRANSACTIONS_OWNER.FIP_TP_DIM.FIP_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.FIP_ORIG_CCY_DIM_ID -> CIRD_OWNER.CCY_DIM.CCY_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.SBC_CCY_DIM_ID -> CIRD_OWNER.CCY_DIM.CCY_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.SRC_ENTR_CNL_TP_DIM_ID -> TRANSACTIONS_OWNER.SRC_ENTR_CNL_TP_DIM.SRC_ENTR_CNL_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.SBC_CALC_DATE_DIM_ID -> COMMON_OWNER.DATE_DIM.DT_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.TRD_SLCT_TP_DIM_ID -> TRANSACTIONS_OWNER.TRD_SLCT_TP_DIM.TRD_SLCT_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.SRC_STM_DIM_ID -> COMMON_OWNER.SRC_STM_DIM.SRC_STM_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.CASH_POS_TP_DIM_ID -> COMMON_OWNER.CASH_POS_TP_DIM.CASH_POS_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.EXG_DIM_ID -> CIRD_OWNER.EXG_DIM.EXG_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.LGCY_CNCL_CMPLN_SRC_DIM_ID -> TRANSACTIONS_OWNER.LGCY_CNCL_CMPLN_SRC_TP_DIM.LGCY_CNCL_CMPLN_SRC_TP_DIM_ID
+- TRANSACTIONS_OWNER.AVY_FEES_FACT.AR_DIM_ID -> CCSI_OWNER.AR_DIM_REDEF.AR_DIM_ID

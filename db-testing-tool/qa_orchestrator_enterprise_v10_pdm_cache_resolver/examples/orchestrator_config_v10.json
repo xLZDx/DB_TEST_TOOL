@@ -1,0 +1,62 @@
+{
+  "table": {
+    "name": "TRANSACTIONS_OWNER.AVY_FACT_SIDE",
+    "short_name": "AVY_FACT_SIDE"
+  },
+  "drd": {
+    "primary_sheet": "Table-View",
+    "first_data_row_index": 12,
+    "columns": {
+      "logical_name": 0,
+      "target_column": 1,
+      "oracle_datatype": 3,
+      "nullable": 4,
+      "business_definition": 7,
+      "action": 9,
+      "source_schema": 24,
+      "source_table": 25,
+      "source_attribute": 26,
+      "source_datatype": 27,
+      "source_nullable": 28,
+      "transformation": 29
+    },
+    "exclude_actions_startswith": ["Remove"]
+  },
+  "pdm_cache": {
+    "enabled": true,
+    "local_kb_dir": "data/local_kb",
+    "schema_kb_glob": "schema_kb_*.json",
+    "hint_index_glob": "hint_index_*.json",
+    "operation_history_file": "operation_history.jsonl",
+    "exact_match_threshold": 0.98,
+    "auto_accept_threshold": 0.88,
+    "review_threshold": 0.72,
+    "trigger_backfill_below": 0.72,
+    "max_candidates": 10
+  },
+  "xml": {
+    "required": false,
+    "encoding": "ISO-8859-1",
+    "normalize_odi_templates": true,
+    "semantic_alias_mapping": true
+  },
+  "match_policy": {
+    "success_threshold": 99.0,
+    "transformation_logic_threshold": 85.0,
+    "aliases": {"BR_CD": "BR_CODE"},
+    "ignore_xml_helper_columns": ["ROWNM", "EXCP_CASH_APA_CODE"],
+    "post_xml_drd_additions": [
+      "STEP_IN_OUT_IND_CD",
+      "STEP_IN_OUT_IND_NM",
+      "SHRT_SALE_EXMPT_CD",
+      "SHRT_SALE_EXMPT_NM"
+    ]
+  },
+  "sql_generation": {
+    "statement_modes": ["source_select", "insert_select", "cte", "merge"],
+    "preferred_for_drd_generator": "insert_select",
+    "preferred_for_control_table": "cte",
+    "business_keys": ["TXN_ID"],
+    "five_step_pipeline": true
+  }
+}

@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Agents - DB Testing Tool{% endblock %}
+{% block page_title %}Agent Profiles{% endblock %}
+
+{% block topbar_actions %}
+<button class="btn btn-primary btn-sm" onclick="openAgentModal()">+ New Agent</button>
+<button class="btn btn-outline btn-sm" onclick="loadAgents()">Refresh</button>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+        <h2 style="margin:0">Agent Profiles</h2>
+        <span class="text-muted" style="font-size:12px">AI agent configurations used for test generation and orchestration</span>
+    </div>
+
+    <div id="agents-loading" class="text-muted" style="padding:24px;text-align:center">Loading agents…</div>
+    <div id="agents-empty" style="display:none;padding:24px;text-align:center">
+        <p class="text-muted">No agent profiles configured yet.</p>
+        <button class="btn btn-primary" onclick="openAgentModal()">Create First Agent</button>
+    </div>
+
+    <div id="agents-list" style="display:none"></div>
+</div>
+
+<!-- Agent Modal -->
+<div id="agent-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9000;align-items:center;justify-content:center">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:640px;width:95%;max-height:90vh;overflow-y:auto">
+        <h3 id="agent-modal-title" style="margin:0 0 20px 0">New Agent Profile</h3>
+
+        <div class="form-group">
+            <label>Name <span style="color:var(--danger)">*</span></label>
+            <input class="form-control" id="ag-name" placeholder="e.g. SQL Validator Agent">
+        </div>
+        <div class="form-group">
+            <label>Role</label>
+            <input class="form-control" id="ag-role" placeholder="e.g. validator, generator, reviewer">
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <input class="form-control" id="ag-desc" placeholder="Short description of what this agent does">
+        </div>
+        <div class="form-group">
+            <label>Domains (comma-separated)</label>
+            <input class="form-control" id="ag-domains" placeholder="e.g. SQL, Oracle, ETL">
+        </div>
+        <div class="form-group">
+            <label>System Prompt</label>
+            <textarea class="form-control" id="ag-system-prompt" rows="6" placeholder="Instructions for the AI model when this agent is active…" style="font-family:monospace;font-size:12px"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Provider</label>
+            <select class="form-control" id="ag-provider">
+                <option value="">Default</option>
+                <option value="openai">OpenAI</option>
+                <option value="azure">Azure OpenAI</option>
+                <option value="github_copilot">GitHub Copilot</option>
+                <option value="anthropic">Anthropic</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Model Override</label>
+            <input class="form-control" id="ag-model" placeholder="Leave blank to use default model">
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:10px">
+            <input type="checkbox" id="ag-active" checked style="width:auto">
+            <label for="ag-active" style="margin:0">Active</label>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+            <button class="btn btn-outline" onclick="closeAgentModal()">Cancel</button>
+            <button class="btn btn-danger btn-sm" id="ag-delete-btn" onclick="deleteAgent()" style="display:none">Delete</button>
+            <button class="btn btn-primary" onclick="saveAgent()">Save Agent</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let _agents = [];
+let _editAgentId = null;
+
+async function loadAgents() {
+    document.getElementById('agents-loading').style.display = 'block';
+    document.getElementById('agents-list').style.display = 'none';
+    document.getElementById('agents-empty').style.display = 'none';
+    try {
+        const r = await fetch('/api/agents/');
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        _agents = data.agents || data || [];
+        renderAgents();
+    } catch(e) {
+        showToast('Failed to load agents: ' + e.message, 'error');
+        document.getElementById('agents-loading').style.display = 'none';
+    }
+}
+
+function renderAgents() {
+    document.getElementById('agents-loading').style.display = 'none';
+    if (!_agents.length) {
+        document.getElementById('agents-empty').style.display = 'block';
+        return;
+    }
+    document.getElementById('agents-list').style.display = 'block';
+    const list = document.getElementById('agents-list');
+    list.innerHTML = _agents.map(a => `
+        <div class="card" style="margin:0 0 12px 0;cursor:pointer;border:1px solid var(--border)" onclick="editAgent(${a.id})">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px">
+                <div>
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <strong>${escHtml(a.name)}</strong>
+                        ${a.role ? `<span style="background:rgba(99,102,241,.2);color:#818cf8;padding:2px 8px;border-radius:4px;font-size:11px">${escHtml(a.role)}</span>` : ''}
+                        <span style="background:${a.is_active ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)'};color:${a.is_active ? '#4ade80' : '#f87171'};padding:2px 8px;border-radius:4px;font-size:11px">${a.is_active ? 'Active' : 'Inactive'}</span>
+                    </div>
+                    ${a.description ? `<div class="text-muted" style="font-size:12px;margin-top:4px">${escHtml(a.description)}</div>` : ''}
+                    ${a.domains ? `<div style="margin-top:4px">${a.domains.split(',').map(d => `<span style="background:var(--border);padding:1px 6px;border-radius:3px;font-size:11px;margin-right:4px">${escHtml(d.trim())}</span>`).join('')}</div>` : ''}
+                </div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;color:var(--text-muted)"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+        </div>
+    `).join('');
+}
+
+function openAgentModal(agentId = null) {
+    _editAgentId = agentId;
+    const modal = document.getElementById('agent-modal');
+    const title = document.getElementById('agent-modal-title');
+    const deleteBtn = document.getElementById('ag-delete-btn');
+    if (agentId) {
+        const a = _agents.find(x => x.id === agentId);
+        if (!a) return;
+        title.textContent = 'Edit Agent Profile';
+        deleteBtn.style.display = 'inline-flex';
+        document.getElementById('ag-name').value = a.name || '';
+        document.getElementById('ag-role').value = a.role || '';
+        document.getElementById('ag-desc').value = a.description || '';
+        document.getElementById('ag-domains').value = a.domains || '';
+        document.getElementById('ag-system-prompt').value = a.system_prompt || '';
+        document.getElementById('ag-provider').value = (a.config || {}).provider || '';
+        document.getElementById('ag-model').value = (a.config || {}).model || '';
+        document.getElementById('ag-active').checked = a.is_active !== false;
+    } else {
+        title.textContent = 'New Agent Profile';
+        deleteBtn.style.display = 'none';
+        ['ag-name','ag-role','ag-desc','ag-domains','ag-system-prompt','ag-model'].forEach(id => { document.getElementById(id).value = ''; });
+        document.getElementById('ag-provider').value = '';
+        document.getElementById('ag-active').checked = true;
+    }
+    modal.style.display = 'flex';
+}
+
+function editAgent(id) { openAgentModal(id); }
+
+function closeAgentModal() {
+    document.getElementById('agent-modal').style.display = 'none';
+    _editAgentId = null;
+}
+
+async function saveAgent() {
+    const name = document.getElementById('ag-name').value.trim();
+    if (!name) { showToast('Name is required', 'warning'); return; }
+    const payload = {
+        name,
+        role: document.getElementById('ag-role').value.trim(),
+        description: document.getElementById('ag-desc').value.trim(),
+        domains: document.getElementById('ag-domains').value.trim(),
+        system_prompt: document.getElementById('ag-system-prompt').value.trim(),
+        is_active: document.getElementById('ag-active').checked,
+        config: {
+            provider: document.getElementById('ag-provider').value,
+            model: document.getElementById('ag-model').value.trim(),
+        },
+    };
+    try {
+        let r;
+        if (_editAgentId) {
+            r = await fetch(`/api/agents/${_editAgentId}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        } else {
+            r = await fetch('/api/agents/', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        }
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text()}`);
+        showToast(_editAgentId ? 'Agent updated' : 'Agent created', 'success');
+        closeAgentModal();
+        loadAgents();
+    } catch(e) {
+        showToast('Save failed: ' + e.message, 'error');
+    }
+}
+
+async function deleteAgent() {
+    if (!_editAgentId) return;
+    if (!confirm('Delete this agent profile?')) return;
+    try {
+        const r = await fetch(`/api/agents/${_editAgentId}`, { method: 'DELETE' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        showToast('Agent deleted', 'success');
+        closeAgentModal();
+        loadAgents();
+    } catch(e) {
+        showToast('Delete failed: ' + e.message, 'error');
+    }
+}
+
+function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modal on backdrop click
+document.getElementById('agent-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeAgentModal();
+});
+
+loadAgents();
+</script>
+{% endblock %}

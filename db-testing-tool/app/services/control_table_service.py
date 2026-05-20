@@ -1114,6 +1114,11 @@ def compare_insert_variants(
     manual_sql: str,
     compare_mode: str = "all",
 ) -> Dict[str, Any]:
+    """Compare INSERT variants (DRD vs generated vs manual) and filter false positives.
+    
+    Real differences (shown): expressions differ in all 3 sources or partial matches with real variance.
+    False positives (hidden): fields missing in all sources or identical across all 3.
+    """
     expected_columns = {row.get("column", "").upper() for row in analysis_rows if row.get("column")}
     generated_map = extract_sql_expression_map(generated_sql, expected_aliases=expected_columns)
     manual_supplied = bool(manual_sql.strip())
@@ -1121,9 +1126,9 @@ def compare_insert_variants(
     rows = []
     for row in analysis_rows:
         col = row["column"]
-        drd_expr = row.get("drd_expression") or ""
-        generated_expr = generated_map.get(col, "")
-        manual_expr = manual_map.get(col, "")
+        drd_expr = (row.get("drd_expression") or "").strip()
+        generated_expr = generated_map.get(col, "").strip()
+        manual_expr = manual_map.get(col, "").strip()
         status = compare_column_status(
             drd_expr,
             generated_expr,
@@ -1134,6 +1139,15 @@ def compare_insert_variants(
             source_attribute=(row.get("source_attribute") or "").strip().upper(),
         )
         recommended = recommend_source(drd_expr, generated_expr, manual_expr, compare_mode=compare_mode)
+        
+        # Detect real difference: false positive if all 3 sources identical OR all missing
+        _drd_present = bool(drd_expr)
+        _gen_present = bool(generated_expr)
+        _man_present = bool(manual_expr)
+        _all_missing = not (_drd_present or _gen_present or _man_present)
+        _all_identical = (drd_expr == generated_expr == manual_expr) if _drd_present else False
+        _real_difference = not (_all_missing or _all_identical) and status != "match_all"
+        
         rows.append(
             {
                 "column": col,
@@ -1143,12 +1157,14 @@ def compare_insert_variants(
                 "manual_expression": manual_expr,
                 "status": status,
                 "recommended_source": recommended,
-                "generated_present": bool(generated_expr.strip()),
-                "manual_present": bool(manual_expr.strip()),
+                "generated_present": _gen_present,
+                "manual_present": _man_present,
+                "is_real_difference": _real_difference,  # UI filter: hide if False
             }
         )
-    mismatch_count = sum(1 for row in rows if row["status"] != "match_all")
-    return {"rows": rows, "mismatch_count": mismatch_count}
+    # Count only real differences for mismatch summary
+    mismatch_count = sum(1 for row in rows if row.get("is_real_difference", False))
+    return {"rows": rows, "mismatch_count": mismatch_count, "total_rows": len(rows)}
 
 
 def compare_column_status(
@@ -2310,6 +2326,11 @@ def derive_lookup_from_transformation(
     lookup_bare = lookup_table.split(".")[-1] if "." in lookup_table else lookup_table
     if "." not in lookup_table and src_schema and lookup_bare not in _KNOWN_SCHEMA_LESS:
         lookup_table = f"{src_schema.upper()}.{lookup_table}"
+
+    # Global schema mapping: CCAL_OWNER → CCAL_REPL_OWNER (use replica for all lookups)
+    if lookup_schema and lookup_schema.upper() == "CCAL_OWNER":
+        lookup_schema = "CCAL_REPL_OWNER"
+        lookup_table = f"{lookup_schema}.{lookup_name}"
 
     lookup_schema, lookup_name = split_fq_table(lookup_table)
     lookup_entry = find_table(source_schema_index, lookup_schema, lookup_name)

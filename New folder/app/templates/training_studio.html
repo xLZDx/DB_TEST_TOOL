@@ -1,0 +1,1310 @@
+{% extends "base.html" %}
+{% block title %}Training Studio – DB Testing Tool{% endblock %}
+{% block page_title %}Training Studio{% endblock %}
+
+{% block content %}
+<style>
+.ts-collapse-btn { cursor:pointer; user-select:none; float:right; font-size:12px; padding:2px 8px; }
+.ts-section-body.collapsed { display: none !important; }
+</style>
+
+<!-- ── Section 1: Input ──────────────────────────────────────────────── -->
+<div class="grid grid-2" style="gap:16px;align-items:start">
+    <div class="card">
+        <div class="card-header" style="cursor:pointer" onclick="tsToggleSection('ts-input-body')">
+            <h2 style="margin:0">Training Input</h2>
+            <button class="btn btn-outline btn-sm ts-collapse-btn">▼</button>
+        </div>
+        <div id="ts-input-body" class="ts-section-body" style="padding:12px 16px 16px 16px">
+            <div class="grid grid-2" style="gap:12px">
+                <div class="form-group" style="margin:0">
+                    <label>Target Table</label>
+                    <input class="form-control" id="ts-target-table" placeholder="e.g. TAXLOT_OWNER.OPN_TAX_LOTS_NON_BKR_FACT">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Source Tables</label>
+                    <input class="form-control" id="ts-source-tables" placeholder="e.g. TAXLOT_STG_OWNER.OPN_TAX_LOTS_NONBKR_TGT">
+                </div>
+            </div>
+            <div class="grid grid-2" style="gap:12px;margin-top:10px">
+                <div class="form-group" style="margin:0">
+                    <label>Source Data Source</label>
+                    <select class="form-control ds-select" id="ts-source-ds"></select>
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Target Data Source</label>
+                    <select class="form-control ds-select" id="ts-target-ds"></select>
+                </div>
+            </div>
+            <div class="flex gap-8" style="align-items:center;flex-wrap:wrap;margin:10px 0">
+                <select class="form-control" id="ts-agent-mode" style="width:160px">
+                    <option value="ghc">GHC (SQL Dev default)</option>
+                    <option value="local">Local Agent</option>
+                </select>
+                <select class="form-control" id="ts-agent-id" style="min-width:240px"></select>
+                <button class="btn btn-outline btn-sm" onclick="loadTrainingStudioAgents()">Refresh Agents</button>
+            </div>
+            <div class="form-group" style="margin:0 0 10px 0">
+                <div class="flex gap-8" style="align-items:center;margin-bottom:4px">
+                    <label style="margin:0">DRD File (.csv, .xlsx)</label>
+                    <label style="margin:0">ODI XML / Reference SQL</label>
+                </div>
+                <div class="grid grid-2" style="gap:8px">
+                    <input class="form-control" id="ts-drd-files" type="file" multiple accept=".csv,.xlsx,.xls,.sql,.txt,.md,.xml,.json">
+                    <div>
+                        <label class="btn btn-outline btn-sm" style="cursor:pointer;font-size:11px;padding:2px 8px;margin:0">
+                            Upload ODI File
+                            <input type="file" accept=".sql,.txt,.xml,.csv,.json" style="display:none" onchange="loadFileIntoTextarea(this,'ts-source-sql')">
+                        </label>
+                        <label class="btn btn-outline btn-sm" style="cursor:pointer;font-size:11px;padding:2px 8px;margin:0">
+                            Upload Expected SQL
+                            <input type="file" accept=".sql,.txt,.csv,.json" style="display:none" onchange="loadFileIntoTextarea(this,'ts-expected-sql')">
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" style="margin:0 0 10px 0">
+                <label>ODI / Manual SQL (reference)</label>
+                <textarea class="form-control" id="ts-source-sql" rows="8" placeholder="Paste ODI SQL, manual insert, or MERGE statement" style="font-family:monospace;font-size:12px"></textarea>
+            </div>
+            <div class="form-group" style="margin:0 0 10px 0">
+                <label>Expected Final SQL / Result</label>
+                <textarea class="form-control" id="ts-expected-sql" rows="8" placeholder="Paste the expected INSERT/SELECT statement" style="font-family:monospace;font-size:12px"></textarea>
+            </div>
+            <div class="form-group" style="margin:0 0 10px 0">
+                <label>Notes</label>
+                <textarea class="form-control" id="ts-notes" rows="3" placeholder="Missing joins, known patterns, manual fixes"></textarea>
+            </div>
+            <div class="flex gap-8" style="flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="tsExtractAndGenerate()">Extract DRD & Generate SQL</button>
+                <button class="btn btn-outline" onclick="runTrainingPipeline()">Run Training Pipeline</button>
+                <button class="btn btn-outline" onclick="runTrainingStudioReproduction()">Run SQL Dev Reproduction</button>
+                <button class="btn btn-outline" onclick="deriveTrainingStudioContext()">Derive DRD Context</button>
+                <button class="btn btn-outline" onclick="saveTrainingStudioPack()">Save to KB</button>
+            </div>
+            <div class="form-group" style="margin:10px 0 0 0">
+                <label>Training Columns <span class="text-muted">(leave empty to train all)</span></label>
+                <input class="form-control" id="ts-train-columns" placeholder="e.g. ADJ_COST, CCY_CD, WASH_SALE_TP (comma-separated)">
+            </div>
+            <div class="flex gap-8" style="flex-wrap:wrap;margin-top:6px">
+                <label style="margin:0;font-size:12px">Max Iterations:</label>
+                <input class="form-control" id="ts-max-iterations" type="number" min="1" max="10" value="5" style="width:70px">
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="cursor:pointer" onclick="tsToggleSection('ts-automation-body')">
+            <h2 style="margin:0;font-size:14px">Automation Loop</h2>
+            <button class="btn btn-outline btn-sm ts-collapse-btn">▼</button>
+        </div>
+        <div id="ts-automation-body" class="ts-section-body collapsed" style="padding:12px 16px 16px 16px">
+            <div class="grid grid-2" style="gap:12px">
+                <div class="form-group" style="margin:0">
+                    <label>Loop Interval Seconds</label>
+                    <input class="form-control" id="ts-auto-interval" type="number" min="30" value="600">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Packs Per Cycle</label>
+                    <input class="form-control" id="ts-auto-max-packs" type="number" min="1" max="25" value="3">
+                </div>
+            </div>
+            <div class="flex gap-8" style="flex-wrap:wrap;margin-top:10px">
+                <button class="btn btn-primary btn-sm" onclick="startTrainingAutomation()">Start</button>
+                <button class="btn btn-outline btn-sm" onclick="runTrainingAutomationOnce()">Run Once</button>
+                <button class="btn btn-danger btn-sm" onclick="stopTrainingAutomation()">Stop</button>
+            </div>
+            <div id="ts-auto-status" class="mt-16 text-muted" style="font-size:12px">Automation is idle.</div>
+            <div id="ts-auto-last-result" class="mt-16 text-muted" style="font-size:12px"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Section 2: Comparison Grid ────────────── -->
+<div class="card mt-16" id="ts-comparison-card" style="display:none">
+    <div class="card-header" style="cursor:pointer" onclick="tsToggleSection('ts-comparison-body')">
+        <h2 style="margin:0">Comparison Grid</h2>
+        <div class="flex gap-8" style="margin-left:auto;align-items:center">
+            <span id="ts-pipeline-summary" class="text-muted" style="font-size:12px"></span>
+            <button class="btn btn-outline btn-sm ts-collapse-btn">▼</button>
+        </div>
+    </div>
+    <div id="ts-comparison-body" class="ts-section-body" style="padding:12px 16px 16px 16px">
+        <div class="flex gap-8" style="flex-wrap:wrap;margin-bottom:10px">
+            <button class="btn btn-primary" onclick="tsApplySelectedFixes()">Apply Selected Fixes to Generated SQL</button>
+            <button class="btn btn-outline" onclick="exportTrainingComparisonCsv()">Export CSV + SQL</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+            <span class="text-muted" style="font-size:12px" id="ts-cmp-match-summary"></span>
+            <span style="font-size:12px;margin-left:4px">Filter:</span>
+            <button class="btn btn-sm btn-outline ts-filter-btn" data-filter="all" onclick="tsFilterComparison('all')">All</button>
+            <button class="btn btn-sm btn-outline ts-filter-btn" data-filter="mismatch" onclick="tsFilterComparison('mismatch')">Mismatches</button>
+            <button class="btn btn-sm btn-outline ts-filter-btn" data-filter="match" onclick="tsFilterComparison('match')">Matched</button>
+            <label style="margin:0 0 0 8px;font-size:12px"><input type="checkbox" id="ts-cmp-select-all" onchange="tsToggleAllComparisonRows(this.checked)"> Select all for apply</label>
+            <span class="text-muted" style="font-size:12px" id="ts-cmp-showing"></span>
+        </div>
+        <div id="ts-iteration-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
+        <div style="max-height:600px;overflow:auto">
+            <table class="data-table" style="font-size:11px" id="ts-comparison-table">
+                <thead><tr>
+                    <th style="width:30px">Fix</th>
+                    <th>Column</th>
+                    <th>Status</th>
+                    <th>DRD</th>
+                    <th>Generated Expression</th>
+                    <th>Expected / Manual</th>
+                    <th>Apply</th>
+                    <th>Win/Lose</th>
+                    <th>Training</th>
+                </tr></thead>
+                <tbody id="ts-comparison-tbody"></tbody>
+            </table>
+        </div>
+        <div class="flex gap-8 mt-4" style="flex-wrap:wrap">
+            <button class="btn btn-success" onclick="markSelectedAsWin()">Mark Selected as Win → Save to KB</button>
+            <button class="btn btn-danger btn-sm" onclick="markSelectedAsLoss()">Mark Loss</button>
+            <button class="btn btn-outline btn-sm" onclick="retrainSelectedColumns()">Retrain Selected Only</button>
+            <button class="btn btn-outline btn-sm" onclick="exportTrainingComparisonCsv()">Export CSV</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Section 3: In-Tool Coaching ────────────────────────────────────────── -->
+<div class="card mt-16" id="ts-coaching-card">
+    <div class="card-header" style="cursor:pointer" onclick="tsToggleSection('ts-coaching-body')">
+        <h2 style="margin:0">In-Tool Coaching (GHC / Local Agent)</h2>
+        <button class="btn btn-outline btn-sm ts-collapse-btn">▼</button>
+    </div>
+    <div id="ts-coaching-body" class="ts-section-body collapsed" style="padding:12px 16px 16px 16px">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+            <select class="form-control" id="ts-coach-mode" style="width:160px">
+                <option value="ghc">GHC</option>
+                <option value="local">Local Agent</option>
+            </select>
+            <select class="form-control" id="ts-coach-agent" style="width:220px"></select>
+            <button class="btn btn-outline btn-sm" onclick="tsClearCoachHistory()">Clear History</button>
+        </div>
+        <div id="ts-coach-history" style="max-height:360px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:10px;background:var(--surface2);font-size:12px;font-family:monospace;margin-bottom:10px;min-height:60px">
+            <span class="text-muted">No conversation yet. Ask a question about mismatches, SQL patterns, or training results.</span>
+        </div>
+        <div class="grid" style="grid-template-columns:1fr auto auto;gap:8px;align-items:start">
+            <textarea class="form-control" id="ts-coach-question" rows="3" onkeydown="tsCoachKeydown(event)" placeholder="Ask about mismatches, why an expression differs, or suggest corrections (Enter = send, Shift+Enter = new line)" style="resize:vertical;font-size:12px"></textarea>
+            <button class="btn btn-primary btn-sm" onclick="tsAskCoach()">Ask</button>
+            <button class="btn btn-success btn-sm" onclick="tsApplyCoachSuggestion()">Apply Suggested Logic</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Section 4: Output & Log ──────────────────────────────────────────── -->
+<div class="card mt-16">
+    <div class="card-header" style="cursor:pointer" onclick="tsToggleSection('ts-output-body')">
+        <h2 style="margin:0">Output & Training Log</h2>
+        <button class="btn btn-outline btn-sm ts-collapse-btn">▼</button>
+    </div>
+    <div id="ts-output-body" class="ts-section-body collapsed" style="padding:12px 16px 16px 16px">
+        <div class="grid grid-2" style="gap:12px">
+            <div class="form-group" style="margin:0">
+                <label>Reproduced / Best SQL</label>
+                <textarea class="form-control" id="ts-output" rows="18" readonly placeholder="Training pipeline output" style="font-family:monospace;font-size:12px"></textarea>
+            </div>
+            <div class="form-group" style="margin:0">
+                <label>Training Activity Log</label>
+                <div id="ts-activity-log" style="min-height:380px;max-height:380px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface2);font-size:12px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Section 5: Training Rules (KB) ──────────────────────────────────── -->
+<div class="card mt-16">
+    <div class="card-header" style="cursor:pointer" onclick="tsToggleSection('ts-rules-body')">
+        <h2 style="margin:0">Training Rules (KB)</h2>
+        <button class="btn btn-outline btn-sm ts-collapse-btn">▼</button>
+    </div>
+    <div id="ts-rules-body" class="ts-section-body collapsed" style="padding:12px 16px 16px 16px">
+        <div class="text-muted" style="font-size:12px;margin-bottom:10px">Editable rules persisted from training sessions. Apply to all future control table generations.</div>
+        <div class="flex gap-8" style="margin-bottom:10px">
+            <button class="btn btn-outline btn-sm" onclick="loadTrainingRulesTable()">Refresh Rules</button>
+            <button class="btn btn-outline btn-sm" onclick="addTrainingRule()">+ Add Rule</button>
+            <span id="ts-rules-count" class="text-muted" style="font-size:12px;margin-left:8px"></span>
+        </div>
+        <div id="ts-rules-table" style="max-height:500px;overflow:auto">
+            <table class="data-table" style="font-size:11px">
+                <thead><tr>
+                    <th>ID</th><th>Table</th><th>Column</th><th>Expression</th><th>Source</th><th>Issue</th><th>Actions</th>
+                </tr></thead>
+                <tbody id="ts-rules-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Training Reproduce Progress Modal -->
+<div id="ts-progress-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center">
+    <div style="background:var(--surface,#1e1e2e);border:1px solid var(--border,#333);border-radius:12px;padding:28px 32px;max-width:520px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.5)">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div id="ts-progress-spinner" style="width:22px;height:22px;border:3px solid var(--border,#555);border-top-color:var(--primary,#58a6ff);border-radius:50%;animation:ts-spin 0.8s linear infinite"></div>
+            <h3 style="margin:0;font-size:15px" id="ts-progress-title">Running SQL Dev Reproduction…</h3>
+        </div>
+        <div id="ts-progress-status" style="font-size:13px;color:var(--text-muted,#aaa);min-height:32px;margin-bottom:14px">Waiting for agent response…</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn btn-outline btn-sm" onclick="dismissTrainingProgressModal()">Dismiss (run in background)</button>
+        </div>
+    </div>
+</div>
+<style>@keyframes ts-spin{to{transform:rotate(360deg)}}</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let _trainingStudioEvents = [];
+let _trainingAutomationPollHandle = null;
+let _trainingStudioDerivedContext = null;
+let _trainingReproduceJobId = null;
+let _trainingReproducePollHandle = null;
+let _tsAnalysisResult = null;  // Stores DRD analysis result for comparison grid
+const TRAINING_STUDIO_STATE_KEY = 'training.studio.state.v1';
+
+function _safeParseTrainingJson(raw, fallback) {
+    if (!raw) return fallback;
+    try { return JSON.parse(raw); } catch (_) { return fallback; }
+}
+
+// ── Section collapse toggle ────────────────────────────────────────────────
+function tsToggleSection(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('collapsed');
+    // Update the collapse button icon
+    const header = el.previousElementSibling;
+    if (header) {
+        const btn = header.querySelector('.ts-collapse-btn');
+        if (btn) btn.textContent = el.classList.contains('collapsed') ? '▶' : '▼';
+    }
+}
+
+// ── DRD Extract & Generate workflow (mirrors Control Table modal) ───────────
+let _tsExtractController = null;
+async function tsExtractAndGenerate() {
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    const sourceTables = (document.getElementById('ts-source-tables')?.value || '').trim();
+    const sourceDsEl = document.getElementById('ts-source-ds');
+    const targetDsEl = document.getElementById('ts-target-ds');
+    const sourceDsId = sourceDsEl?.value || '';
+    const targetDsId = targetDsEl?.value || '';
+    const manualSql = (document.getElementById('ts-source-sql')?.value || '').trim();
+    const drdFiles = document.getElementById('ts-drd-files')?.files;
+
+    if (!targetTable) return showToast('Set target table first', 'warning');
+    if (!drdFiles || !drdFiles.length) return showToast('Upload a DRD file first', 'warning');
+    if (!sourceDsId) return showToast('Select source datasource', 'warning');
+
+    const parts = targetTable.split('.');
+    const targetSchema = parts.length > 1 ? parts[0] : '';
+    const targetTableName = parts.length > 1 ? parts[1] : parts[0];
+
+    appendTrainingStudioLog(`Extracting DRD and generating SQL for ${targetTable}...`, 'info');
+    showTrainingProgressModal(`Extracting DRD: ${targetTable}`, 'Uploading and analyzing DRD file...');
+
+    const form = new FormData();
+    form.append('file', drdFiles[0]);
+    form.append('target_schema', targetSchema);
+    form.append('target_table', targetTableName);
+    form.append('source_datasource_id', sourceDsId);
+    if (targetDsId) form.append('target_datasource_id', targetDsId);
+    form.append('control_schema', 'ikorostelev');
+    form.append('manual_sql', manualSql);
+
+    if (_tsExtractController) _tsExtractController.abort();
+    _tsExtractController = new AbortController();
+
+    try {
+        const res = await fetch('/api/tests/control-table/analyze', {
+            method: 'POST',
+            body: form,
+            signal: _tsExtractController.signal,
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`${res.status}: ${text}`);
+        }
+        const result = await res.json();
+        _tsAnalysisResult = result;
+
+        // Show generated SQL in output
+        const output = document.getElementById('ts-output');
+        if (output) output.value = result.generated_insert_sql || '';
+
+        // Show comparison grid from the analysis result
+        if (result.comparison) {
+            tsRenderAnalysisComparison(result);
+        }
+
+        appendTrainingStudioLog(`DRD analysis complete for ${targetTable}: ${(result.comparison?.rows || []).length} columns`, 'success');
+        updateTrainingProgressModal('Analysis complete!', true);
+        setTimeout(hideTrainingProgressModal, 1500);
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        hideTrainingProgressModal();
+        appendTrainingStudioLog(`DRD extraction failed: ${e.message || String(e)}`, 'error');
+        showToast(`DRD extraction failed: ${e.message || String(e)}`, 'error');
+    }
+}
+
+function tsRenderAnalysisComparison(result) {
+    const rows = (result.comparison?.rows || []);
+    const tbody = document.getElementById('ts-comparison-tbody');
+    const tabsEl = document.getElementById('ts-iteration-tabs');
+    if (!tbody) return;
+    if (tabsEl) tabsEl.innerHTML = '';
+
+    const matchCount = rows.filter(r => (r.status || '').includes('match_all')).length;
+    const mismatchCount = rows.length - matchCount;
+
+    const summaryEl = document.getElementById('ts-pipeline-summary');
+    if (summaryEl) {
+        summaryEl.textContent = `${matchCount}/${rows.length} matched, ${mismatchCount} mismatch(es)`;
+        summaryEl.style.color = mismatchCount === 0 ? 'var(--success)' : 'var(--warning)';
+    }
+    const matchSummaryEl = document.getElementById('ts-cmp-match-summary');
+    if (matchSummaryEl) matchSummaryEl.textContent = `${mismatchCount} mismatch(es) out of ${rows.length}.`;
+    const showEl = document.getElementById('ts-cmp-showing');
+    if (showEl) showEl.textContent = `Showing ${rows.length} row(s)`;
+
+    tbody.innerHTML = rows.map(row => {
+        const isMatch = (row.status || '').includes('match_all');
+        const statusBadge = isMatch ? 'badge-success' : 'badge-danger';
+        const statusText = isMatch ? 'MATCH_ALL' : (row.status || 'MISMATCH').toUpperCase();
+        const drdExpr = row.drd_expression || '';
+        const genExpr = row.generated_expression || 'NULL';
+        const manExpr = row.manual_expression || '';
+        const ruleExpr = row.rule_expression || '';
+        const recommended = row.recommended_source || '';
+        const winLose = isMatch
+            ? '<span style="color:var(--success);font-weight:600">WIN</span>'
+            : '<span style="color:var(--danger);font-weight:600">LOSE</span>';
+        const rowBg = isMatch ? 'transparent' : 'rgba(239,68,68,.08)';
+        const ruleTag = row.training_rule_id
+            ? `<span class="badge" style="font-size:9px;background:var(--primary);color:#fff" title="Rule #${row.training_rule_id}: ${escapeHtml(ruleExpr.substring(0, 80))}">R#${row.training_rule_id}</span> `
+            : '';
+        return `<tr style="background:${rowBg}" data-column="${escapeHtml(row.column)}" data-status="${isMatch ? 'match' : 'mismatch'}">
+            <td><input type="checkbox" class="ts-cmp-check" data-column="${escapeHtml(row.column)}"></td>
+            <td><strong>${escapeHtml(row.column)}</strong></td>
+            <td>${ruleTag}<span class="badge ${statusBadge}">${statusText}</span></td>
+            <td style="font-family:monospace;font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;cursor:pointer" title="${escapeHtml(drdExpr)}" onclick="tsHighlightCell(this)">
+                <div style="max-width:200px;white-space:pre-wrap">${escapeHtml(drdExpr.substring(0, 80))}</div>
+            </td>
+            <td style="font-family:monospace;font-size:11px;max-width:260px;overflow:hidden;text-overflow:ellipsis;cursor:pointer" title="${escapeHtml(genExpr)}" onclick="tsHighlightCell(this)">
+                <div style="max-width:260px;white-space:pre-wrap">${escapeHtml(genExpr.substring(0, 100))}</div>
+            </td>
+            <td style="font-family:monospace;font-size:11px;max-width:260px;cursor:pointer" title="${escapeHtml(manExpr)}" onclick="tsHighlightCell(this)">
+                <div style="max-width:260px;white-space:pre-wrap">${escapeHtml(manExpr.substring(0, 100))}</div>
+            </td>
+            <td>
+                <select class="form-control ts-cmp-apply-choice" data-column="${escapeHtml(row.column)}" style="min-width:110px;font-size:11px">
+                    <option value="generated" ${recommended === 'generated' ? 'selected' : ''}>Generated</option>
+                    <option value="manual" ${recommended === 'manual' ? 'selected' : ''}>Manual</option>
+                    <option value="drd" ${recommended === 'drd' ? 'selected' : ''}>DRD</option>
+                    <option value="rule" ${recommended === 'rule' ? 'selected' : ''}>Rule</option>
+                </select>
+            </td>
+            <td>${winLose}</td>
+            <td>
+                <button class="btn btn-outline btn-sm" style="font-size:10px;padding:1px 6px" onclick="tsTrainColumn('${escapeHtml(row.column)}','${escapeHtml(genExpr.replace(/'/g, "\\'").substring(0,200))}')">Train</button>
+                ${isMatch
+                    ? '<button class="btn btn-success btn-sm" style="font-size:10px;padding:1px 6px" onclick="saveColumnWin(\'' + escapeHtml(row.column) + '\')">Save KB</button>'
+                    : '<button class="btn btn-outline btn-sm" style="font-size:10px;padding:1px 6px" onclick="retrainColumn(\'' + escapeHtml(row.column) + '\')">Retrain</button>'}
+            </td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('ts-comparison-card').style.display = '';
+    // Expand the comparison section
+    const compBody = document.getElementById('ts-comparison-body');
+    if (compBody && compBody.classList.contains('collapsed')) tsToggleSection('ts-comparison-body');
+}
+
+function tsHighlightCell(td) {
+    // Toggle highlight on click, copy text to clipboard
+    const wasHighlighted = td.style.backgroundColor === 'rgba(59, 130, 246, 0.2)';
+    document.querySelectorAll('#ts-comparison-tbody td').forEach(c => c.style.backgroundColor = '');
+    if (!wasHighlighted) {
+        td.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+        const text = td.getAttribute('title') || td.textContent;
+        navigator.clipboard?.writeText(text).then(() => showToast('Copied to clipboard', 'info')).catch(() => {});
+    }
+}
+
+function tsTrainColumn(column, currentExpr) {
+    // Open rule editor for this column to save/update training rule
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    const parts = targetTable.split('.');
+    const bareTable = parts.length > 1 ? parts[1] : parts[0];
+    openRuleEditorModal({
+        title: 'Train Rule: ' + column,
+        target_table: bareTable.toUpperCase(),
+        target_column: column,
+        replacement_expression: currentExpr || '',
+        recommended_source: 'rule',
+        issue_type: 'expression_mismatch',
+        notes: 'Trained from Training Studio comparison grid',
+        lockTable: true,
+        lockColumn: true,
+        onSave: () => { loadTrainingRulesTable(); },
+    });
+}
+
+function persistTrainingStudioState() {
+    const state = {
+        events: (_trainingStudioEvents || []).slice(0, 80),
+        target_table: document.getElementById('ts-target-table')?.value || '',
+        source_tables: document.getElementById('ts-source-tables')?.value || '',
+        source_sql: document.getElementById('ts-source-sql')?.value || '',
+        expected_sql: document.getElementById('ts-expected-sql')?.value || '',
+        notes: document.getElementById('ts-notes')?.value || '',
+        output: document.getElementById('ts-output')?.value || '',
+        mode: document.getElementById('ts-agent-mode')?.value || 'ghc',
+        agent_id: document.getElementById('ts-agent-id')?.value || '',
+        auto_interval: document.getElementById('ts-auto-interval')?.value || '600',
+        auto_max_packs: document.getElementById('ts-auto-max-packs')?.value || '3',
+    };
+    localStorage.setItem(TRAINING_STUDIO_STATE_KEY, JSON.stringify(state));
+}
+
+function restoreTrainingStudioState() {
+    const state = _safeParseTrainingJson(localStorage.getItem(TRAINING_STUDIO_STATE_KEY), null);
+    if (!state) return;
+    if (state.target_table) document.getElementById('ts-target-table').value = state.target_table;
+    if (state.source_tables) document.getElementById('ts-source-tables').value = state.source_tables;
+    if (state.source_sql) document.getElementById('ts-source-sql').value = state.source_sql;
+    if (state.expected_sql) document.getElementById('ts-expected-sql').value = state.expected_sql;
+    if (state.notes) document.getElementById('ts-notes').value = state.notes;
+    if (state.output) document.getElementById('ts-output').value = state.output;
+    if (state.mode) document.getElementById('ts-agent-mode').value = state.mode;
+    if (state.auto_interval) document.getElementById('ts-auto-interval').value = state.auto_interval;
+    if (state.auto_max_packs) document.getElementById('ts-auto-max-packs').value = state.auto_max_packs;
+    _trainingStudioEvents = Array.isArray(state.events) ? state.events : [];
+    const el = document.getElementById('ts-activity-log');
+    if (el && _trainingStudioEvents.length) {
+        el.innerHTML = _trainingStudioEvents.map(item => `<div style="padding:6px 0;border-bottom:1px solid var(--border);color:${item.tone === 'error' ? 'var(--danger)' : item.tone === 'success' ? 'var(--success)' : 'var(--text)'}"><strong>${escapeHtml(item.stamp)}</strong><div>${escapeHtml(item.message)}</div></div>`).join('');
+    }
+}
+
+function appendTrainingStudioLog(message, tone = 'info') {
+    const el = document.getElementById('ts-activity-log');
+    if (!el) return;
+    const stamp = new Date().toLocaleString();
+    _trainingStudioEvents.unshift({ stamp, message, tone });
+    _trainingStudioEvents = _trainingStudioEvents.slice(0, 80);
+    el.innerHTML = _trainingStudioEvents.map(item => `<div style="padding:6px 0;border-bottom:1px solid var(--border);color:${item.tone === 'error' ? 'var(--danger)' : item.tone === 'success' ? 'var(--success)' : 'var(--text)'}"><strong>${escapeHtml(item.stamp)}</strong><div>${escapeHtml(item.message)}</div></div>`).join('');
+    persistTrainingStudioState();
+}
+
+async function logTrainingEventSafe(payload) {
+    try {
+        if (typeof API?.logTrainingEvent === 'function') await API.logTrainingEvent(payload);
+    } catch (_) {
+    }
+}
+
+async function loadTrainingStudioAgents() {
+    const select = document.getElementById('ts-agent-id');
+    if (!select) return;
+    try {
+        const agents = await API.getAgents();
+        select.innerHTML = agents.map(a => `<option value="${a.id}">${escapeHtml(a.name || ('Agent ' + a.id))}</option>`).join('');
+        if (!agents.length) select.innerHTML = '<option value="">No local agents</option>';
+        const sqlDevIdx = agents.findIndex(a => /sql\s*dev|sql.*developer|developer.*sql/i.test(a.name || '') || /sql/i.test(a.role || ''));
+        if (sqlDevIdx >= 0) select.value = String(agents[sqlDevIdx].id);
+    } catch (e) {
+        select.innerHTML = '<option value="">Load failed</option>';
+        appendTrainingStudioLog(`Agent load failed: ${e.message || String(e)}`, 'error');
+    }
+}
+
+function buildTrainingStudioContext() {
+    return JSON.stringify({
+        target_table: (document.getElementById('ts-target-table')?.value || '').trim(),
+        source_tables: (document.getElementById('ts-source-tables')?.value || '').trim(),
+        notes: (document.getElementById('ts-notes')?.value || '').trim(),
+        derived_context: _trainingStudioDerivedContext || {},
+    }, null, 2);
+}
+
+async function deriveTrainingStudioContext() {
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    const sourceTables = (document.getElementById('ts-source-tables')?.value || '').trim();
+    const sourceSql = (document.getElementById('ts-source-sql')?.value || '').trim();
+    const expectedSql = (document.getElementById('ts-expected-sql')?.value || '').trim();
+    const drdFiles = Array.from(document.getElementById('ts-drd-files')?.files || []);
+    if (!targetTable && !sourceSql && !expectedSql && !drdFiles.length) {
+        return showToast('Add at least target table, SQL, or DRD files first', 'warning');
+    }
+    appendTrainingStudioLog('Deriving Oracle context from SQL and DRD files...', 'info');
+    try {
+        const res = await API.deriveTrainingPackContext({
+            target_table: targetTable,
+            source_tables: sourceTables,
+            source_sql: sourceSql,
+            expected_sql: expectedSql,
+            drd_files: drdFiles,
+        });
+        _trainingStudioDerivedContext = res || null;
+        if (res?.target_table && !targetTable) {
+            const targetEl = document.getElementById('ts-target-table');
+            if (targetEl) targetEl.value = res.target_table;
+        }
+        if ((res?.source_tables || []).length && !sourceTables) {
+            const srcEl = document.getElementById('ts-source-tables');
+            if (srcEl) srcEl.value = res.source_tables.join(', ');
+        }
+        const hints = (res?.hints || []).join(' | ');
+        appendTrainingStudioLog(`Derived context ready${hints ? `: ${hints}` : ''}`, 'success');
+        showToast('Derived DRD context applied', 'success');
+        return res;
+    } catch (e) {
+        appendTrainingStudioLog(`Context derivation failed: ${e.message || String(e)}`, 'error');
+        showToast(`Context derivation failed: ${e.message || String(e)}`, 'error');
+        return null;
+    }
+}
+
+function buildTrainingAutomationPayload() {
+    return {
+        interval_seconds: parseInt(document.getElementById('ts-auto-interval')?.value || '600', 10) || 600,
+        mode: document.getElementById('ts-agent-mode')?.value || 'ghc',
+        agent_id: parseInt(document.getElementById('ts-agent-id')?.value || '0', 10) || null,
+        target_table: (document.getElementById('ts-target-table')?.value || '').trim(),
+        max_packs_per_cycle: parseInt(document.getElementById('ts-auto-max-packs')?.value || '3', 10) || 3,
+    };
+}
+
+function renderTrainingAutomationStatus(status) {
+    const statusEl = document.getElementById('ts-auto-status');
+    const resultEl = document.getElementById('ts-auto-last-result');
+    if (!statusEl || !resultEl) return;
+    statusEl.textContent = status.enabled
+        ? `Automation is ${status.running ? 'running' : 'enabled'}${status.last_run_at ? ` | last run ${status.last_run_at}` : ''}`
+        : 'Automation is idle.';
+    const lastResult = status.last_result || {};
+    resultEl.textContent = lastResult.status
+        ? `Last result: ${lastResult.status} | processed ${lastResult.processed_count || 0} | skipped ${lastResult.skipped_count || 0}${lastResult.last_pack ? ` | pack ${lastResult.last_pack}` : ''}${status.last_error ? ` | error: ${status.last_error}` : ''}`
+        : '';
+}
+
+function stopTrainingAutomationPolling() {
+    if (_trainingAutomationPollHandle) {
+        clearInterval(_trainingAutomationPollHandle);
+        _trainingAutomationPollHandle = null;
+    }
+}
+
+function startTrainingAutomationPolling() {
+    stopTrainingAutomationPolling();
+    _trainingAutomationPollHandle = setInterval(loadTrainingAutomationStatus, 5000);
+}
+
+async function loadTrainingAutomationStatus() {
+    try {
+        const status = await API.getTrainingAutomationStatus();
+        renderTrainingAutomationStatus(status);
+        if (status.enabled) startTrainingAutomationPolling();
+        else stopTrainingAutomationPolling();
+    } catch (e) {
+        appendTrainingStudioLog(`Automation status load failed: ${e.message || String(e)}`, 'error');
+    }
+}
+
+async function startTrainingAutomation() {
+    try {
+        const status = await API.startTrainingAutomation(buildTrainingAutomationPayload());
+        renderTrainingAutomationStatus(status);
+        appendTrainingStudioLog('Background automation loop started', 'success');
+        showToast('Background automation started', 'success');
+        startTrainingAutomationPolling();
+    } catch (e) {
+        appendTrainingStudioLog(`Background automation start failed: ${e.message || String(e)}`, 'error');
+        showToast(`Background automation start failed: ${e.message || String(e)}`, 'error');
+    }
+}
+
+async function stopTrainingAutomation() {
+    try {
+        const status = await API.stopTrainingAutomation();
+        renderTrainingAutomationStatus(status);
+        appendTrainingStudioLog('Background automation loop stopped', 'warning');
+        showToast('Background automation stopped', 'warning');
+        stopTrainingAutomationPolling();
+    } catch (e) {
+        appendTrainingStudioLog(`Background automation stop failed: ${e.message || String(e)}`, 'error');
+        showToast(`Background automation stop failed: ${e.message || String(e)}`, 'error');
+    }
+}
+
+async function runTrainingAutomationOnce() {
+    try {
+        const result = await API.runTrainingAutomationOnce(buildTrainingAutomationPayload());
+        renderTrainingAutomationStatus({ enabled: false, running: false, last_result: result, last_error: '', last_run_at: new Date().toISOString() });
+        appendTrainingStudioLog(`Automation cycle completed for ${result.last_pack || 'available packs'}`, 'success');
+        showToast('Automation cycle completed', 'success');
+    } catch (e) {
+        appendTrainingStudioLog(`Automation cycle failed: ${e.message || String(e)}`, 'error');
+        showToast(`Automation cycle failed: ${e.message || String(e)}`, 'error');
+    }
+}
+
+function showTrainingProgressModal(title, statusText) {
+    const modal = document.getElementById('ts-progress-modal');
+    if (!modal) return;
+    document.getElementById('ts-progress-title').textContent = title || 'Running SQL Dev Reproduction…';
+    document.getElementById('ts-progress-status').textContent = statusText || 'Waiting for agent response…';
+    document.getElementById('ts-progress-spinner').style.display = 'block';
+    modal.style.display = 'flex';
+}
+
+function updateTrainingProgressModal(statusText, done) {
+    const modal = document.getElementById('ts-progress-modal');
+    if (!modal || modal.style.display === 'none') return;
+    document.getElementById('ts-progress-status').textContent = statusText || '';
+    if (done) document.getElementById('ts-progress-spinner').style.display = 'none';
+}
+
+function hideTrainingProgressModal() {
+    const modal = document.getElementById('ts-progress-modal');
+    if (modal) modal.style.display = 'none';
+    stopTrainingReproducePoll();
+}
+
+function dismissTrainingProgressModal() {
+    // Hides the modal but keeps the background poll running
+    const modal = document.getElementById('ts-progress-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function stopTrainingReproducePoll() {
+    if (_trainingReproducePollHandle) {
+        clearInterval(_trainingReproducePollHandle);
+        _trainingReproducePollHandle = null;
+    }
+}
+
+function loadFileIntoTextarea(input, textareaId) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const el = document.getElementById(textareaId);
+        if (el) {
+            el.value = e.target.result || '';
+            appendTrainingStudioLog(`Loaded file "${file.name}" into ${textareaId === 'ts-source-sql' ? 'ODI SQL' : 'Expected SQL'} field`, 'info');
+        }
+        input.value = '';
+    };
+    reader.onerror = () => showToast(`Failed to read file ${file.name}`, 'error');
+    reader.readAsText(file);
+}
+
+async function runTrainingStudioReproduction() {
+    const mode = document.getElementById('ts-agent-mode')?.value || 'ghc';
+    const agentId = parseInt(document.getElementById('ts-agent-id')?.value || '0', 10);
+    const sourceSql = (document.getElementById('ts-source-sql')?.value || '').trim();
+    const expectedSql = (document.getElementById('ts-expected-sql')?.value || '').trim();
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    const output = document.getElementById('ts-output');
+    if (!sourceSql && !expectedSql) return showToast('Add ODI/manual SQL or expected final SQL first', 'warning');
+    if (!_trainingStudioDerivedContext && document.getElementById('ts-drd-files')?.files?.length) {
+        await deriveTrainingStudioContext();
+    }
+    appendTrainingStudioLog(`Started SQL Dev reproduction for ${targetTable || 'training case'}`, 'info');
+    const agentIds = mode === 'local' && agentId ? [agentId] : [];
+    const derivedContext = _trainingStudioDerivedContext && Object.keys(_trainingStudioDerivedContext).length
+        ? `\n\nDerived DRD Context (Oracle normalized):\n${JSON.stringify(_trainingStudioDerivedContext, null, 2)}`
+        : '';
+    const messages = [{ role: 'user', content: `Reasonably reproduce the ODI and/or manual transformation logic for ${targetTable || 'the target table'}. Prefer practical Oracle SQL that could actually be executed and explain assumptions. Source/manual SQL:\n${sourceSql || '[none]'}\n\nExpected final SQL/result:\n${expectedSql || '[none]'}${derivedContext}` }];
+    if (output) output.value = 'Running SQL Dev reproduction… (stays active if you switch tabs)';
+    showTrainingProgressModal(`Reproducing SQL for ${targetTable || 'training case'}`, 'Submitting to AI agent…');
+    stopTrainingReproducePoll();
+    try {
+        const { job_id } = await API.startTrainingReproduceAsync(messages, buildTrainingStudioContext(), 'githubcopilot', agentIds, 'sql dev reproduction training');
+        _trainingReproduceJobId = job_id;
+        updateTrainingProgressModal('Job started — polling for result…', false);
+        let elapsed = 0;
+        _trainingReproducePollHandle = setInterval(async () => {
+            try {
+                elapsed += 3;
+                const job = await API.getTrainingReproduceJobStatus(_trainingReproduceJobId);
+                updateTrainingProgressModal(`Waiting… ${job.elapsed_seconds || elapsed}s elapsed`, false);
+                if (job.status === 'done') {
+                    stopTrainingReproducePoll();
+                    const text = String(job.result?.reply || job.result?.message || job.result?.response || job.result?.content || '').trim();
+                    if (output) output.value = text || 'No response returned';
+                    appendTrainingStudioLog(`SQL Dev reproduction completed for ${targetTable || 'training case'}`, 'success');
+                    updateTrainingProgressModal('Completed!', true);
+                    setTimeout(hideTrainingProgressModal, 1500);
+                    await logTrainingEventSafe({ event_type: 'training_reproduction_run', entity_type: 'training_studio', target_table: targetTable, source: mode, status: 'completed', details: { expected_sql_present: !!expectedSql, source_sql_length: sourceSql.length }, knowledge_refs: ['training_studio', ...(targetTable ? [targetTable] : [])] });
+                } else if (job.status === 'error') {
+                    stopTrainingReproducePoll();
+                    const errMsg = job.error || 'Unknown error';
+                    if (output) output.value = `Run failed: ${errMsg}`;
+                    appendTrainingStudioLog(`SQL Dev reproduction failed: ${errMsg}`, 'error');
+                    updateTrainingProgressModal(`Failed: ${errMsg}`, true);
+                    setTimeout(hideTrainingProgressModal, 3000);
+                    await logTrainingEventSafe({ event_type: 'training_reproduction_run', entity_type: 'training_studio', target_table: targetTable, source: mode, status: 'failed', details: { error: errMsg }, knowledge_refs: ['training_studio', ...(targetTable ? [targetTable] : [])] });
+                }
+            } catch (pollErr) {
+                stopTrainingReproducePoll();
+                updateTrainingProgressModal(`Poll error: ${pollErr.message || String(pollErr)}`, true);
+                setTimeout(hideTrainingProgressModal, 3000);
+            }
+        }, 3000);
+    } catch (e) {
+        stopTrainingReproducePoll();
+        hideTrainingProgressModal();
+        if (output) output.value = `Run failed: ${e.message || String(e)}`;
+        appendTrainingStudioLog(`SQL Dev reproduction failed: ${e.message || String(e)}`, 'error');
+        await logTrainingEventSafe({ event_type: 'training_reproduction_run', entity_type: 'training_studio', target_table: targetTable, source: mode, status: 'failed', details: { error: e.message || String(e) }, knowledge_refs: ['training_studio', ...(targetTable ? [targetTable] : [])] });
+    }
+}
+
+async function saveTrainingStudioPack() {
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    const sourceTables = (document.getElementById('ts-source-tables')?.value || '').trim();
+    const notes = (document.getElementById('ts-notes')?.value || '').trim();
+    const referenceSql = (document.getElementById('ts-source-sql')?.value || '').trim();
+    const validationSql = (document.getElementById('ts-expected-sql')?.value || document.getElementById('ts-output')?.value || '').trim();
+    const drdFiles = Array.from(document.getElementById('ts-drd-files')?.files || []);
+    if (!targetTable) return showToast('Set target table first', 'warning');
+    try {
+        const res = await API.saveTrainingPack({ target_table: targetTable, source_tables: sourceTables, notes, reference_sql: referenceSql, validation_sql: validationSql, source_datasource_id: '', target_datasource_id: '', drd_files: drdFiles });
+        appendTrainingStudioLog(`Saved example pack ${res.pack_id || ''} for ${targetTable}`, 'success');
+        await logTrainingEventSafe({ event_type: 'training_pack_saved', entity_type: 'training_studio', target_table: targetTable, source: 'training_studio', status: 'saved', details: { pack_id: res.pack_id || '', source_tables: sourceTables }, knowledge_refs: ['training_pack', targetTable] });
+        showToast(`Saved training pack ${res.pack_id || ''}`.trim(), 'success');
+    } catch (e) {
+        appendTrainingStudioLog(`Training pack save failed: ${e.message || String(e)}`, 'error');
+        showToast(`Training pack save failed: ${e.message || String(e)}`, 'error');
+    }
+}
+
+async function markTrainingStudioOutcome(status) {
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    await logTrainingEventSafe({ event_type: 'training_outcome', entity_type: 'training_studio', target_table: targetTable, source: 'manual_mark', status, details: { notes: (document.getElementById('ts-notes')?.value || '').trim() }, knowledge_refs: ['training_outcome', ...(targetTable ? [targetTable] : [])] });
+    appendTrainingStudioLog(`Marked ${targetTable || 'training case'} as ${status}`, status === 'win' ? 'success' : 'error');
+    showToast(`Marked as ${status}`, status === 'win' ? 'success' : 'warning');
+}
+
+// ── Training Pipeline ──────────────────────────────────────────────────────
+let _tsPipelineResult = null;
+let _tsCurrentIteration = 0;
+
+async function runTrainingPipeline() {
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    const sourceTables = (document.getElementById('ts-source-tables')?.value || '').trim();
+    const sourceSql = (document.getElementById('ts-source-sql')?.value || '').trim();
+    const expectedSql = (document.getElementById('ts-expected-sql')?.value || '').trim();
+    const columns = (document.getElementById('ts-train-columns')?.value || '').split(',').map(c => c.trim()).filter(Boolean);
+    const maxIterations = parseInt(document.getElementById('ts-max-iterations')?.value || '5', 10) || 5;
+    const mode = document.getElementById('ts-agent-mode')?.value || 'ghc';
+    const agentId = parseInt(document.getElementById('ts-agent-id')?.value || '0', 10) || null;
+    const drdContext = _trainingStudioDerivedContext ? JSON.stringify(_trainingStudioDerivedContext) : '';
+
+    if (!targetTable) return showToast('Set target table first', 'warning');
+    if (!expectedSql) return showToast('Provide expected SQL for training comparison', 'warning');
+
+    appendTrainingStudioLog(`Starting training pipeline for ${targetTable} (max ${maxIterations} iterations, ${columns.length || 'all'} columns)`, 'info');
+    showTrainingProgressModal(`Training Pipeline: ${targetTable}`, 'Running iterative comparison…');
+
+    try {
+        const result = await API.runTrainingPipeline({
+            target_table: targetTable,
+            source_tables: sourceTables,
+            source_sql: sourceSql,
+            expected_sql: expectedSql,
+            drd_context: drdContext,
+            max_iterations: maxIterations,
+            columns,
+            mode,
+            agent_id: agentId,
+        });
+        _tsPipelineResult = result;
+
+        // Show output
+        const output = document.getElementById('ts-output');
+        if (output) output.value = result.best_sql || result.training_summary || '';
+
+        // Render comparison grid
+        renderTrainingComparisonGrid(result);
+
+        const summaryEl = document.getElementById('ts-pipeline-summary');
+        if (summaryEl) {
+            summaryEl.textContent = `${result.status === 'win' ? '✓ WIN' : '⚠ PARTIAL'}: ${result.final_match_count}/${result.final_total_columns} matched in ${result.total_iterations} iteration(s)`;
+            summaryEl.style.color = result.status === 'win' ? 'var(--success)' : 'var(--warning)';
+        }
+        document.getElementById('ts-comparison-card').style.display = '';
+
+        appendTrainingStudioLog(result.training_summary || `Pipeline finished: ${result.status}`, result.status === 'win' ? 'success' : 'warning');
+        updateTrainingProgressModal(result.status === 'win' ? 'All columns matched!' : `${result.final_match_count}/${result.final_total_columns} matched`, true);
+        setTimeout(hideTrainingProgressModal, 2000);
+    } catch (e) {
+        hideTrainingProgressModal();
+        appendTrainingStudioLog(`Training pipeline failed: ${e.message || String(e)}`, 'error');
+        showToast(`Training pipeline failed: ${e.message || String(e)}`, 'error');
+    }
+}
+
+function renderTrainingComparisonGrid(result) {
+    const iterations = result.iterations || [];
+    const tbody = document.getElementById('ts-comparison-tbody');
+    const tabsEl = document.getElementById('ts-iteration-tabs');
+    if (!tbody || !tabsEl) return;
+
+    // Iteration tabs
+    tabsEl.innerHTML = iterations.map((it, idx) => {
+        const cls = idx === iterations.length - 1 ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+        const icon = it.match_count === it.total_columns ? '✓' : `${it.match_count}/${it.total_columns}`;
+        return `<button class="${cls}" onclick="showTrainingIteration(${idx})" id="ts-iter-tab-${idx}">Iter ${it.iteration} (${icon})</button>`;
+    }).join('');
+
+    _tsCurrentIteration = iterations.length - 1;
+    renderTrainingIterationRows(iterations[_tsCurrentIteration]);
+}
+
+function showTrainingIteration(idx) {
+    if (!_tsPipelineResult?.iterations?.[idx]) return;
+    _tsCurrentIteration = idx;
+    document.querySelectorAll('[id^="ts-iter-tab-"]').forEach(btn => {
+        btn.className = btn.id === `ts-iter-tab-${idx}` ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline';
+    });
+    renderTrainingIterationRows(_tsPipelineResult.iterations[idx]);
+}
+
+function renderTrainingIterationRows(iteration) {
+    const tbody = document.getElementById('ts-comparison-tbody');
+    if (!tbody || !iteration) return;
+    const firstIter = _tsPipelineResult?.iterations?.[0];
+    const rows = iteration.results || [];
+    const matchCount = rows.filter(r => r.status === 'match').length;
+    const summaryEl = document.getElementById('ts-cmp-match-summary');
+    if (summaryEl) summaryEl.textContent = `${rows.length - matchCount} mismatch(es) out of ${rows.length}.`;
+    const showEl = document.getElementById('ts-cmp-showing');
+    if (showEl) showEl.textContent = `Showing ${rows.length} row(s)`;
+
+    tbody.innerHTML = rows.map(row => {
+        const isMatch = row.status === 'match';
+        const statusColor = isMatch ? 'var(--success)' : 'var(--danger)';
+        const statusText = isMatch ? 'MATCH_ALL' : 'GENERATED_MISMATCH';
+        const statusBadge = isMatch ? 'badge-success' : 'badge-danger';
+        const firstRow = firstIter?.results?.find(r => r.column === row.column);
+        const drdExpr = row.drd_expression || row.expected || '';
+        const genExpr = row.generated || 'NULL';
+        const manExpr = row.expected || '';
+        const winLose = isMatch
+            ? '<span style="color:var(--success);font-weight:600">WIN</span>'
+            : '<span style="color:var(--danger);font-weight:600">LOSE</span>';
+        const rowBg = isMatch ? 'transparent' : 'rgba(239,68,68,.08)';
+        const defaultChecked = false;
+        return `<tr style="background:${rowBg}" data-column="${escapeHtml(row.column)}" data-status="${isMatch ? 'match' : 'mismatch'}">
+            <td><input type="checkbox" class="ts-cmp-check" data-column="${escapeHtml(row.column)}" ${defaultChecked ? 'checked' : ''}></td>
+            <td><strong>${escapeHtml(row.column)}</strong></td>
+            <td><span class="badge ${statusBadge}">${statusText}</span></td>
+            <td style="font-family:monospace;font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(drdExpr)}">
+                <div style="max-width:200px;white-space:pre-wrap">${escapeHtml(drdExpr.substring(0, 80))}</div>
+            </td>
+            <td style="font-family:monospace;font-size:11px;max-width:260px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(genExpr)}">
+                <div style="max-width:260px;white-space:pre-wrap">${escapeHtml(genExpr.substring(0, 100))}</div>
+            </td>
+            <td style="font-family:monospace;font-size:11px;max-width:260px" title="${escapeHtml(manExpr)}">
+                <div style="max-width:260px;white-space:pre-wrap">${escapeHtml(manExpr.substring(0, 100))}</div>
+            </td>
+            <td>
+                <select class="form-control ts-cmp-apply-choice" data-column="${escapeHtml(row.column)}" style="min-width:110px;font-size:11px">
+                    <option value="generated" ${!isMatch ? '' : 'selected'}>Generated</option>
+                    <option value="expected" ${!isMatch ? 'selected' : ''}>Expected</option>
+                    <option value="drd">DRD</option>
+                </select>
+            </td>
+            <td>${winLose}</td>
+            <td>${isMatch
+                ? '<button class="btn btn-success btn-sm" style="font-size:10px" onclick="saveColumnWin(\'' + escapeHtml(row.column) + '\')">Save KB</button>'
+                : '<button class="btn btn-outline btn-sm" style="font-size:10px" onclick="retrainColumn(\'' + escapeHtml(row.column) + '\')">Retrain</button> <button class="btn btn-outline btn-sm" style="font-size:10px" onclick="saveColumnWin(\'' + escapeHtml(row.column) + '\')">Save Rule</button>'
+            }</td>
+        </tr>`;
+    }).join('');
+}
+
+let _tsComparisonFilter = 'all';
+function tsFilterComparison(filter) {
+    _tsComparisonFilter = filter;
+    document.querySelectorAll('.ts-filter-btn').forEach(b => {
+        b.className = b.dataset.filter === filter ? 'btn btn-sm btn-primary ts-filter-btn' : 'btn btn-sm btn-outline ts-filter-btn';
+    });
+    document.querySelectorAll('#ts-comparison-tbody tr').forEach(tr => {
+        const rowStatus = tr.dataset.status || '';
+        tr.style.display = (filter === 'all' || filter === rowStatus) ? '' : 'none';
+    });
+    const visible = document.querySelectorAll('#ts-comparison-tbody tr:not([style*="display: none"])').length;
+    const showEl = document.getElementById('ts-cmp-showing');
+    if (showEl) showEl.textContent = `Showing ${visible} row(s)`;
+}
+
+function tsApplySelectedFixes() {
+    const output = document.getElementById('ts-output');
+    if (!output) return;
+    const lastIter = _tsPipelineResult?.iterations?.slice(-1)[0];
+    if (!lastIter) return showToast('Run training pipeline first', 'warning');
+    const selected = Array.from(document.querySelectorAll('.ts-cmp-check:checked')).map(cb => cb.dataset.column);
+    if (!selected.length) return showToast('Select columns to apply fixes', 'warning');
+    // Build fix map
+    let sql = output.value || '';
+    for (const col of selected) {
+        const choice = document.querySelector(`.ts-cmp-apply-choice[data-column="${col}"]`)?.value || 'expected';
+        const row = lastIter.results?.find(r => r.column === col);
+        if (!row) continue;
+        const replacement = choice === 'expected' ? (row.expected || '') : choice === 'drd' ? (row.drd_expression || row.expected || '') : (row.generated || '');
+        if (replacement && row.generated && row.generated !== replacement) {
+            sql = sql.replace(row.generated, replacement);
+        }
+    }
+    output.value = sql;
+    showToast(`Applied ${selected.length} fix(es) to output SQL`, 'success');
+    appendTrainingStudioLog(`Applied ${selected.length} expression fixes to generated SQL`, 'info');
+}
+
+// ── Coaching Chat ──────────────────────────────────────────────────────────
+let _tsCoachHistory = [];
+
+function tsClearCoachHistory() {
+    _tsCoachHistory = [];
+    const el = document.getElementById('ts-coach-history');
+    if (el) el.innerHTML = '<span class="text-muted">Conversation cleared.</span>';
+}
+
+function tsCoachKeydown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        tsAskCoach();
+    }
+}
+
+function _renderTsCoachHistory() {
+    const el = document.getElementById('ts-coach-history');
+    if (!el) return;
+    if (!_tsCoachHistory.length) {
+        el.innerHTML = '<span class="text-muted">No conversation yet.</span>';
+        return;
+    }
+    el.innerHTML = _tsCoachHistory.map(msg => {
+        const isUser = msg.role === 'user';
+        const bg = isUser ? 'rgba(59,130,246,.1)' : 'rgba(16,185,129,.08)';
+        const label = isUser ? 'You' : 'Agent';
+        const color = isUser ? 'var(--primary)' : 'var(--success)';
+        return `<div style="padding:8px;margin-bottom:6px;border-radius:6px;background:${bg}">
+            <div style="font-weight:600;color:${color};font-size:11px;margin-bottom:2px">${label}</div>
+            <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(msg.content)}</div>
+        </div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+}
+
+async function tsAskCoach() {
+    const question = (document.getElementById('ts-coach-question')?.value || '').trim();
+    if (!question) return;
+    document.getElementById('ts-coach-question').value = '';
+    _tsCoachHistory.push({ role: 'user', content: question });
+    _renderTsCoachHistory();
+
+    // Build context from current training state
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    const lastIter = _tsPipelineResult?.iterations?.slice(-1)[0];
+    const mismatchSummary = lastIter?.results?.filter(r => r.status !== 'match')?.map(r =>
+        `${r.column}: generated="${(r.generated || '').substring(0, 80)}" expected="${(r.expected || '').substring(0, 80)}"`
+    )?.join('\n') || 'No mismatches available';
+
+    const systemContext = `You are a SQL/Oracle expert helping train a DRD-to-INSERT mapping tool. Target table: ${targetTable}. Current mismatches:\n${mismatchSummary}`;
+
+    const messages = _tsCoachHistory.map(m => ({ role: m.role, content: m.content }));
+    messages.unshift({ role: 'system', content: systemContext });
+
+    try {
+        const mode = document.getElementById('ts-coach-mode')?.value || 'ghc';
+        const agentId = parseInt(document.getElementById('ts-coach-agent')?.value || '0', 10) || null;
+        const agentIds = mode === 'local' && agentId ? [agentId] : [];
+        const res = await API.startTrainingReproduceAsync(messages, systemContext, 'githubcopilot', agentIds, 'training coaching');
+        // Poll for result
+        let elapsed = 0;
+        const pollId = setInterval(async () => {
+            elapsed += 2;
+            if (elapsed > 120) { clearInterval(pollId); _tsCoachHistory.push({ role: 'assistant', content: 'Timed out waiting for response.' }); _renderTsCoachHistory(); return; }
+            try {
+                const job = await API.getTrainingReproduceJobStatus(res.job_id);
+                if (job.status === 'done') {
+                    clearInterval(pollId);
+                    const reply = String(job.result?.reply || job.result?.message || job.result?.response || job.result?.content || '').trim();
+                    _tsCoachHistory.push({ role: 'assistant', content: reply || 'No response' });
+                    _renderTsCoachHistory();
+                    appendTrainingStudioLog('Coach responded', 'success');
+                } else if (job.status === 'error') {
+                    clearInterval(pollId);
+                    _tsCoachHistory.push({ role: 'assistant', content: `Error: ${job.error || 'Unknown'}` });
+                    _renderTsCoachHistory();
+                }
+            } catch (e) {
+                clearInterval(pollId);
+                _tsCoachHistory.push({ role: 'assistant', content: `Poll error: ${e.message}` });
+                _renderTsCoachHistory();
+            }
+        }, 2000);
+    } catch (e) {
+        _tsCoachHistory.push({ role: 'assistant', content: `Request failed: ${e.message || String(e)}` });
+        _renderTsCoachHistory();
+        showToast('Coach request failed: ' + e.message, 'error');
+    }
+}
+
+function tsApplyCoachSuggestion() {
+    // Find last assistant message
+    const lastAssistant = [..._tsCoachHistory].reverse().find(m => m.role === 'assistant');
+    if (!lastAssistant) return showToast('No coach response to apply', 'warning');
+    // Extract SQL blocks from response
+    const sqlBlocks = lastAssistant.content.match(/```sql\s*([\s\S]*?)```/gi);
+    if (sqlBlocks && sqlBlocks.length) {
+        const sql = sqlBlocks.map(b => b.replace(/```sql\s*/i, '').replace(/```/, '').trim()).join('\n');
+        const output = document.getElementById('ts-output');
+        if (output) {
+            output.value = sql;
+            showToast('Applied SQL from coach response to output', 'success');
+            appendTrainingStudioLog('Applied coach suggestion to output SQL', 'info');
+        }
+    } else {
+        showToast('No SQL code block found in coach response. Copy manually.', 'warning');
+    }
+}
+
+function tsToggleAllComparisonRows(checked) {
+    document.querySelectorAll('.ts-cmp-check').forEach(cb => cb.checked = checked);
+}
+
+async function markSelectedAsWin() {
+    const selected = Array.from(document.querySelectorAll('.ts-cmp-check:checked')).map(cb => cb.dataset.column);
+    if (!selected.length) return showToast('Select columns to mark as win', 'warning');
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    let saved = 0;
+    for (const col of selected) {
+        const row = _tsPipelineResult?.iterations?.slice(-1)[0]?.results?.find(r => r.column === col && r.status === 'match');
+        if (!row) continue;
+        try {
+            await API.saveControlTableTrainingFeedback({
+                target_table: targetTable,
+                target_column: col,
+                issue_type: 'training_win',
+                source_attribute: '',
+                recommended_source: 'rule',
+                chosen_expression: row.generated || row.expected || '',
+                notes: `Auto-trained win from pipeline iteration ${_tsCurrentIteration + 1}`,
+            });
+            saved++;
+        } catch (e) { /* continue */ }
+    }
+    appendTrainingStudioLog(`Saved ${saved} winning expressions to KB for ${targetTable}`, 'success');
+    showToast(`Saved ${saved} rules to KB`, 'success');
+    await loadTrainingRulesTable();
+}
+
+async function markSelectedAsLoss() {
+    const selected = Array.from(document.querySelectorAll('.ts-cmp-check:checked')).map(cb => cb.dataset.column);
+    appendTrainingStudioLog(`Marked ${selected.length} columns as loss`, 'error');
+    showToast(`${selected.length} columns marked as loss`, 'warning');
+}
+
+async function saveColumnWin(column) {
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    const parts = targetTable.split('.');
+    const bareTable = parts.length > 1 ? parts[1] : parts[0];
+    // Try pipeline result first, then analysis result
+    let row = _tsPipelineResult?.iterations?.slice(-1)[0]?.results?.find(r => r.column === column);
+    if (!row && _tsAnalysisResult?.comparison?.rows) {
+        row = _tsAnalysisResult.comparison.rows.find(r => r.column === column);
+    }
+    if (!row) return;
+    const expr = row.generated || row.generated_expression || row.expected || '';
+    try {
+        await API.saveControlTableTrainingFeedback({
+            target_table: bareTable.toUpperCase(),
+            target_column: column,
+            issue_type: 'training_win',
+            source_attribute: '',
+            recommended_source: 'rule',
+            chosen_expression: expr,
+            notes: `Training pipeline win`,
+        });
+        appendTrainingStudioLog(`Saved winning expression for ${column} to KB`, 'success');
+        showToast(`Rule saved for ${column}`, 'success');
+        await loadTrainingRulesTable();
+    } catch (e) {
+        showToast(`Save failed: ${e.message}`, 'error');
+    }
+}
+
+async function retrainColumn(column) {
+    document.getElementById('ts-train-columns').value = column;
+    await runTrainingPipeline();
+}
+
+async function retrainSelectedColumns() {
+    const selected = Array.from(document.querySelectorAll('.ts-cmp-check:checked'))
+        .filter(cb => {
+            const row = _tsPipelineResult?.iterations?.slice(-1)[0]?.results?.find(r => r.column === cb.dataset.column);
+            return row && row.status !== 'match';
+        })
+        .map(cb => cb.dataset.column);
+    if (!selected.length) return showToast('No mismatch columns selected', 'warning');
+    document.getElementById('ts-train-columns').value = selected.join(', ');
+    await runTrainingPipeline();
+}
+
+function exportTrainingComparisonCsv() {
+    let rows = [];
+    const iteration = _tsPipelineResult?.iterations?.slice(-1)[0];
+    if (iteration?.results?.length) {
+        rows = iteration.results.map(r => ({ column: r.column, status: r.status, generated: r.generated || '', expected: r.expected || '' }));
+    } else if (_tsAnalysisResult?.comparison?.rows?.length) {
+        rows = _tsAnalysisResult.comparison.rows.map(r => ({ column: r.column, status: r.status, generated: r.generated_expression || '', expected: r.manual_expression || r.drd_expression || '' }));
+    }
+    if (!rows.length) return showToast('No data to export', 'warning');
+    const header = 'Column,Status,Generated,Expected\n';
+    const csv = rows.map(r =>
+        `"${r.column}","${r.status}","${(r.generated).replace(/"/g, '""')}","${(r.expected).replace(/"/g, '""')}"`
+    ).join('\n');
+    const blob = new Blob([header + csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'training_comparison.csv'; a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ── Training Rules Table ───────────────────────────────────────────────────
+let _tsRules = [];
+
+async function loadTrainingRulesTable() {
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    try {
+        _tsRules = await API.listTrainingPipelineRules(targetTable);
+        renderTrainingRulesTable();
+    } catch (e) {
+        appendTrainingStudioLog(`Failed to load rules: ${e.message}`, 'error');
+    }
+}
+
+function renderTrainingRulesTable() {
+    const tbody = document.getElementById('ts-rules-tbody');
+    const countEl = document.getElementById('ts-rules-count');
+    if (!tbody) return;
+    if (countEl) countEl.textContent = `${_tsRules.length} rule(s)`;
+    if (!_tsRules.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-muted" style="text-align:center">No training rules saved yet</td></tr>';
+        return;
+    }
+    tbody.innerHTML = _tsRules.map(r => `<tr>
+        <td>${r.id}</td>
+        <td style="font-size:10px">${escapeHtml(r.target_table || '')}</td>
+        <td style="font-weight:600">${escapeHtml(r.target_column || '')}</td>
+        <td style="font-family:monospace;font-size:10px;max-width:250px;overflow:hidden;text-overflow:ellipsis" title="${escapeHtml(r.replacement_expression || '')}">${escapeHtml((r.replacement_expression || '').substring(0, 60))}</td>
+        <td><span class="badge">${escapeHtml(r.recommended_source || '')}</span></td>
+        <td style="font-size:10px">${escapeHtml(r.issue_type || '')}</td>
+        <td>
+            <button class="btn btn-outline btn-sm" onclick="editTrainingRule(${r.id})" style="padding:1px 6px;font-size:10px">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTrainingRule(${r.id})" style="padding:1px 6px;font-size:10px">Del</button>
+        </td>
+    </tr>`).join('');
+}
+
+async function deleteTrainingRule(ruleId) {
+    try {
+        await api('DELETE', `/api/tests/control-table/training/rules/${ruleId}`);
+        showToast('Rule deleted', 'success');
+        await loadTrainingRulesTable();
+    } catch (e) {
+        showToast(`Delete failed: ${e.message}`, 'error');
+    }
+}
+
+function editTrainingRule(ruleId) {
+    const rule = _tsRules.find(r => r.id === ruleId);
+    if (!rule) return;
+    openRuleEditorModal({
+        title: 'Edit Rule #' + ruleId,
+        id: ruleId,
+        target_table: rule.target_table || '',
+        target_column: rule.target_column || '',
+        replacement_expression: rule.replacement_expression || '',
+        recommended_source: rule.recommended_source || 'rule',
+        issue_type: rule.issue_type || 'expression_mismatch',
+        notes: rule.notes || '',
+        lockTable: true,
+        lockColumn: true,
+        onSave: () => loadTrainingRulesTable(),
+    });
+}
+
+function addTrainingRule() {
+    const targetTable = (document.getElementById('ts-target-table')?.value || '').trim();
+    openRuleEditorModal({
+        title: 'Add New Training Rule',
+        target_table: targetTable,
+        target_column: '',
+        replacement_expression: '',
+        recommended_source: 'rule',
+        issue_type: 'manual_add',
+        notes: '',
+        lockTable: !!targetTable,
+        onSave: () => loadTrainingRulesTable(),
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Set initial collapse button icons
+    document.querySelectorAll('.ts-section-body').forEach(body => {
+        const header = body.previousElementSibling;
+        if (header) {
+            const btn = header.querySelector('.ts-collapse-btn');
+            if (btn) btn.textContent = body.classList.contains('collapsed') ? '▶' : '▼';
+        }
+    });
+
+    restoreTrainingStudioState();
+    await loadTrainingStudioAgents();
+    const persisted = _safeParseTrainingJson(localStorage.getItem(TRAINING_STUDIO_STATE_KEY), null);
+    if (persisted?.agent_id) {
+        const sel = document.getElementById('ts-agent-id');
+        const hasOption = Array.from(sel?.options || []).some(o => String(o.value) === String(persisted.agent_id));
+        if (hasOption) sel.value = persisted.agent_id;
+    }
+    await loadTrainingAutomationStatus();
+    await loadTrainingRulesTable();
+    // Populate datasource selects
+    try {
+        const datasources = await API.getDatasources();
+        ['ts-source-ds', 'ts-target-ds'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Select datasource</option>' +
+                datasources.map(ds => `<option value="${ds.id}">${ds.id}: ${escapeHtml(ds.name || ds.host || '')} (${ds.db_type})</option>`).join('');
+        });
+    } catch (_) {}
+    // Populate coaching agent select (same as main agent list)
+    try {
+        const agents = await API.getAgents();
+        const coachSel = document.getElementById('ts-coach-agent');
+        if (coachSel) {
+            coachSel.innerHTML = agents.map(a => `<option value="${a.id}">${escapeHtml(a.name || ('Agent ' + a.id))}</option>`).join('');
+            if (!agents.length) coachSel.innerHTML = '<option value="">No local agents</option>';
+        }
+    } catch (_) {}
+    ['ts-target-table', 'ts-source-tables', 'ts-source-sql', 'ts-expected-sql', 'ts-notes', 'ts-agent-mode', 'ts-agent-id', 'ts-auto-interval', 'ts-auto-max-packs'].forEach((id) => {
+        document.getElementById(id)?.addEventListener('input', persistTrainingStudioState);
+        document.getElementById(id)?.addEventListener('change', persistTrainingStudioState);
+    });
+    // When target table changes, refresh rules
+    document.getElementById('ts-target-table')?.addEventListener('change', () => loadTrainingRulesTable());
+});
+</script>
+{% endblock %}

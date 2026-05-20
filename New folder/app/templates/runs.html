@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Test Runs – DB Testing Tool{% endblock %}
+{% block page_title %}Test Runs{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="flex gap-8 mb-16">
+        <input class="form-control" id="filter-batch" placeholder="Filter by batch ID..." style="max-width:300px">
+        <button class="btn btn-outline" onclick="loadRuns()">Filter</button>
+        <button class="btn btn-outline" onclick="document.getElementById('filter-batch').value=''; loadRuns()">Clear</button>
+        <button class="btn btn-danger" id="btn-del-selected-runs" style="display:none" onclick="bulkDeleteRuns()">Delete Selected (<span id="runs-sel-count">0</span>)</button>
+        <button class="btn btn-warning" onclick="triageFailures()" style="margin-left:auto">AI Triage Failures</button>
+        <button class="btn btn-danger" onclick="autoBugs()">Create TFS Bugs</button>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th style="width:36px"><input type="checkbox" id="runs-select-all" onchange="toggleAllRuns(this.checked)"></th><th>ID</th><th>Test</th><th>Batch</th><th>Status</th><th>Mismatches</th><th>Detail</th><th>Time</th><th>Executed</th></tr></thead>
+            <tbody id="runs-tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" id="modal-detail">
+    <div class="modal" style="max-width:700px">
+        <div class="modal-header"><h2>Run Detail</h2><button class="modal-close" onclick="closeModal('modal-detail')">&times;</button></div>
+        <div id="run-detail"></div>
+    </div>
+</div>
+
+<!-- Triage modal -->
+<div class="modal-overlay" id="modal-triage">
+    <div class="modal" style="max-width:700px">
+        <div class="modal-header"><h2>AI Triage Results</h2><button class="modal-close" onclick="closeModal('modal-triage')">&times;</button></div>
+        <div id="triage-result"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentBatchId = null;
+const RUNS_STATE_KEY = 'runs.page.filter.v1';
+
+async function loadRuns() {
+    const batchFilter = document.getElementById('filter-batch').value.trim();
+    localStorage.setItem(RUNS_STATE_KEY, batchFilter);
+    const runs = await API.getRuns(batchFilter || null);
+    currentBatchId = runs.length ? runs[0].batch_id : null;
+    const tbody = document.getElementById('runs-tbody');
+    tbody.innerHTML = runs.map(r => `
+        <tr onclick="viewDetail(${r.id})" style="cursor:pointer">
+            <td><input type="checkbox" class="run-cb" value="${r.id}" onchange="updateRunsSelCount()" onclick="event.stopPropagation()"></td>
+            <td>${r.id}</td>
+            <td>${r.test_case_id}</td>
+            <td><code>${r.batch_id || '-'}</code></td>
+            <td>${statusBadge(r.status)}</td>
+            <td>${r.mismatch_count}</td>
+            <td class="text-muted" style="max-width:300px; overflow:hidden; text-overflow:ellipsis">${escapeHtml(r.actual_result || r.error_message || '')}</td>
+            <td>${r.execution_time_ms ? r.execution_time_ms + ' ms' : '-'}</td>
+            <td class="text-muted">${r.executed_at || '-'}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="9" class="empty-state">No runs found</td></tr>';
+    document.getElementById('runs-select-all').checked = false;
+    updateRunsSelCount();
+}
+
+async function viewDetail(runId) {
+    try {
+        const r = await API.getRun(runId);
+        document.getElementById('run-detail').innerHTML = `
+            <dl style="display:grid; grid-template-columns: 120px 1fr; gap:6px; font-size:13px;">
+                <dt class="text-muted">Status</dt><dd>${statusBadge(r.status)}</dd>
+                <dt class="text-muted">Batch</dt><dd>${r.batch_id}</dd>
+                <dt class="text-muted">Mismatches</dt><dd>${r.mismatch_count}</dd>
+                <dt class="text-muted">Time</dt><dd>${r.execution_time_ms} ms</dd>
+                <dt class="text-muted">Error</dt><dd>${escapeHtml(r.error_message || '-')}</dd>
+            </dl>
+            <h3 style="margin:16px 0 8px">Source Result</h3>
+            <pre class="code-block">${escapeHtml(r.source_result || 'N/A')}</pre>
+            <h3 style="margin:16px 0 8px">Target Result</h3>
+            <pre class="code-block">${escapeHtml(r.target_result || 'N/A')}</pre>
+            <h3 style="margin:16px 0 8px">Actual Result</h3>
+            <pre class="code-block">${escapeHtml(r.actual_result || 'N/A')}</pre>
+            <h3 style="margin:16px 0 8px">Mismatch Sample</h3>
+            <pre class="code-block">${escapeHtml(r.mismatch_sample || 'N/A')}</pre>
+        `;
+        openModal('modal-detail');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function triageFailures() {
+    const batchFilter = document.getElementById('filter-batch').value.trim();
+    const runs = await API.getRuns(batchFilter || null);
+    const failures = runs.filter(r => r.status === 'failed' || r.status === 'error').map(r => ({
+        test_case_id: r.test_case_id,
+        batch_id: r.batch_id,
+        status: r.status,
+        mismatch_count: r.mismatch_count,
+        error_message: r.error_message,
+        actual_result: r.actual_result,
+    }));
+    if (!failures.length) return showToast('No failures to triage', 'info');
+    showToast('AI analyzing failures...', 'info');
+    try {
+        const res = await API.triageFailures(failures);
+        if (res.error) { showToast(res.error, 'error'); return; }
+        document.getElementById('triage-result').innerHTML = (res.clusters || []).map(c => `
+            <div class="card" style="margin-bottom:12px">
+                <h3>${escapeHtml(c.cluster_name)} ${severityBadge(c.severity)}</h3>
+                <p class="text-muted mt-16">${escapeHtml(c.likely_root_cause)}</p>
+                <p><strong>Affected:</strong> ${(c.affected_tests || []).join(', ')}</p>
+                <p><strong>Next steps:</strong></p>
+                <ul>${(c.suggested_investigation_steps || []).map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+            </div>
+        `).join('') || '<div class="empty-state">No clusters returned</div>';
+        openModal('modal-triage');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function autoBugs() {
+    if (!currentBatchId) return showToast('No batch ID identified', 'error');
+    if (!confirm(`Create TFS bugs for failed runs in batch ${currentBatchId}?`)) return;
+    try {
+        const res = await API.autoBugs(currentBatchId);
+        showToast(`Created ${res.created} TFS work item(s)`, 'success');
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+function toggleAllRuns(checked) {
+    document.querySelectorAll('.run-cb').forEach(cb => cb.checked = checked);
+    updateRunsSelCount();
+}
+
+function updateRunsSelCount() {
+    const checked = document.querySelectorAll('.run-cb:checked').length;
+    document.getElementById('runs-sel-count').textContent = checked;
+    document.getElementById('btn-del-selected-runs').style.display = checked > 0 ? '' : 'none';
+}
+
+async function bulkDeleteRuns() {
+    const ids = Array.from(document.querySelectorAll('.run-cb:checked')).map(cb => parseInt(cb.value));
+    if (!ids.length) return;
+    if (!confirm(`Delete ${ids.length} selected run(s)?`)) return;
+    try {
+        const res = await API.bulkDeleteRuns(ids);
+        showToast(`Deleted ${res.deleted} run(s)`, 'success');
+        loadRuns();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+loadRuns();
+</script>
+{% endblock %}
