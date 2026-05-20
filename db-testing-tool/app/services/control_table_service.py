@@ -157,6 +157,7 @@ def analyze_control_table(
         target_table=target_table,
         target_definition=target_def,
         analysis_rows=analysis_rows,
+        source_schema_index=source_index,
     )
     comparison = compare_insert_variants(analysis_rows, insert_sql, manual_sql)
     suite_tests = build_control_table_test_defs(
@@ -494,6 +495,7 @@ def build_control_insert_sql(
     target_table: str,
     target_definition: Dict[str, Any],
     analysis_rows: List[Dict[str, Any]],
+    source_schema_index: Optional[Dict[Tuple[str, str], Dict[str, Any]]] = None,
 ) -> str:
     row_map = {row["column"]: row for row in analysis_rows}
 
@@ -606,6 +608,8 @@ def build_control_insert_sql(
     joins = []
     join_alias_map: Dict[str, Tuple[str, str]] = {}
     lk_table_alias_counts: Dict[str, int] = {}  # Track per-table numbering
+    pdm_missing_old_aliases: set = set()
+    pdm_missing_lookup_bases: set = set()
 
     # Collect unique raw joins with row context first, then collapse low-quality duplicates.
     raw_join_seen: set[str] = set()
@@ -615,21 +619,45 @@ def build_control_insert_sql(
         if not lookup_join or lookup_join in raw_join_seen:
             continue
         raw_join_seen.add(lookup_join)
-        old_alias = extract_join_alias(lookup_join)
         _lk_tbl_match = re.search(r'\bJOIN\s+([A-Z0-9_\.\"\$#]+)\b', lookup_join, flags=re.IGNORECASE)
         _lk_fq = (_lk_tbl_match.group(1).replace('"', '').upper() if _lk_tbl_match else "LOOKUP")
         _lk_bare = _lk_fq.split(".")[-1]
+
+        # Extract alias including $ for Oracle dollar-sign tables like J$TXN.
+        _alias_m = re.search(r'\bJOIN\s+[\w\.\$#]+\s+([A-Z_][A-Z0-9_\$#]*)\b', lookup_join, flags=re.IGNORECASE)
+        old_alias = _alias_m.group(1) if _alias_m else extract_join_alias(lookup_join)
 
         _on_match = re.search(r'\bON\b\s+([\s\S]*)$', lookup_join, flags=re.IGNORECASE)
         _on_text = (_on_match.group(1) if _on_match else "").upper()
 
         # Source-side key used by this join (if present).
+        # First try: look for explicit source/main table reference.
         _src_key_match = re.search(
             rf"\b(?:{re.escape(_src_ref_name)}|{re.escape(_src_table_name)}|S)\.([A-Z0-9_#\$]+)\b",
             _on_text,
             flags=re.IGNORECASE,
         )
         _src_key = (_src_key_match.group(1).upper() if _src_key_match else "")
+        # If no explicit source match, look for any non-lookup-alias.col reference on the
+        # right side of = that isn't the lookup table alias itself.
+        if not _src_key and old_alias:
+            _lhs_ref = re.search(
+                r'(?:(?:NVL\(\s*TO_CHAR\(\s*)?([A-Z_][A-Z0-9_\$#]*)\.'
+                r'([A-Z0-9_#\$]+))\s*=+',
+                _on_text,
+                flags=re.IGNORECASE,
+            )
+            if _lhs_ref and _lhs_ref.group(1).upper() != old_alias.upper():
+                _src_key = _lhs_ref.group(2).upper()
+        if not _src_key and old_alias:
+            _rhs_ref = re.search(
+                r'=\s*(?:NVL\(\s*TO_CHAR\(\s*)?([A-Z_][A-Z0-9_\$#]*)\.'
+                r'([A-Z0-9_#\$]+)',
+                _on_text,
+                flags=re.IGNORECASE,
+            )
+            if _rhs_ref and _rhs_ref.group(1).upper() != old_alias.upper():
+                _src_key = _rhs_ref.group(2).upper()
         _row_src_attr = (row.get("source_attribute") or "").strip().upper()
 
         # Quality scoring for duplicate collapse.
@@ -686,9 +714,20 @@ def build_control_insert_sql(
         lookup_join = cand["lookup_join"]
         old_alias = cand.get("old_alias") or ""
         _lk_bare = cand.get("lookup_bare") or "LOOKUP"
+        _lk_fq = cand.get("lookup_fq") or ""
 
         lk_table_alias_counts[_lk_bare] = lk_table_alias_counts.get(_lk_bare, 0) + 1
         new_alias = f"{_lk_bare}_{lk_table_alias_counts[_lk_bare]}"
+
+        # If lookup table is not present in current source schema KB index,
+        # skip JOIN emission and force dependent expressions to NULL marker later.
+        _lk_schema, _lk_name = split_fq_table(_lk_fq)
+        if source_schema_index is not None and not find_table(source_schema_index, _lk_schema, _lk_name):
+            if old_alias:
+                pdm_missing_old_aliases.add(old_alias.upper())
+            pdm_missing_lookup_bases.add(_lk_bare.upper())
+            continue
+
         join_sql_renamed = replace_join_alias(lookup_join, old_alias, new_alias) if old_alias else lookup_join
         # Normalize S. references in JOIN ON clause to use source ref name
         join_sql_renamed = re.sub(r'\bS\.([A-Z0-9_#\$]+)\b', f'{_src_ref_name}.\\1', join_sql_renamed, flags=re.IGNORECASE)
@@ -837,7 +876,7 @@ def build_control_insert_sql(
         _expr_for_check = expr
         _undef_aliases = [
             m.group(1).upper()
-            for m in re.finditer(r'\b([A-Z_][A-Z0-9_]*)\.[A-Z_][A-Z0-9_#\$]*\b', _expr_for_check, flags=re.IGNORECASE)
+            for m in re.finditer(r'\b([A-Z_][A-Z0-9_\$#]*)\.[A-Z_][A-Z0-9_#\$]*\b', _expr_for_check, flags=re.IGNORECASE)
             if m.group(1).upper() not in all_valid_aliases
             and m.group(1).upper() not in {"SYSDATE", "SYSTIMESTAMP", "DUAL"}
         ]
@@ -863,11 +902,18 @@ def build_control_insert_sql(
             _still_undef = any(
                 m.group(1).upper() not in all_valid_aliases
                 and m.group(1).upper() not in {"SYSDATE", "SYSTIMESTAMP", "DUAL"}
-                for m in re.finditer(r'\b([A-Z_][A-Z0-9_]*)\.[A-Z_][A-Z0-9_#\$]*\b', expr, flags=re.IGNORECASE)
+                for m in re.finditer(r'\b([A-Z_][A-Z0-9_\$#]*)\.[A-Z_][A-Z0-9_#\$]*\b', expr, flags=re.IGNORECASE)
             )
             if _still_undef:
                 _col_def = col_map_def.get(col_name, {})
-                if not _col_def.get("nullable", True):
+                _hits_pdm_miss = any(
+                    (_undef_a in pdm_missing_old_aliases)
+                    or (re.sub(r"_\d+$", "", _undef_a) in pdm_missing_lookup_bases)
+                    for _undef_a in _undef_aliases
+                )
+                if _hits_pdm_miss:
+                    expr = "NULL /* PDM_MISS */"
+                elif not _col_def.get("nullable", True):
                     _is_pk = col_name in pk_cols or bool(_col_def.get("is_pk"))
                     expr = fallback_non_nullable_expression(col_name, (_col_def.get("data_type") or "").upper(), is_pk=_is_pk)
                 else:
@@ -1146,7 +1192,7 @@ def compare_column_status(
             return "generated_mismatch"
         if gen_norm == man_norm and drd_norm != gen_norm:
             return "both_match_each_other_not_drd"
-        # All different — try canonical resolution before giving up
+        # All different - try canonical resolution before giving up
         canonical_status = _try_canonical_resolution(
             target_column, source_attribute or drd_expr,
             generated_expr, manual_expr, saved_rules,
@@ -1231,7 +1277,7 @@ def apply_compare_decisions(base_sql: str, decisions: List[Dict[str, str]]) -> s
         select_parts[idx] = f"{expr} AS {column}"
     result_sql = rebuild_sql_with_select_parts(base_sql, parsed, select_parts)
     # Also apply column-reference corrections to JOIN ON clauses so that
-    # rules that fix a column name (e.g. ACG_TP_CODE → AC_TP_CODE) propagate
+    # rules that fix a column name (e.g. ACG_TP_CODE -> AC_TP_CODE) propagate
     # into the JOIN conditions, not just the SELECT list.
     result_sql = apply_rule_corrections_to_joins(result_sql, decisions)
     return ensure_parallel_hints(result_sql)
@@ -1240,11 +1286,9 @@ def apply_compare_decisions(base_sql: str, decisions: List[Dict[str, str]]) -> s
 def apply_rule_corrections_to_joins(sql_text: str, decisions: List[Dict[str, str]]) -> str:
     """Fix JOIN ON clauses based on rule decisions.
 
-    When a rule replaces an expression for a column, the old *source_attribute*
+    When a rule replaces an expression for a column, the old source_attribute
     referenced in JOIN ON conditions may also be wrong (e.g. the DRD says
-    ``ACG_TP_CODE`` but the real source column is ``AC_TP_CODE``).  This
-    function extracts the column references from both old and new expressions
-    and rewrites JOIN ON clauses accordingly.
+    ACG_TP_CODE but the real source column is AC_TP_CODE).
     """
     if not decisions or not sql_text:
         return sql_text
@@ -1815,7 +1859,7 @@ def _logical_to_physical(logical_name: str) -> str:
 
 
 def extract_join_alias(join_sql: str) -> str:
-    m = re.search(r"\bJOIN\s+[A-Z0-9_\.\(\)\" ]+\s+([A-Z0-9_]+)\s*\nON\b", join_sql, flags=re.IGNORECASE)
+    m = re.search(r"\bJOIN\s+[A-Z0-9_\.\(\)\"\$# ]+\s+([A-Z0-9_\$#]+)\s*\nON\b", join_sql, flags=re.IGNORECASE)
     return (m.group(1) if m else "").upper()
 
 
@@ -1830,7 +1874,7 @@ def replace_join_alias(sql: str, old_alias: str, new_alias: str) -> str:
     if not old_alias or not new_alias or old_alias.upper() == new_alias.upper():
         return sql
     out = re.sub(
-        rf"(\bJOIN\s+[A-Z0-9_\.\(\)\" ]+\s+){re.escape(old_alias)}(\b)",
+        rf"(\bJOIN\s+[A-Z0-9_\.\(\)\"\$# ]+\s+){re.escape(old_alias)}(\b)",
         rf"\1{new_alias}\2",
         sql,
         flags=re.IGNORECASE,
@@ -2293,6 +2337,7 @@ def derive_lookup_from_transformation(
     src_lookup_col = (spec.get("source_lookup_col") or source_attr or "").strip().upper().split(".")[-1]
     src_lookup_literal = (spec.get("source_lookup_literal") or "").strip()
     extra_filter = (spec.get("extra_filter") or "").strip()
+    explicit_on_clause = bool(spec.get("explicit_on_clause"))
 
     if lookup_name == "CL_VAL" and (src_lookup_col in {"CL_VAL", "CL_VAL_NM", "CL_VAL_CD"} or src_lookup_col == source_attr):
         inferred_src = infer_lookup_source_key_from_text(transformation, source_attr)
@@ -2312,7 +2357,7 @@ def derive_lookup_from_transformation(
             elif lookup_cols:
                 val_col = sorted(lookup_cols)[0]
 
-    if source_entry:
+    if source_entry and not explicit_on_clause:
         source_cols = set((source_entry.get("columns") or {}).keys())
         if src_lookup_col and src_lookup_col not in source_cols:
             inferred_src = infer_lookup_source_key_from_text(transformation, source_attr)
@@ -2321,6 +2366,30 @@ def derive_lookup_from_transformation(
             else:
                 src_lookup_col = source_attr if source_attr in source_cols else ""
 
+    # Determine the correct source reference for the ON clause.
+    # If source_table bare name matches lookup bare name (e.g., both are CL_VAL),
+    # use the main FROM anchor table or the DRD-specified source alias instead to
+    # avoid self-referencing joins.
+    _lk_bare_name = lookup_table.split(".")[-1].upper() if lookup_table else ""
+    _src_bare_name = src_table.split(".")[-1].upper() if src_table else ""
+    _source_alias_hint = (spec.get("source_alias_hint") or "").strip().upper()
+
+    if _src_bare_name and _src_bare_name == _lk_bare_name:
+        # Source table IS the lookup table — use the main FROM anchor or DRD alias hint
+        _block_schema, _block_table = parse_source_table_from_block(source_block)
+        if _block_table and _block_table.upper() != _lk_bare_name:
+            _effective_src = _block_table.upper()
+        elif _source_alias_hint and _source_alias_hint != _lk_bare_name:
+            _effective_src = _source_alias_hint
+        else:
+            logger.warning("derive_lookup_from_transformation: falling back to S for self-referencing lookup %s", lookup_table)
+            _effective_src = "S"
+    elif _source_alias_hint and _source_alias_hint not in {"S", _src_bare_name, _lk_bare_name}:
+        # DRD referenced an intermediate table alias (e.g., AP for APA)
+        _effective_src = _source_alias_hint
+    else:
+        _effective_src = src_table if src_table else "S"
+
     if src_lookup_literal:
         source_expr = src_lookup_literal if re.fullmatch(r"-?\d+(?:\.\d+)?", src_lookup_literal) else f"'{src_lookup_literal}'"
         on_sql = f"LK.{join_col} = {source_expr}"
@@ -2328,7 +2397,7 @@ def derive_lookup_from_transformation(
         # If we cannot resolve a valid source lookup key, keep the join non-matching but executable.
         on_sql = "1 = 0"
     else:
-        _src_ref = f"{src_table}.{src_lookup_col}" if src_table else f"S.{src_lookup_col}"
+        _src_ref = f"{_effective_src}.{src_lookup_col}"
         on_sql = f"NVL(TO_CHAR(LK.{join_col}), '{NVL_NULL_SENTINEL}') = NVL(TO_CHAR({_src_ref}), '{NVL_NULL_SENTINEL}')"
 
     if extra_filter:

@@ -71,7 +71,7 @@ def _column_token_parts(expr: str) -> Tuple[str, str]:
     text = (expr or "").strip().strip('"')
     if not text:
         return "", ""
-    match = re.search(r'(?:(?P<alias>[A-Z0-9_]+)\.)?"?(?P<column>[A-Z0-9_]+)"?$', text.upper())
+    match = re.search(r'(?:(?P<alias>[A-Z0-9_\$#]+)\.)?"?(?P<column>[A-Z0-9_\$#]+)"?$', text.upper())
     if not match:
         return "", ""
     return (match.group("alias") or "").upper(), (match.group("column") or "").upper()
@@ -1841,7 +1841,14 @@ def _extract_lookup_spec(
             return False
         if "." in t:
             return True
-        return t.endswith("_DIM") or t.endswith("_MAP") or t.endswith("CL_VAL") or t == "CL_VAL"
+        return (
+            t.endswith("_DIM")
+            or t.endswith("_MAP")
+            or t.endswith("_LKUP")
+            or t.endswith("_LKP")
+            or t.endswith("CL_VAL")
+            or t == "CL_VAL"
+        )
 
     def _normalize_lookup_table_token(token: str) -> str:
         t = (token or "").strip().upper()
@@ -1852,19 +1859,61 @@ def _extract_lookup_spec(
         return t
 
     # Pattern 0: Explicit LEFT [OUTER] JOIN schema.table alias ON col1 = col2
-    m0 = re.search(r'LEFT\s+(?:OUTER\s+)?JOIN\s+(?:TO\s+)?([\w\.]+)\s+\w+(?:\s+TABLE)?\s+ON\s+([\w\.]+)\s*=\s*([\w\.]+)', upper)
+    # Include $ in table/column patterns for Oracle identifiers like J$TXN
+    m0 = re.search(
+        r'LEFT\s+(?:OUTER\s+)?JOIN\s+(?:TO\s+)?'
+        r'([\w\.\$#]+)\s+([A-Z_][A-Z0-9_\$#]*)(?:\s+TABLE)?\s+ON\s+'
+        r'([\w\.\$#]+)\s*=\s*([\w\.\$#]+)',
+        upper,
+    )
     if m0:
         lk_tbl = m0.group(1)
-        _, lk_join_col = _column_token_parts(m0.group(2))
-        _, src_col = _column_token_parts(m0.group(3))
-        if _looks_like_lookup_table(lk_tbl) and lk_join_col and src_col:
+        lk_alias = m0.group(2)
+        left_token = m0.group(3)
+        right_token = m0.group(4)
+        left_prefix, left_col = _column_token_parts(left_token)
+        right_prefix, right_col = _column_token_parts(right_token)
+
+        # Determine which side of = references the lookup table by alias prefix.
+        lk_bare = lk_tbl.split(".")[-1].upper() if "." in lk_tbl else lk_tbl.upper()
+        left_is_lookup = (left_prefix.upper() in {lk_alias.upper(), lk_bare, lk_tbl.upper()})
+        right_is_lookup = (right_prefix.upper() in {lk_alias.upper(), lk_bare, lk_tbl.upper()})
+
+        if left_is_lookup and not right_is_lookup:
+            lk_join_col = left_col
+            src_col = right_col
+            src_alias = right_prefix
+        elif right_is_lookup and not left_is_lookup:
+            lk_join_col = right_col
+            src_col = left_col
+            src_alias = left_prefix
+        else:
+            # Ambiguous or both match - use positional default (left=lookup)
+            lk_join_col = left_col
+            src_col = right_col
+            src_alias = right_prefix
+
+        extra_filter = _extract_lookup_filters(transformation)
+        _tail = upper[m0.end():]
+        _tail_m = re.match(r'\s*(AND\b[\s\S]+)$', _tail)
+        if _tail_m:
+            _tail_filter = (_tail_m.group(1) or "").strip()
+            if extra_filter:
+                if _tail_filter.upper() != extra_filter.upper():
+                    extra_filter = f"{extra_filter} {_tail_filter}"
+            else:
+                extra_filter = _tail_filter
+
+        # Pattern 0 is explicit JOIN syntax from DRD, so trust the lookup table token.
+        if lk_tbl and lk_join_col and src_col:
             return {
                 "lookup_table": lk_tbl,
                 "source_lookup_col": src_col,
                 "lookup_join_col": lk_join_col,
                 "lookup_value_col": target_col_u,
-                "extra_filter": _extract_lookup_filters(transformation),
+                "extra_filter": extra_filter,
                 "explicit_on_clause": True,
+                "source_alias_hint": src_alias,
             }
 
     # Pattern 0b: "LOOK UP USING A.B = C.D"

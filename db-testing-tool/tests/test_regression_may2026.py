@@ -322,3 +322,113 @@ def test_schema_catalog_unsupported_type(_server_running):
         assert False, "Expected 404"
     except urllib.error.HTTPError as e:
         assert e.code == 404, f"Expected 404 for unknown DS ID, got {e.code}"
+
+
+def test_extract_lookup_spec_supports_dollar_hash_and_and_tail():
+    from app.services.drd_import_service import _extract_lookup_spec
+
+    spec = _extract_lookup_spec(
+        transformation=(
+            "LEFT OUTER JOIN CCAL_REPL_OWNER.J$TXN J$TXN ON "
+            "J$TXN.SRC_TXN_ID = TXN.TXN_ID AND J$TXN.ACTV_F = 'Y'"
+        ),
+        src_attr_u="TXN_ID",
+        target_col_u="SRC_TXN_TYPE_CD",
+        src_schema="AMOGOREANU",
+        src_table="TXN",
+    )
+
+    assert spec is not None
+    assert spec["lookup_table"] == "CCAL_REPL_OWNER.J$TXN"
+    assert spec["lookup_join_col"] == "SRC_TXN_ID"
+    assert spec["source_lookup_col"] == "TXN_ID"
+    assert "ACTV_F" in (spec.get("extra_filter") or "")
+    assert spec.get("source_alias_hint") == "TXN"
+
+
+def test_extract_lookup_spec_accepts_lkup_suffix_table():
+    from app.services.drd_import_service import _extract_lookup_spec
+
+    spec = _extract_lookup_spec(
+        transformation="LOOKUP ON TXN_SRC_TAX_CODE_LKUP USING SRC_TAX_CODE_ID",
+        src_attr_u="SRC_TAX_CODE_ID",
+        target_col_u="SRC_TAX_CODE_DESC",
+        src_schema="CCAL_REPL_OWNER",
+        src_table="TXN",
+    )
+
+    assert spec is not None
+    assert spec["lookup_table"].endswith("TXN_SRC_TAX_CODE_LKUP")
+
+
+def test_derive_lookup_preserves_explicit_on_source_column():
+    from app.services.control_table_service import derive_lookup_from_transformation
+
+    row = {
+        "transformation": (
+            "LEFT JOIN COMMON_OWNER.CCY_DIM CCY_DIM "
+            "ON CCY_DIM.CCY_CD = TXN.TXN_CCY_CD"
+        ),
+        "source_schema": "AMOGOREANU",
+        "source_table": "TXN",
+    }
+    source_schema_index = {
+        ("COMMON_OWNER", "CCY_DIM"): {
+            "schema": "COMMON_OWNER",
+            "table": "CCY_DIM",
+            "columns": {"CCY_CD": "CCY_CD", "CCY_ID": "CCY_ID"},
+        },
+        ("AMOGOREANU", "TXN"): {
+            "schema": "AMOGOREANU",
+            "table": "TXN",
+            "columns": {"TXN_ID": "TXN_ID", "TXN_CCY_CD": "TXN_CCY_CD"},
+        },
+    }
+
+    join_sql, _ = derive_lookup_from_transformation(
+        row=row,
+        source_attr="TXN_ID",
+        target_col="TXN_CCY_ID",
+        source_schema_index=source_schema_index,
+        source_block="FROM AMOGOREANU.TXN TXN",
+    )
+
+    assert "CCY_DIM.CCY_CD" in join_sql
+    assert "TXN.TXN_CCY_CD" in join_sql
+    assert "TXN.TXN_ID" not in join_sql
+
+
+def test_build_control_insert_sql_pdm_missing_join_becomes_null_marker():
+    from app.services.control_table_service import build_control_insert_sql
+
+    sql = build_control_insert_sql(
+        control_schema="CTL_OWNER",
+        target_table="TGT",
+        target_definition={
+            "columns": [{"name": "COL_A", "nullable": True, "data_type": "VARCHAR2(20)"}],
+            "primary_keys": [],
+        },
+        analysis_rows=[
+            {
+                "column": "COL_A",
+                "drd_expression": "MISS_LKP.COL_A",
+                "lookup_join": "LEFT JOIN CCAL_REPL_OWNER.TXN_SRC_TAX_CODE_LKUP MISS_LKP ON MISS_LKP.SRC_TAX_CODE_ID = TXN.SRC_TAX_CODE_ID",
+                "source_table": "TXN",
+                "source_schema": "AMOGOREANU",
+                "source_attribute": "SRC_TAX_CODE_ID",
+                "transformation": "",
+                "source_block": "FROM AMOGOREANU.TXN TXN",
+                "nullable": True,
+            }
+        ],
+        source_schema_index={
+            ("AMOGOREANU", "TXN"): {
+                "schema": "AMOGOREANU",
+                "table": "TXN",
+                "columns": {"SRC_TAX_CODE_ID": "SRC_TAX_CODE_ID"},
+            }
+        },
+    )
+
+    assert "TXN_SRC_TAX_CODE_LKUP" not in sql
+    assert "NULL /* PDM_MISS */ AS COL_A" in sql
