@@ -1,0 +1,1847 @@
+[
+  {
+    "col": "EXG_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "AR_DIM_ID",
+    "expr": "NVL(TXN.AR_ID, -1)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "OFST_AR_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "ACG_TP_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "CASH_POS_TP_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "SBC_CCY_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "SEC_PD_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "CASH_PD_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "LGCY_CNCL_CMPLN_RSN_DIM_ID",
+    "expr": "NVL(TXN.LGCY_CNCL_CMPLN_RSN_TP_ID, -1)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "LGCY_CNCL_CMPLN_SRC_DIM_ID",
+    "expr": "NVL(TXN.LGCY_CNCL_CMPLN_SRC_TP_ID, -1)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "LGCY_MKT_TP_DIM_ID",
+    "expr": "NVL(TXN.LGCY_MKT_TP_ID, -1)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "LGCY_TRD_CPCTY_TP_DIM_ID",
+    "expr": "NVL(TXN.LGCY_TRD_CPCTY_TP_ID, -1)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "SRC_PCS_TP_DIM_ID",
+    "expr": "NVL(TXN.SRC_PCS_TP_ID, -1)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "SRC_ENTR_CNL_TP_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "TRD_SLCT_TP_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "TXN_SRC_STM_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "REL_TXN_SRC_STM_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "BKR_AR_DIM_ID",
+    "expr": "NVL(TXN.AR_ID, -1)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "TD_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "TD",
+    "expr": "NVL(TXN.TD, SYSDATE)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "SD_DIM_ID",
+    "expr": "-1",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "SD",
+    "expr": "TXN.SD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKG_DT",
+    "expr": "TXN.BKG_DT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ORIG_BKG_DT",
+    "expr": "TXN.ORIG_BKG_DT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_DTM",
+    "expr": "TXN.EXEC_DTM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_ID",
+    "expr": "TXN.TXN_ID",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "REL_TXN_ID",
+    "expr": "TXN_RLTNP.TRGT_TXN_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TRD_NUM",
+    "expr": "TXN.TRD_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ORIG_TRD_NUM",
+    "expr": "TXN.ORIG_TRD_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_SRC_KEY",
+    "expr": "TXN.TXN_SRC_KEY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_APA_ID",
+    "expr": "APA_SECURITY.APA_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CSH_APA_ID",
+    "expr": "APA_CASH.APA_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_PRC_IN_TXN_CCY",
+    "expr": "APA_SECURITY.SEC_PRC_IN_TXN_CCY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_TXN_AMT",
+    "expr": "APA_SECURITY.TXN_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_TXN_AMT",
+    "expr": "APA_CASH.TXN_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_ORIG_QTY",
+    "expr": "APA_SECURITY.SEC_ORIG_QTY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_SRC_PRC_IN_SBC",
+    "expr": "APA_SECURITY.SEC_SRC_PRC_IN_SBC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SALE_CHRG_RATE_PCT",
+    "expr": "CASE WHEN APA_CASH.SALE_CHRG_RATE_TP_ID = 2506 THEN APA_CASH.SALE_CHRG_RATE END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SALE_CHRG_RATE_TP_ID",
+    "expr": "APA_CASH.SALE_CHRG_RATE_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SALE_CHRG_RATE_TP_CD",
+    "expr": "APA_CASH.SALE_CHRG_RATE_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_SBC_AMT",
+    "expr": "APA_SECURITY.SBC_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_SBC_AMT",
+    "expr": "APA_CASH.SBC_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SBC_CCY_CALC_DT",
+    "expr": "APA_SECURITY.SBC_CCY_CALC_DT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SBC_EXG_RATE",
+    "expr": "APA_SECURITY.SBC_EXG_RATE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_DB_CR_CD",
+    "expr": "APA_CASH.DB_CR_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_DB_CR_CD",
+    "expr": "APA_SECURITY.DB_CR_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_SRC_SEQ_NUM",
+    "expr": "APA_SECURITY.SRC_SEQ_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_APA_EXT_QUALFR",
+    "expr": "APA_SECURITY.APA_EXT_QUALFR",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_DSC_TRAILER_1",
+    "expr": "APA_SECURITY.DSC_TRAILER_1",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_ALT_DSC_TRAILER_2",
+    "expr": "APA_SECURITY.ALT_DSC_TRAILER_2",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BUY_SELL_IND",
+    "expr": "TXN.BUY_SELL_IND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CF_GEN_F",
+    "expr": "TXN.CF_GEN_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_CL_F",
+    "expr": "TXN.TXN_CL_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OPT_CLSS_CD",
+    "expr": "TXN.OPTS_CLSS_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_SRC_CUSIP",
+    "expr": "APA_SECURITY.SEC_SRC_CUSIP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_DSC_TRAILER_1",
+    "expr": "APA_CASH.DSC_TRAILER_1",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_ALT_DSC_TRAILER_2",
+    "expr": "APA_CASH.ALT_DSC_TRAILER_2",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_SRC_SEQ_NUM",
+    "expr": "APA_CASH.SRC_SEQ_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_TP_ID",
+    "expr": "TXN.TXN_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_TP_CD",
+    "expr": "TRANSACTION_TYPE.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_TP_NM",
+    "expr": "TRANSACTION_TYPE.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_TP_DSC",
+    "expr": "TRANSACTION_TYPE.DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_SBTP_ID",
+    "expr": "TXN.TXN_SBTP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_SUB_TP_NM",
+    "expr": "TRANSACTION_SUBTYPE.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_SUB_TP_CD",
+    "expr": "TRANSACTION_SUBTYPE.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_SUB_TP_DSC",
+    "expr": "TRANSACTION_SUBTYPE.DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_TP_ID",
+    "expr": "TXN.EXEC_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_TP_CD",
+    "expr": "EXECUTION_TYPE.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_TP_NM",
+    "expr": "EXECUTION_TYPE.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_TP_DSC",
+    "expr": "EXECUTION_TYPE.DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_SBTP_CD",
+    "expr": "EXECUTION_SUBTYPE.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_SBTP_NM",
+    "expr": "EXECUTION_SUBTYPE.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_SBTP_DSC",
+    "expr": "EXECUTION_SUBTYPE.DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXEC_SBTP_ID",
+    "expr": "TXN.EXEC_SBTP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_APA_TP_ID",
+    "expr": "APA_SECURITY.APA_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_APA_TP_CD",
+    "expr": "APA_SECURITY.APA_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_APA_TP_NM",
+    "expr": "APA_SECURITY.APA_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_APA_TP_DSC",
+    "expr": "APA_SECURITY.APA_TP_DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CSH_APA_TP_ID",
+    "expr": "APA_CASH.APA_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_APA_TP_CD",
+    "expr": "APA_CASH.APA_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_APA_TP_NM",
+    "expr": "APA_CASH.APA_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_APA_TP_DSC",
+    "expr": "APA_CASH.APA_TP_DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_AVY_CGY",
+    "expr": "APA_SECURITY.AVY_CGY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_AVY_TP",
+    "expr": "APA_SECURITY.AVY_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_AVY_CL_ID",
+    "expr": "APA_SECURITY.AVY_CL_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_AVY_CGY",
+    "expr": "APA_CASH.AVY_CGY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_AVY_TP",
+    "expr": "APA_CASH.AVY_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CSH_AVY_CL_ID",
+    "expr": "APA_CASH.AVY_CL_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CRT_DTM",
+    "expr": "NVL(TXN.CRT_DTM, SYSDATE)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "CRT_USR_NM",
+    "expr": "NVL(TXN.CRT_USR_NM, 'SYSTEM')",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "SESS_NO",
+    "expr": "0",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_ENTR_DTM",
+    "expr": "TXN.SRC_ENTR_DTM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AR_ID",
+    "expr": "TXN.AR_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_PD_ID",
+    "expr": "APA_SECURITY.SEC_PD_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_PD_ID",
+    "expr": "APA_CASH.CASH_PD_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_AR_ID",
+    "expr": "CASE WHEN AR_DIM.ORIG_SRC_STM_CD = 'BKRBO1'\nTHEN\tTXN.AR_ID\nWHEN APA_CASH.BKR_AR_ID IS NOT NULL \nTHEN APA_CASH.BKR_AR_ID\nWHEN APA_SECURITY.BKR_AR_ID IS NOT NULL \nTHEN APA_SECURITY.BKR_AR_ID\nELSE AR_GRP_SUBDIM.LINKED_BKR_AR_ID\nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OFST_AR_ID",
+    "expr": "coalesce(APA_CASH.OFST_AR_ID,APA_SECURITY.OFST_AR_ID)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BR_CD",
+    "expr": "TXN.BR_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "FA_NUM",
+    "expr": "TXN.FA_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_CRT_USRNM",
+    "expr": "TXN.SRC_CRT_USRNM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ORIG_TD",
+    "expr": "TXN.ORIG_TD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_PCS_TP_CD",
+    "expr": "SRC_PCS_TP_DIM.SRC_PCS_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_PCS_TP_NM",
+    "expr": "SRC_PCS_TP_DIM.SRC_PCS_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CCY_DIM_ID",
+    "expr": "NVL(coalesce(APA_CASH.CCY_DIM_ID,APA_SECURITY.CCY_DIM_ID),0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CCY_CD",
+    "expr": "coalesce(APA_CASH.TXN_ISO_CCY_CODE,APA_SECURITY.TXN_ISO_CCY_CODE)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SBC_CCY_CD",
+    "expr": "coalesce(APA_CASH.STM_BASE_ISO_CCY_CODE,APA_SECURITY.STM_BASE_ISO_CCY_CODE)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_EFF_DT",
+    "expr": "coalesce(APA_CASH.SRC_EFF_DT,APA_SECURITY.SRC_EFF_DT)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DOL_IND_ID",
+    "expr": "TXN.DOL_IND_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DOL_IND_CD",
+    "expr": "CD_CL_VAL.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DOL_IND_NM",
+    "expr": "CD_CL_VAL.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OMS_ORDR_KEY",
+    "expr": "TXN.OMS_ORDR_KEY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXG_CD",
+    "expr": "TXN.EXG_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EXG_NM",
+    "expr": "EXG_DIM.EXG_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACG_TP_CD",
+    "expr": "coalesce(APA_CASH.ACG_TP_CD,APA_SECURITY.ACG_TP_CD)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACG_TP_NM",
+    "expr": "coalesce(APA_CASH.ACG_TP_NM,APA_SECURITY.ACG_TP_NM)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_POS_TP_CD",
+    "expr": "APA_CASH.CASH_POS_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_POS_TP_NM",
+    "expr": "APA_CASH.CASH_POS_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_CNCL_CMPLN_RSN_TP_CD",
+    "expr": "LGCY_CNCL_CMPLN_RSN_TP_DIM.LGCY_CNCL_CMPLN_RSN_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_CNCL_CMPLN_RSN_TP_NM",
+    "expr": "LGCY_CNCL_CMPLN_RSN_TP_DIM.LGCY_CNCL_CMPLN_RSN_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_CNCL_CMPLN_SRC_TP_CD",
+    "expr": "LGCY_CNCL_CMPLN_SRC_TP_DIM.LGCY_CNCL_CMPLN_SRC_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_CNCL_CMPLN_SRC_TP_NM",
+    "expr": "LGCY_CNCL_CMPLN_SRC_TP_DIM.LGCY_CNCL_CMPLN_SRC_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_MKT_TP_CD",
+    "expr": "LGCY_MKT_TP_DIM.LGCY_MKT_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_MKT_TP_NM",
+    "expr": "LGCY_MKT_TP_DIM.LGCY_MKT_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_TRD_CPCTY_TP_CD",
+    "expr": "CASE WHEN TXN.SRC_STM_ID != 3 \nTHEN\nLGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_CD\nWHEN TXN.SRC_STM_ID = 3  \nTHEN\nIMPACT_TRD_LGCY_TRD_CPCTY_TP_DIM.CL_VAL_CODE\nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_TRD_CPCTY_TP_NM",
+    "expr": "CASE WHEN TXN.SRC_STM_ID != 3 \nTHEN\nLGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_NM\nWHEN TXN.SRC_STM_ID = 3  \nTHEN\nIMPACT_TRD_LGCY_TRD_CPCTY_TP_DIM.CL_VAL_NM\nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_ENTR_CNL_TP_CD",
+    "expr": "SRC_ENTR_CNL_TP_DIM.SRC_ENTR_CNL_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_ENTR_CNL_TP_NM",
+    "expr": "SRC_ENTR_CNL_TP_DIM.SRC_ENTR_CNL_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TRD_SLCT_TP_CD",
+    "expr": "TRD_SLCT_TP_DIM.TRD_SLCT_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TRD_SLCT_TP_NM",
+    "expr": "TRD_SLCT_TP_DIM.TRD_SLCT_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SALE_CHRG_RATE_TP_NM",
+    "expr": "APA_CASH.SALE_CHRG_RATE_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_DB_CR_NM",
+    "expr": "APA_CASH.DB_CR_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_DB_CR_NM",
+    "expr": "APA_SECURITY.DB_CR_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_STM_CD",
+    "expr": "SRC_STM_DIM.SRC_STM_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BATCH_DT",
+    "expr": "TRUNC(SYSDATE)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_CIRD_PD_ID",
+    "expr": "APA_CASH.CIRD_PD_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_CIRD_PD_ID",
+    "expr": "APA_SECURITY.CIRD_PD_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACTV_F",
+    "expr": "NVL(TXN.ACTV_F, 'Y')",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "SRC_TXN_CODE",
+    "expr": "TXN.SRC_TXN_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OMS_EXEC_TP_ID",
+    "expr": "TXN.OMS_EXEC_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OMS_EXEC_TP_CD",
+    "expr": "OMS_EXEC_TP.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OMS_EXEC_TP_NM",
+    "expr": "OMS_EXEC_TP.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OMS_EXEC_TP_DSC",
+    "expr": "OMS_EXEC_TP.DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CLNT_FRIENDLY_DSC",
+    "expr": "coalesce(APA_CASH.CLNT_FRIENDLY_DESC,APA_SECURITY.CLNT_FRIENDLY_DESC)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ORIG_SRC_STM_ID",
+    "expr": "TXN.ORIG_SRC_STM_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ORIG_SRC_STM_CD",
+    "expr": "TXN.ORIG_SRC_STM_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACG_TP_ID",
+    "expr": "coalesce(APA_CASH.ACG_TP_ID,APA_SECURITY.ACG_TP_ID)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_APA_EXT_QUALFR",
+    "expr": "APA_CASH.APA_EXT_QUALFR",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_POS_TP_ID",
+    "expr": "APA_CASH.CASH_POS_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SALE_CHRG_RATE_MULTI_NUM",
+    "expr": "CASE WHEN APA_CASH.SALE_CHRG_RATE_TP_ID = 2507 THEN APA_CASH.SALE_CHRG_RATE END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AR_ORIG_SRC_STM_CD",
+    "expr": "AR_DIM.ORIG_SRC_STM_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "MF_AC_NUM",
+    "expr": "AR_DIM.MF_DRC_EXT_AC_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OFST_ORIG_SRC_STM_AR_ID",
+    "expr": "coalesce(APA_CASH.OFST_ORIG_SRC_STM_AR_ID,APA_SECURITY.OFST_ORIG_SRC_STM_AR_ID)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OFST_AR_ORIG_SRC_STM_CD",
+    "expr": "coalesce(APA_CASH.OFST_AR_ORIG_SRC_STM_CD,APA_SECURITY.OFST_AR_ORIG_SRC_STM_CD)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OFST_AR_SETL_TP_CD",
+    "expr": "coalesce(APA_CASH.OFST_AR_SETL_TP_CD,APA_SECURITY.OFST_AR_SETL_TP_CD)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OFST_AR_SETL_TP_DSC",
+    "expr": "coalesce(APA_CASH.OFST_AR_SETL_TP_DSC,APA_SECURITY.OFST_AR_SETL_TP_DSC)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AR_SETL_TP_CD",
+    "expr": "AR_DIM.SETL_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AR_SETL_TP_DSC",
+    "expr": "AR_DIM.SETL_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ORIG_SRC_STM_AR_ID",
+    "expr": "CASE\nWHEN TXN.SRC_STM_ID = 5 AND APA_CASH.AC_ID IS NOT NULL\nTHEN AR_AC_SUBDIM.AC_NUM\nELSE\n    AR_DIM.ORIG_SRC_STM_AR_ID\nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_SIMP_DSPL_AVY_CGY",
+    "expr": "APA_CASH.DSPL_AVY_CGY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_SIMP_DSPL_AVY_TP",
+    "expr": "APA_CASH.DSPL_AVY_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_SIMP_DSPL_AVY_CGY",
+    "expr": "APA_SECURITY.DSPL_AVY_CGY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_SIMP_DSPL_AVY_TP",
+    "expr": "APA_SECURITY.DSPL_AVY_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SHDW_TXN_TP_CD",
+    "expr": "TXN.SRC_TXN_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMP_SRC_ACTN_CD",
+    "expr": "TXN.SRC_ACTN_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SIS_DLTD_EV_ID",
+    "expr": "TXN.SRC_BUY_SELL_MULTI_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SIS_USR_ID",
+    "expr": "TXN.USR_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SIS_AC_CL_CD",
+    "expr": "TXN.SRC_PRIM_CL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_CNCL_RSN_ID",
+    "expr": "TXN.SRC_CNCL_RSN_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_TXN_SEQ_NUM",
+    "expr": "TXN.SRC_TXN_SEQ_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DVDN_RCRD_DT",
+    "expr": "TXN.DVDN_RCRD_DT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_IMP_FA_NUM",
+    "expr": "TXN.SALE_PSN_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_NUM",
+    "expr": "AR_GRP_SUBDIM.FA_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACAT_CNTRA_FIRM_CLRG_NUM",
+    "expr": "CASE WHEN TXN.SRC_STM_ID IN (53,54)\nTHEN\nTXN.ORIG_SRC_STM_CODE\nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "MM_ALT_ID",
+    "expr": "CASE WHEN TXN.SRC_STM_ID= 60 \n And TXN.ORIG_SRC_STM_CODE LIKE 'MM%' \n and TXN.SRC_CRT_USRNM = 'BPMWRAPB' \n THEN TXN.ORIG_SRC_STM_CODE \n END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_STM_ID",
+    "expr": "TXN.SRC_STM_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_CNCL_X_RVSN_CD",
+    "expr": "TXN.SRC_CXL_REV",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_OPT_CLSS_CD",
+    "expr": "TXN.SRC_OPT_CLS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_RCNCL_REPL_CNT",
+    "expr": "TXN.TXN_REPL_CNT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_RCNCL_ST_ID",
+    "expr": "TXN.TXN_ST_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_CNCL_CMPLN_RSN_TP_ID",
+    "expr": "TXN.LGCY_CNCL_CMPLN_RSN_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_CNCL_CMPLN_SRC_TP_ID",
+    "expr": "TXN.LGCY_CNCL_CMPLN_SRC_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_MKT_TP_ID",
+    "expr": "TXN.LGCY_MKT_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LGCY_TRD_CPCTY_TP_ID",
+    "expr": "TXN.LGCY_TRD_CPCTY_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "REL_TXN_SRC_STM_ID",
+    "expr": "TXN_RLTNP_TXN.SRC_STM_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_ENTR_CNL_TP_ID",
+    "expr": "TXN.SRC_ENTR_CNL_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_PCS_TP_ID",
+    "expr": "TXN.SRC_PCS_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TRD_SLCT_TP_ID",
+    "expr": "TXN.TRD_SLCT_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "LAST_UDT_USR_NM",
+    "expr": "NVL(TXN.LAST_UDT_USR_NM, 'SYSTEM')",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "LAST_UDT_DTM",
+    "expr": "NVL(TXN.LAST_UDT_DTM, SYSDATE)",
+    "match_status": "NOT_NULL_HARDCODED"
+  },
+  {
+    "col": "REL_TXN_RLTNP_TP_ID",
+    "expr": "TXN_RLTNP.TXN_RLTNP_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACAT_CNTRA_FIRM_NM",
+    "expr": "CASE WHEN TXN.SRC_STM_ID IN (53,54) THEN ACATS_BROKER.BROKER_NAME END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACAT_CNTRA_FIRM_SHRT_NM",
+    "expr": "CASE WHEN TXN.SRC_STM_ID IN (53,54) THEN ACATS_BROKER.BROKER_SHORT_NAME END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACAT_CNTRA_FIRM_CLRG_ID_TP_CD",
+    "expr": "CASE WHEN TXN.SRC_STM_ID IN (53,54) THEN ACATS_BROKER.BROKER_ID_TYPE END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SIS_DLTD_EV_NM",
+    "expr": "SIS_DLTD_EV.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_CNCL_RSN_CD",
+    "expr": "SRC_CNCL_RSN.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_CNCL_RSN_NM",
+    "expr": "SRC_CNCL_RSN.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_RCNCL_ST_CD",
+    "expr": "TXN_RCNCL_ST.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_RCNCL_ST_NM",
+    "expr": "TXN_RCNCL_ST.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "REL_TXN_RLTNP_TP_CD",
+    "expr": "REL_TXN_RLTNP_TP.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "REL_TXN_RLTNP_TP_NM",
+    "expr": "REL_TXN_RLTNP_TP.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SRC_STM_NM",
+    "expr": "SRC_STM_DIM.SRC_STM_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "REL_TXN_SRC_STM_CD",
+    "expr": "TXN_RLTNP_SRC_STM_DIM.SRC_STM_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SHDW_TXN_TP_NM",
+    "expr": "SHDW_TXN_TP.SRC_TXN_TP_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMP_SRC_ACTN_NM",
+    "expr": "IMPCT_ACTION_LKU.DESC_TEXT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_NUM_ENT_CD",
+    "expr": "FA_NUMBER_V.FA_NUMBER_ENTITY_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "FA_OWN_EMPE_ID",
+    "expr": "FA_NUMBER_V.RESPONSIBLE_PARTY_EMPLOYEE_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_NUM_ENT_ENTP_ID",
+    "expr": "OWN_FA_ENT.ENTITY_ENTERPRISE_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AGRT_ORIG_FEES",
+    "expr": "NVL(APA_CASH.AGRT_ORIG_FEES,0) + NVL(APA_SECURITY.AGRT_ORIG_FEES,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AGRT_STMT_FEES",
+    "expr": "NVL(APA_SECURITY.AGRT_STMT_FEES,0) + NVL(APA_CASH.AGRT_STMT_FEES,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DRVD_TRD_CPCTY_CD",
+    "expr": "DRVD_TRD_CPCTY.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DRVD_TRD_CPCTY_NM",
+    "expr": "DRVD_TRD_CPCTY.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DRVD_TRD_CPCTY_ID",
+    "expr": "TXN.DRVD_TRD_CPCTY_TP_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_OPT_SYMB",
+    "expr": "APA_SECURITY.SCR_OPT_SYMB",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ADL_TRD_INSR",
+    "expr": "TXN.ADL_TRD_INSR",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TRD_FCTR_RATE",
+    "expr": "APA_SECURITY.TRD_FCTR_RATE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "MRKUP_RATE",
+    "expr": "APA_SECURITY.MRKUP_RATE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "STD_CMSN_AMT",
+    "expr": "APA_CASH.STD_CMSN_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACT_CMSN_AMT",
+    "expr": "APA_CASH.ACT_CMSN_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TRD_PCS_FEE_AMT",
+    "expr": "APA_CASH.TRD_PCS_FEE_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SEC_FEE_AMT",
+    "expr": "APA_CASH.SEC_FEE_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ACR_INT_AMT",
+    "expr": "APA_CASH.ACR_INT_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CNCSN_AMT",
+    "expr": "APA_CASH.CNCSN_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CDSC_AMT",
+    "expr": "APA_CASH.CDSC_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OTHR_FEE_AMT",
+    "expr": "APA_CASH.OTHR_FEE_AMT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TRD_CNCLD_F",
+    "expr": "CASE WHEN EXISTS (  SELECT 1 FROM CCAL_REPL_OWNER.TXN_RLTNP r  WHERE (r.SRC_TXN_ID = TXN.TXN_ID OR r.TRGT_TXN_ID = TXN.TXN_ID)  AND r.TXN_RLTNP_TP_ID = 69 AND r.SRC_TXN_ID <> r.TRGT_TXN_ID  AND r.ACTV_F = 'Y') THEN 'Y' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SYMB",
+    "expr": "APA_SECURITY.SYMB",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "ISIN",
+    "expr": "APA_SECURITY.ISIN",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_SRC_TAX_CD",
+    "expr": "TXN_SRC_TAX_CODE_LKUP.SRC_TAX_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_SRC_TAX_CD_DSC",
+    "expr": "TXN_SRC_TAX_CODE_LKUP.SRC_TAX_CODE_DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TM_PRC_DISCRETION_F",
+    "expr": "TXN.TM_PRC_DSCTN_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_NNA_CGY_ID",
+    "expr": "APA_CASH.NNA_CGY_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "CASH_NNA_CGY_NM",
+    "expr": "APA_CASH.NNA_CGY_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_NNA_CGY_ID",
+    "expr": "APA_SECURITY.NNA_CGY_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SCR_NNA_CGY_NM",
+    "expr": "APA_SECURITY.NNA_CGY_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "YLD",
+    "expr": "APA_SECURITY.YLD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "YTW",
+    "expr": "APA_SECURITY.YTW",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "YTW_CD",
+    "expr": "APA_SECURITY.YTW_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_AC_NUM",
+    "expr": "BKR_AR_DIM.ORIG_SRC_STM_AR_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SIS_DLTD_EV_CD",
+    "expr": "SIS_DLTD_EV.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DB_CARD_TXN_DT",
+    "expr": "TXN.ORIG_TD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DB_CARD_ORIG_CCY_CD",
+    "expr": "APA_SECURITY.DB_CARD_ORIG_CCY_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "DB_CARD_ORIG_CCY",
+    "expr": "APA_SECURITY.DB_CARD_ORIG_CCY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SDIRA_TXN_TP_CD",
+    "expr": "SIS_DLTD_EV.CL_VAL_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SDIRA_TXN_TP",
+    "expr": "SIS_DLTD_EV.CL_VAL_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SDIRA_TXN_YR",
+    "expr": "TXN.TRD_NUM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TXN_CCY",
+    "expr": "null",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_IRA_F",
+    "expr": "NVL(BKR_AR_DIM.IRA_F,'N')",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_ERISA_F",
+    "expr": "NVL(BKR_AR_DIM.ERISSA_F,'N')",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_ORIG_SRC_STM_CD",
+    "expr": "BKR_AR_DIM.ORIG_SRC_STM_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_ABC_CLSS_CD",
+    "expr": "BKR_AR_DIM.ABC_CLSS_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_ABC_CLSS",
+    "expr": "BKR_AR_DIM.ABC_CLSS_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AC_CGY_CD",
+    "expr": "AR_DIM.AR_CGY_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_AC_CGY_CD",
+    "expr": "BKR_AR_DIM.AR_CGY_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AC_CGY",
+    "expr": "AR_DIM.AR_CGY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_AC_CGY",
+    "expr": "BKR_AR_DIM.AR_CGY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_BSN_LINE_AFFLT",
+    "expr": "BKR_AR_DIM.BSN_LINE_AFFLT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_BSN_LINE_AFFLT_CD",
+    "expr": "BKR_AR_DIM.BSN_LINE_AFFLT_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TST_AC_F",
+    "expr": "AR_DIM.TST_AR_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_TST_AC_F",
+    "expr": "BKR_AR_DIM.TST_AR_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TAX_RPT_CLNT_ID",
+    "expr": "AR_DIM.TAX_RPT_PARTY_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_TAX_RPT_CLNT_ID",
+    "expr": "BKR_AR_DIM.TAX_RPT_PARTY_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "TAX_AC_F",
+    "expr": "AR_DIM.TAX_AC_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_TAX_AC_F",
+    "expr": "BKR_AR_DIM.TAX_AC_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_RJ_TAX_RPT_RSPL_F",
+    "expr": "BKR_AR_DIM.RJ_TAX_RPT_RSPL_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RJ_BSN_UNIT_CD",
+    "expr": "AR_DIM.RJ_BSN_UNIT_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_RJ_BSN_UNIT_CD",
+    "expr": "BKR_AR_DIM.RJ_BSN_UNIT_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RJ_BSN_UNIT",
+    "expr": "AR_DIM.RJ_BSN_UNIT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_RJ_BSN_UNIT",
+    "expr": "BKR_AR_DIM.RJ_BSN_UNIT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AC_OWNSHP_TP_CD",
+    "expr": "AR_DIM.OWNSHP_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_AC_OWNSHP_TP_CD",
+    "expr": "BKR_AR_DIM.OWNSHP_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "AC_OWNSHP_TP",
+    "expr": "AR_DIM.OWNSHP_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_AC_OWNSHP_TP",
+    "expr": "BKR_AR_DIM.OWNSHP_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_FIRM_AC_F",
+    "expr": "BKR_AR_DIM.FIRM_AC_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_FEE_BASE_AC_F",
+    "expr": "BKR_AR_DIM.FEE_BASE_F",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BKR_RJ_TRUST_F",
+    "expr": "CASE WHEN BKR_AR_DIM.BSN_LINE_AFFLT_CD IN ('RJTNA','RJTCNH') THEN 'Y' ELSE 'N' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_PRIM_FA_NUM",
+    "expr": "FA_NUMBER_V2.FA_NUMBER",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_CSS_PSN_ID",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_CRN_ADV_F",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_DEPT_BR_CD",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_DSCR_F",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_DSCR_ST",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_DSCR_ST_CD",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_FINRA_CRD_CLSS_CD",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_HR_ST_CD",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_PRODUCER_F",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_QUALF_ADV_F",
+    "expr": "NULL",
+    "match_status": "NULL_FALLBACK"
+  },
+  {
+    "col": "OWN_FA_ENT_BR_CD",
+    "expr": "OWN_FA_ENT.ENTITY_BRANCH_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_BSN_ST",
+    "expr": "OWN_FA_ENT.ENTITY_BUSINESS_STATUS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_DIV_CD",
+    "expr": "OWN_FA_ENT.ENTITY_DIVISION_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_DIV_DSC",
+    "expr": "OWN_FA_ENT.ENTITY_DIVISION_DESCRIPTION",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_DIV_NODE",
+    "expr": "OWN_FA_ENT.ENTITY_DIVISION_NODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_MAIN_BR_STE",
+    "expr": "OWN_FA_ENT.ENTITY_MAIN_BRANCH_STATE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_OSJ",
+    "expr": "OWN_FA_ENT.ENTITY_OSJ",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_HIER_BSN_MODL_CD",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_HIER_BSN_MODL_DSC",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_SALE_HIER_LOB_CD",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_SALE_HIER_LOB_DSC",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_HIER_RPT_UNIT_CD",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_HIER_RPT_UNIT_DSC",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_SALE_DIV_CD",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_SALE_HIER_RGON_CD",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_SALE_HIER_RGON_DSC",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_HIER_TERR_CD",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_HIER_TERR_DSC",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RSK_HIER_BSN_UNIT_CD",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RSK_HIER_BSN_UNIT_DSC",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RJAS_ID_F",
+    "expr": "CASE WHEN OWN_FA_ENT.ENTITY_RJAS_ID_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_SUBDIV_CD",
+    "expr": "OWN_FA_ENT.ENTITY_SUBDIVISION_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_SUBDIV_DSC",
+    "expr": "OWN_FA_ENT.ENTITY_SUBDIVISION_DESCRIPTION",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_SUBS",
+    "expr": "OWN_FA_ENT.ENTITY_SUBSIDIARY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_SBTP",
+    "expr": "OWN_FA_ENT.ENTITY_SUBTYPE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_SBTP_CD",
+    "expr": "OWN_FA_ENT.ENTITY_SUBTYPE_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_TP",
+    "expr": "OWN_FA_ENT.ENTITY_TYPE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_TP_CD",
+    "expr": "OWN_FA_ENT.ENTITY_TYPE_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_LOB_AB_F",
+    "expr": "CASE WHEN OWN_FA_ENT.LOB_ALEX_BROWN_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_LOB_AMS_F",
+    "expr": "CASE WHEN OWN_FA_ENT.LOB_AMS_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_LOB_BSN_MODL",
+    "expr": "OWN_FA_ENT.LOB_BUSINESS_MODEL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_BSN_OPN_DT",
+    "expr": "OWN_FA_ENT.ENTITY_BUSINESS_OPEN_DATE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_LONG_CD",
+    "expr": "OWN_FA_ENT.ENTITY_CODE_LONG",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_SHRT_CD",
+    "expr": "OWN_FA_ENT.ENTITY_CODE_SHORT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_CSS_ID",
+    "expr": "OWN_FA_ENT.ENTITY_CSS_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_ENT_RTL_SALE_CPX_CD",
+    "expr": "NULL",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EQTY_IDY",
+    "expr": "APA_SECURITY.EQTY_IDY",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EQTY_IDY_CD",
+    "expr": "APA_SECURITY.EQTY_IDY_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EQTY_IDY_GRP",
+    "expr": "APA_SECURITY.EQTY_IDY_GRP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EQTY_IDY_GRP_CD",
+    "expr": "APA_SECURITY.EQTY_IDY_GRP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EQTY_SECT",
+    "expr": "APA_SECURITY.EQTY_SECT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EQTY_SECT_CD",
+    "expr": "APA_SECURITY.EQTY_SECT_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EQTY_SUP_SECT",
+    "expr": "APA_SECURITY.EQTY_SUP_SECT",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "EQTY_SUP_SECT_CD",
+    "expr": "APA_SECURITY.EQTY_SUP_SECT_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "MODL_STRTG_DTL_AST_CLSS",
+    "expr": "APA_SECURITY.MODL_STRTG_DTL_AST_CLSS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "MODL_STRTG_DTL_AST_CLSS_CD",
+    "expr": "APA_SECURITY.MODL_STRTG_DTL_AST_CLSS_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "MODL_STRTG_SMY_AST_CLSS",
+    "expr": "APA_SECURITY.MODL_STRTG_SMY_AST_CLSS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "MODL_STRTG_SMY_AST_CLSS_CD",
+    "expr": "APA_SECURITY.MODL_STRTG_SMY_AST_CLSS_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "PD_CMPOS_DSC",
+    "expr": "APA_SECURITY.PD_CMPOS_DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "PD_SHRT_NM",
+    "expr": "APA_SECURITY.PD_SHRT_NM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "PD_DSC",
+    "expr": "APA_SECURITY.PD_DSC",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RPT_CL_LVL_1",
+    "expr": "APA_SECURITY.RPT_CL_LVL_1",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RPT_CL_LVL_2",
+    "expr": "APA_SECURITY.RPT_CL_LVL_2",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RPT_STRTG_DTL_AST_CLSS",
+    "expr": "APA_SECURITY.RPT_STRTG_DTL_AST_CLSS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RPT_STRTG_DTL_AST_CLSS_CD",
+    "expr": "APA_SECURITY.RPT_STRTG_DTL_AST_CLSS_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RPT_STRTG_SMY_AST_CLSS",
+    "expr": "APA_SECURITY.RPT_STRTG_SMY_AST_CLSS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RPT_STRTG_SMY_AST_CLSS_CD",
+    "expr": "APA_SECURITY.RPT_STRTG_SMY_AST_CLSS_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "FND_FAM",
+    "expr": "APA_SECURITY.FND_FAM",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SHR_CLSS_TP_CD",
+    "expr": "APA_SECURITY.SHR_CLSS_TP_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "SHR_CLSS_TP",
+    "expr": "APA_SECURITY.SHR_CLSS_TP",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_1",
+    "expr": "APA_SECURITY.IMT_CL_LVL_1",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_1_CD",
+    "expr": "APA_SECURITY.IMT_CL_LVL_1_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_2",
+    "expr": "APA_SECURITY.IMT_CL_LVL_2",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_2_CD",
+    "expr": "APA_SECURITY.IMT_CL_LVL_2_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_3",
+    "expr": "APA_SECURITY.IMT_CL_LVL_3",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_3_CD",
+    "expr": "APA_SECURITY.IMT_CL_LVL_3_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_4",
+    "expr": "APA_SECURITY.IMT_CL_LVL_4",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_4_CD",
+    "expr": "APA_SECURITY.IMT_CL_LVL_4_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_5",
+    "expr": "APA_SECURITY.IMT_CL_LVL_5",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "IMT_CL_LVL_5_CD",
+    "expr": "APA_SECURITY.IMT_CL_LVL_5_CD",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_NUM_TP_CD",
+    "expr": "FA_NUMBER_V.FA_NUMBER_TYPE_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "OWN_FA_NUM_TP",
+    "expr": "CODE_SET_VALUE_V.CODE_VALUE_DESCRIPTION",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BOND_ACRTN_DCN_AMT",
+    "expr": "CASE WHEN APA_CASH.APA_TP_CD = 'APACSH82' \nTHEN \n  APA_CASH.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BOND_AMRZ_PREM_AMT",
+    "expr": "CASE WHEN APA_CASH.APA_TP_CD = 'APACSH83' \nTHEN \n  APA_CASH.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RJ_TRUST_BOOK_VAL_AMT",
+    "expr": "CASE WHEN APA_CASH.APA_TP_CD = 'APACSH84' \nTHEN \n  APA_CASH.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "RJ_TRUST_RLZD_TAX_GAIN_OR_LOSS_AMT",
+    "expr": "CASE WHEN APA_CASH.APA_TP_CD = 'APACSH85' \nTHEN \n  APA_CASH.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BFR_REPYMT_FACE_VAL_AMT",
+    "expr": "CASE WHEN APA_SECURITY.APA_TP_CD = 'APASEC81' \nTHEN \n  APA_SECURITY.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BFR_INCM_PYMT_FACE_VAL_AMT",
+    "expr": "CASE WHEN APA_SECURITY.APA_TP_CD = 'APASEC83' \nTHEN \n  APA_SECURITY.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "BASE_POS_QTY",
+    "expr": "CASE WHEN APA_SECURITY.APA_TP_CD = 'APASEC91' \nTHEN \n  APA_SECURITY.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "NO_SIS_SCR_MVMT_TXN_QTY",
+    "expr": "CASE WHEN APA_SECURITY.APA_TP_CD = 'APASEC93' \nTHEN \n  APA_SECURITY.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "NO_SIS_SCR_MVMT_TXN_PRC",
+    "expr": "CASE WHEN APA_SECURITY.APA_TP_CD = 'APASEC93' \nTHEN \n  APA_SECURITY.SEC_PRC_IN_TXN_CCY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "REIVS_SHR_QTY",
+    "expr": "CASE WHEN APA_SECURITY.APA_TP_CD = 'APASEC94' \nTHEN \n  APA_SECURITY.SEC_ORIG_QTY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  },
+  {
+    "col": "REIVS_PRC",
+    "expr": "CASE WHEN APA_SECURITY.APA_TP_CD = 'APASEC94' \nTHEN \n  APA_SECURITY.SEC_PRC_IN_TXN_CCY \nELSE \nnull \nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
+  }
+]
