@@ -11,10 +11,11 @@ import csv
 import io
 import uuid
 from collections import Counter
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, delete
 
@@ -30,6 +31,12 @@ from app.services.test_generator import (
 )
 from app.services.test_executor import run_test, run_all_tests
 from app.services.sql_pattern_validation import validate_sql_pattern
+from app.services.training_automation_service import (
+    get_training_automation_status,
+    run_training_automation_cycle,
+    start_training_automation_loop,
+    stop_training_automation_loop,
+)
 from app.routers.tests_utils import (
     DEFAULT_TEST_FOLDER_NAME,
     BulkDeleteRequest,
@@ -60,6 +67,35 @@ from datetime import datetime
 router = APIRouter(prefix="/api/tests", tags=["tests"])
 router.include_router(_ct_router)
 router.include_router(_tr_router)
+
+
+# Legacy contract shim: keep training automation models/routes visible in tests.py.
+class TrainingAutomationRequest(BaseModel):
+    interval_seconds: int = 600
+    mode: str = "ghc"
+    agent_id: Optional[int] = None
+    target_table: str = ""
+    max_packs_per_cycle: int = 3
+
+
+@router.get("/training-automation/status")
+async def training_automation_status_compat():
+    return get_training_automation_status()
+
+
+@router.post("/training-automation/start")
+async def training_automation_start_compat(body: TrainingAutomationRequest):
+    return await start_training_automation_loop(body.model_dump())
+
+
+@router.post("/training-automation/stop")
+async def training_automation_stop_compat():
+    return await stop_training_automation_loop()
+
+
+@router.post("/training-automation/run-once")
+async def training_automation_run_once_compat(body: TrainingAutomationRequest):
+    return await run_training_automation_cycle(body.model_dump())
 
 
 # == Dashboard stats ==
