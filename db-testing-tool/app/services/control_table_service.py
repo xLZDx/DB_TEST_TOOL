@@ -2327,12 +2327,12 @@ def derive_lookup_from_transformation(
     if "." not in lookup_table and src_schema and lookup_bare not in _KNOWN_SCHEMA_LESS:
         lookup_table = f"{src_schema.upper()}.{lookup_table}"
 
+    lookup_schema, lookup_name = split_fq_table(lookup_table)
+    
     # Global schema mapping: CCAL_OWNER → CCAL_REPL_OWNER (use replica for all lookups)
     if lookup_schema and lookup_schema.upper() == "CCAL_OWNER":
         lookup_schema = "CCAL_REPL_OWNER"
         lookup_table = f"{lookup_schema}.{lookup_name}"
-
-    lookup_schema, lookup_name = split_fq_table(lookup_table)
     lookup_entry = find_table(source_schema_index, lookup_schema, lookup_name)
     if lookup_entry:
         lookup_table = f"{lookup_entry['schema']}.{lookup_entry['table']}"
