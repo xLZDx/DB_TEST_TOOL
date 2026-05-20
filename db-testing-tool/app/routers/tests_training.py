@@ -424,7 +424,6 @@ async def generate_test_suite_from_sql(
             source_query=ddl_sql,
             expected_result="table_created",
             is_active=True,
-            created_at=datetime.utcnow(),
         )
         db.add(ddl_test)
         await db.flush()
@@ -439,7 +438,6 @@ async def generate_test_suite_from_sql(
         source_query=insert_sql,
         expected_result="rows_inserted",
         is_active=True,
-        created_at=datetime.utcnow(),
     )
     db.add(insert_test)
     await db.flush()
@@ -455,7 +453,6 @@ async def generate_test_suite_from_sql(
             source_query=validation_sql,
             expected_result="validation_passed",
             is_active=True,
-            created_at=datetime.utcnow(),
         )
         db.add(val_test)
         await db.flush()
