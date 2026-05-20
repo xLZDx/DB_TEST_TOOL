@@ -115,11 +115,7 @@ async def _close_cached_connector(ds_id: int):
 
 async def _get_or_create_cached_connector(ds: DataSource):
     if (ds.db_type or "").lower().strip() != "redshift":
-        conn = await asyncio.to_thread(
-            get_connector,
-            ds.db_type, ds.host, ds.port, ds.database_name,
-            ds.username, ds.password, ds.extra_params,
-        )
+        conn = await asyncio.to_thread(get_connector, ds)
         return conn, False
 
     now = time.time()
@@ -140,11 +136,7 @@ async def _get_or_create_cached_connector(ds: DataSource):
             except Exception:
                 pass
 
-    conn = await asyncio.to_thread(
-        get_connector,
-        ds.db_type, ds.host, ds.port, ds.database_name,
-        ds.username, ds.password, ds.extra_params,
-    )
+    conn = await asyncio.to_thread(get_connector, ds)
 
     with _CONNECTOR_CACHE_LOCK:
         _CONNECTOR_CACHE[ds.id] = {

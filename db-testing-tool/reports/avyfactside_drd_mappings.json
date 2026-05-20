@@ -1,0 +1,3359 @@
+[
+  {
+    "target_col": "SHDW_TXN_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_TXN_TP",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "SHDW_TXN_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "SHDW_TXN_TP",
+    "src_col": "SRC_TXN_TP_NM",
+    "transform": "Look up using TXN.SRC_TXN_TP=SHDW_TXN_TP.SRC_TXN_TP",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "IMP_SRC_ACTN_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_ACTN_CODE",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "IMP_SRC_ACTN_NM",
+    "src_schema": "REFERENCE_REPL_OWNER",
+    "src_table": "IMPCT_ACTION_LKU",
+    "src_col": "desc_text",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.impct_action_lku lk ON t.src_actn_code = impct_action_lku.action_code",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "SIS_DLTD_EV_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_BUY_SELL_MULTI_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SIS_DLTD_EV_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.cl_val cv\nleft join ccal_repl_owner.cl_val cv ON\ncv.cl_val_id = t.SRC_BUY_SELL_MULTI_ID\nand\ncv.CL_SCM_ID = '99'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "SIS_USR_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "USR_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "SIS_AC_CL_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_PRIM_CL",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "SRC_CNCL_RSN_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_CNCL_RSN_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SRC_CNCL_RSN_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON \ncl_val.cl_val_id = t.SRC_CNCL_RSN_ID\ncs.cl_scm_id = '102'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SRC_CNCL_RSN_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON \ncl_val.cl_val_id = t.SRC_CNCL_RSN_ID\ncs.cl_scm_id = '102'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "SRC_TXN_SEQ_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_TXN_SEQ_NUM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "DVDN_RCRD_DT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "DVDN_RCRD_DT",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "OWN_IMP_FA_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SALE_PSN_NUM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OWN_FA_NUM",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_GRP_SUBDIM",
+    "src_col": "FA_NUM",
+    "transform": "select fa.FA_NUM from \nccal_repl_owner.txn t\nLEFT JOIN ccsi_owner.AR_GRP_SUBDIM fa ON t.AR_ID = fa.AR_ID\nand t.td >= fa.EFF_DT\nand t.td < fa.END_DT;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(6)"
+  },
+  {
+    "target_col": "OWN_FA_NUM_ENT_CD",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "FA_NUMBER_V",
+    "src_col": "FA_NUMBER_ENTITY_CODE",
+    "transform": "Derive based on OWN_FA_NUM field.\n\nleft join SSDS_DAL_OWNER.FA_NUMBER_V fn on fn.FA_NUMBER = OWN_FA_NUM\nand t.td >= fn.EFF_DT\nAND t.td < fn.END_DT",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "FA_OWN_EMPE_ID",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "FA_NUMBER_V",
+    "src_col": "RESPONSIBLE_PARTY_EMPLOYEE_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(44)"
+  },
+  {
+    "target_col": "OWN_FA_NUM_ENT_ENTP_ID",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "ENTITY_ENTERPRISE_ID",
+    "transform": "Derive based on OWN_FA_NUM_ENT_CD field.\n\nLEFT JOIN SSDS_DAL_OWNER.ENTERPRISE_ENTITY_DIM_V e\nON e.Entity_code_long = OWN_FA_NUM_ENT_CD\nAND t.td >= e.EFF_DT \nAND t.td < e.END_DT\nAND e.ENTITY_RECYCLED_BOOLEAN='0'\nAND e.ENTITY_FINANCIAL_RIA_BOOLEAN = '0'",
+    "nullable": "YES",
+    "dtype": "NUMBER(22,0)"
+  },
+  {
+    "target_col": "ACAT_CNTRA_FIRM_CLRG_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ORIG_SRC_STM_CODE",
+    "transform": "ccal_repl_owner.txn t\nwhere\nt.src_stm_id IN ( 53, 54 )",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(4)"
+  },
+  {
+    "target_col": "ACAT_CNTRA_FIRM_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "ACATS_BROKER",
+    "src_col": "BROKER_NAME",
+    "transform": "ccal_repl_owner.txn t\nLEFT join ccal_repl_owner.acats_broker\nON b.broker_id = t.orig_src_stm_code and\nt.src_stm_id IN ( 53, 54 )",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "ACAT_CNTRA_FIRM_SHRT_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "ACATS_BROKER",
+    "src_col": "BROKER_SHORT_NAME",
+    "transform": "ccal_repl_owner.txn t\nLEFT join ccal_repl_owner.acats_broker\nON b.broker_id = t.orig_src_stm_code and\nt.src_stm_id IN ( 53, 54 )",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(15)"
+  },
+  {
+    "target_col": "ACAT_CNTRA_FIRM_CLRG_ID_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "ACATS_BROKER",
+    "src_col": "BROKER_ID_TYPE",
+    "transform": "ccal_repl_owner.txn t\nLEFT join ccal_repl_owner.acats_broker b\nON b.broker_id = t.orig_src_stm_code and\nt.src_stm_id IN ( 53, 54 )",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "MM_ALT_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ORIG_SRC_STM_CODE",
+    "transform": "ccal_repl_owner.txn t\nwhere\nt.src_stm_id= '60' and t.ORIG_SRC_STM_CODE like 'MM%' and t.SRC_CRT_USRNM = 'BPMWRAPB';",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "AR_ORIG_SRC_STM_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "ORIG_SRC_STM_CD",
+    "transform": "ccal_repl_owner.txn t\njoin ccsi_owner.ar_dim ard ON ard.AR_ID = t.AR_ID\nand ard.eff_dt <= t.td\nand ard.end_dt > t.td",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SRC_STM_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_STM_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SRC_STM_NM",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "SRC_STM_DIM",
+    "src_col": "SRC_STM_NM",
+    "transform": "ccal_repl_owner.txn t\nleft JOIN common_owner.src_stm_dim ss\non t.src_stm_id = ss.src_stm_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(60)"
+  },
+  {
+    "target_col": "SRC_CNCL_X_RVSN_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_CXL_REV",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(3)"
+  },
+  {
+    "target_col": "SRC_OPT_CLSS_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_OPT_CLS",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "TXN_RCNCL_REPL_CNT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TXN_REPL_CNT",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TXN_RCNCL_ST_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TXN_ST_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TXN_RCNCL_ST_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.txn_st_id\nand cv.CL_SCM_ID = 12",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "TXN_RCNCL_ST_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.txn_st_id\nand cv.CL_SCM_ID = 12",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "MF_AC_NUM",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "MF_DRC_EXT_AC_NUM",
+    "transform": "ccal_repl_owner.txn t\nLEFT join ccsi_owner.ar_dim ard ON ard.AR_ID = t.AR_ID\nand ard.eff_dt <= t.td\nand ard.end_dt > t.td",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(30)"
+  },
+  {
+    "target_col": "OFST_ORIG_SRC_STM_AR_ID",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "ORIG_SRC_STM_AR_ID",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccsi_owner.ar_dim ad ON AP.OFST_AR_ID =  ad.AR_ID\nand t.td >= ad.EFF_DT\nand t.td < ad.END_DT",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "OFST_AR_ORIG_SRC_STM_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "ORIG_SRC_STM_CD",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccsi_owner.ar_dim ad ON AP.OFST_AR_ID =  ad.AR_ID\nand t.td >= ad.EFF_DT\nand t.td < ad.END_DT",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OFST_AR_SETL_TP_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "SETL_TP_CD",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccsi_owner.ar_dim ad ON AP.OFST_AR_ID =  ad.AR_ID\nand t.td >= ad.EFF_DT\nand t.td < ad.END_DT",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OFST_AR_SETL_TP_DSC",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "SETL_TP",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccsi_owner.ar_dim ad ON AP.OFST_AR_ID =  ad.AR_ID\nand t.td >= ad.EFF_DT\nand t.td < ad.END_DT",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "AR_SETL_TP_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "SETL_TP_CD",
+    "transform": "ccal_repl_owner.txn t\nLEFT join ccsi_owner.ar_dim ard ON ard.AR_ID = t.AR_ID\nand ard.eff_dt <= t.td\nand ard.end_dt > t.td",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "AR_SETL_TP_DSC",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "SETL_TP",
+    "transform": "ccal_repl_owner.txn t\nLEFT join ccsi_owner.ar_dim ard ON ard.AR_ID = t.AR_ID\nand ard.eff_dt <= t.td\nand ard.end_dt > t.td",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "ORIG_SRC_STM_AR_ID",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM\nAR_AC_SUBDIM",
+    "src_col": "ORIG_SRC_STM_AR_ID\nAC_NUM",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa apa on apa.exec_id = t.txn_id\n \nWHEN txn.src_stm_id = 5 (RJBNK1) and apa.ac_id is not null (NOTE: APA on ESP activity is always APACSH defined on [ETL Notes] tab)\nTHEN\nleft join ccsi_owner.ar_ac_subdim aas ON \naas.ar_id = t.ar_id \nAND aas.dep_ac_setup_id = apa.ac_id\nand aas.eff_dt <= t.td\nand aas.end_dt > t.td\nuse aas.AC_NUM\nELSE\nccal_repl_owner.txn t\nleft join ccsi_owner.ar_dim ard ON ard.AR_ID = t.AR_ID\nand ard.eff_dt <= t.td\nand ard.end_dt > t.td\nuse ard.ORIG_SRC_STM_AR_ID",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "TD_DIM_ID",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "DATE_DIM",
+    "src_col": "DT_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nLEFT join common_owner.date_dim dd ON t.td = dd.cal_dt",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "EXG_DIM_ID",
+    "src_schema": "CIRD_OWNER",
+    "src_table": "EXG_DIM",
+    "src_col": "EXG_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join cird_owner.exg_dim ed ON ed.EXG_CD = t.exg_code",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "ACG_TP_CD",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "ACG_TP_DIM",
+    "src_col": "ACG_TP_CD",
+    "transform": "First preference is to APACASH and then to APASEC\n\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join common_owner.acg_tp_dim atd ON AP.ACG_TP_ID = atd.ACG_TP_ID",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "ACG_TP_DIM_ID",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "ACG_TP_DIM",
+    "src_col": "ACG_TP_DIM_ID",
+    "transform": "First preference is to APACASH and then to APASEC\n\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join common_owner.acg_tp_dim atd ON AP.ACG_TP_ID = atd.ACG_TP_ID",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "ACG_TP_NM",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "ACG_TP_DIM",
+    "src_col": "ACG_TP_NM",
+    "transform": "First preference is to APACASH and then to APASEC\n\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join common_owner.acg_tp_dim atd ON AP.ACG_TP_ID = atd.ACG_TP_ID",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(30)"
+  },
+  {
+    "target_col": "ACG_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ACG_TP_ID",
+    "transform": "First preference is to APACASH and then to APASEC\n\nccal_repl_owner.txn txn\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "ACTV_F",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ACTV_F",
+    "transform": "",
+    "nullable": "NO",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "AGRT_ORIG_FEES",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "FIP_ORIG_AMT",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nLEFT join ccal_repl_owner.fip f ON f.apa_id = ap.apa_id",
+    "nullable": "YES",
+    "dtype": "NUMBER"
+  },
+  {
+    "target_col": "AGRT_STMT_FEES",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "FIP_STMT_AMT",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nLEFT join ccal_repl_owner.fip f ON f.apa_id = ap.apa_id",
+    "nullable": "YES",
+    "dtype": "NUMBER"
+  },
+  {
+    "target_col": "AR_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "AR_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "BATCH_DT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "J$TXN",
+    "src_col": "BATCH_DT",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.j$txn jt ON jt.txn_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "BKG_DT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "BKG_DT",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "BR_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "BR_CODE",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "BKR_AR_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA\nTXN",
+    "src_col": "BKR_AR_ID\nAR_ID",
+    "transform": "ccal_repl_owner.txn t \njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\njoin ccal_repl_owner.AR_DIM BKR_AR_DIM ON T.AR_ID = BKR_AR_DIM.AR_ID\nand TD >= BKR_AR_DIM.EFF_DT (+) \nand TD < BKR_AR_DIM.END_DT (+))\n\nIf BKR_AR_DIM.ORIG_SRC_STM_CD = 'BKRBO1' then populate with T.AR_ID\nElse if AP.BKR_AR_ID is not NULL then use ap.BKR_AR_ID\nElse join ccsi_owner.AR_GRP_SUBDIM asd ON asd.AR_ID = t.AR_ID\nand t.td >= asd.EFF_DT\nand t.td < asd.END_DT\nand populate with asd.LINKED_BKR_AR_ID",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "BUY_SELL_IND",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "BUY_SELL_IND",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(10)"
+  },
+  {
+    "target_col": "CASH_AVY_CGY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "AVY_CGY",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(25)"
+  },
+  {
+    "target_col": "CASH_SIMP_DSPL_AVY_CGY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "DSPL_AVY_CGY",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(25)"
+  },
+  {
+    "target_col": "CSH_AVY_CL_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN_AVY_CL",
+    "src_col": "AVY_CL_ID",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_AVY_TP",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "AVY_TP",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "CASH_SIMP_DSPL_AVY_TP",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "DSPL_AVY_TP",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "CASH_ALT_DSC_TRAILER_2",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ALT_DSC",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(256)"
+  },
+  {
+    "target_col": "CASH_APA_EXT_QUALFR",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "APA_EXT_QUALFR",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "CSH_APA_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "APA_ID",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_APA_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "CASH_APA_TP_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "DSC",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1000)"
+  },
+  {
+    "target_col": "CSH_APA_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "APA_TP_ID",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_APA_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "CASH_CIRD_PD_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CCAL_CIRD_PD_MAP",
+    "src_col": "CIRD_PD_ID",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.apa ap \nleft join ccal_repl_owner.ccal_cird_pd_map ccpd ON ap.pd_id = ccpd.ccal_pd_id and ccpm.actv_f = 'Y'",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_DB_CR_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.apa ap \nleft join ccal_repl_owner.cl_val cv ON ap.db_cr_id = cv.cl_val_id\nand cv.cl_scm_id = '15'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "CASH_DB_CR_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.apa ap \nleft join ccal_repl_owner.cl_val cv ON ap.db_cr_id = cv.cl_val_id\nand cv.cl_scm_id = '15'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "CASH_DSC_TRAILER_1",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "APA_DSC",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(256)"
+  },
+  {
+    "target_col": "CF_GEN_F",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "CF_GEN_F",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(2)"
+  },
+  {
+    "target_col": "CASH_POS_TP_CD",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "CASH_POS_TP_DIM",
+    "src_col": "CASH_POS_TP_CD",
+    "transform": "ccal_repl_owner.apa ap \nleft join common_owner.cash_pos_tp_dim cptd ON ap.CASH_POS_TP_ID = cptd.CASH_POS_TP_ID",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(10)"
+  },
+  {
+    "target_col": "CASH_POS_TP_DIM_ID",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "CASH_POS_TP_DIM",
+    "src_col": "CASH_POS_TP_DIM_ID",
+    "transform": "ccal_repl_owner.apa ap \nleft join common_owner.cash_pos_tp_dim cptd ON ap.CASH_POS_TP_ID = cptd.CASH_POS_TP_ID",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_POS_TP_NM",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "CASH_POS_TP_DIM",
+    "src_col": "CASH_POS_TP_NM",
+    "transform": "ccal_repl_owner.apa ap \nleft join common_owner.cash_pos_tp_dim cptd ON ap.CASH_POS_TP_ID = cptd.CASH_POS_TP_ID",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(75)"
+  },
+  {
+    "target_col": "CASH_POS_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "CASH_POS_TP_ID",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_PD_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "PD_ID",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_PD_DIM_ID",
+    "src_schema": "CIRD_OWNER",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "IMT_PD_DIM_ID",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic.\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nLEFT join cird_owner.imt_pd_dim ipd ON ipd.CCAL_PD_ID = ap.PD_ID\nand ipd.eff_dt <= t.td\nand ipd.end_dt > t.td",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_SRC_SEQ_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SRC_SEQ_NUM",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_SBC_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "STM_BASE_CCY_AMT",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\nFor a Transaction, If 2 APACSH records exists\n     If (one record is 'APACSH04' & other is 'APACSH11') \n          then skip 'APACSH04' record and load 'APACSH11' but use the values to\n          calculate aggregated value from APA.TXN_AMT fields from 'APACSH04' and 'APACSH11' and store it in Cash Transaction Amount and Cash System base currency amount\n\t else exception entire transaction",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "CASH_TXN_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "TXN_AMT",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\nFor a Transaction, If 2 APACSH records exists\n     If (one record is 'APACSH04' & other is 'APACSH11') \n          then skip 'APACSH04' record and load 'APACSH11' but use the values to\n          calculate aggregated value from APA.TXN_AMT fields from 'APACSH04' and 'APACSH11' and store it in Cash Transaction Amount and Cash System base currency amount\n\t else exception entire transaction",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "CLNT_FRIENDLY_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "CLNT_FRIENDLY_DESC",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(256)"
+  },
+  {
+    "target_col": "CRT_DTM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "CRT_DTM",
+    "transform": "",
+    "nullable": "NO",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "CRT_USR_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "CRT_USR_NM",
+    "transform": "",
+    "nullable": "NO",
+    "dtype": "VARCHAR2(256)"
+  },
+  {
+    "target_col": "CCY_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "txn_iso_ccy_code",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(3)"
+  },
+  {
+    "target_col": "CCY_DIM_ID",
+    "src_schema": "CIRD_OWNER",
+    "src_table": "CCY_DIM",
+    "src_col": "CCY_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join cird_owner.ccy_dim cd ON cd.ccy_cd = ap.txn_iso_ccy_code",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "DOL_IND_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON t.dol_ind_id = cv.cl_val_id\nand cv.cl_scm_id = '35'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "DOL_IND_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "DOL_IND_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "DOL_IND_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON t.dol_ind_id = cv.cl_val_id\nand cv.cl_scm_id = '35'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "EXG_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "EXG_CODE",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(30)"
+  },
+  {
+    "target_col": "EXG_NM",
+    "src_schema": "CIRD_OWNER",
+    "src_table": "EXG_DIM",
+    "src_col": "EXG_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join cird_owner.exg_dim ed ON ed.EXG_CD = t.exg_code",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(500)"
+  },
+  {
+    "target_col": "EXEC_DTM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "EXEC_DTM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "TIMESTAMP(6)"
+  },
+  {
+    "target_col": "EXEC_SBTP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON t.EXEC_SBTP_ID = cv.CL_VAL_ID\nand cv.cl_scm_id = '6'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "EXEC_SBTP_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "DSC",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON t.EXEC_SBTP_ID = cv.CL_VAL_ID\nand cv.cl_scm_id = '6'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1000)"
+  },
+  {
+    "target_col": "EXEC_SBTP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "EXEC_SBTP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "EXEC_SBTP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON t.EXEC_SBTP_ID = cv.CL_VAL_ID\nand cv.cl_scm_id = '6'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "EXEC_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON t.EXEC_TP_ID = cv.CL_VAL_ID\nand cv.cl_scm_id = '5'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "EXEC_TP_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "DSC",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON t.EXEC_TP_ID = cv.CL_VAL_ID\nand cv.cl_scm_id = '5'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1000)"
+  },
+  {
+    "target_col": "EXEC_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "EXEC_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "EXEC_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON t.EXEC_TP_ID = cv.CL_VAL_ID\nand cv.cl_scm_id = '5'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "FA_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "FA_NUM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "LGCY_CNCL_CMPLN_RSN_TP_CD",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_CNCL_CMPLN_RSN_TP_DIM",
+    "src_col": "LGCY_CNCL_CMPLN_RSN_TP_CD",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_cncl_cmpln_rsn_tp_dim ld ON ld.lgcy_cncl_cmpln_rsn_tp_id = t.lgcy_cncl_cmpln_rsn_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "LGCY_CNCL_CMPLN_RSN_DIM_ID",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_CNCL_CMPLN_RSN_TP_DIM",
+    "src_col": "LGCY_CNCL_CMPLN_RSN_TP_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_cncl_cmpln_rsn_tp_dim ld ON ld.lgcy_cncl_cmpln_rsn_tp_id = t.lgcy_cncl_cmpln_rsn_tp_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "LGCY_CNCL_CMPLN_RSN_TP_NM",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_CNCL_CMPLN_RSN_TP_DIM",
+    "src_col": "LGCY_CNCL_CMPLN_RSN_TP_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_cncl_cmpln_rsn_tp_dim ld ON ld.lgcy_cncl_cmpln_rsn_tp_id = t.lgcy_cncl_cmpln_rsn_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "LGCY_CNCL_CMPLN_RSN_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "LGCY_CNCL_CMPLN_RSN_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "LGCY_CNCL_CMPLN_SRC_TP_CD",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_CNCL_CMPLN_SRC_TP_DIM",
+    "src_col": "LGCY_CNCL_CMPLN_SRC_TP_CD",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_cncl_cmpln_src_tp_dim ld ON ld.lgcy_cncl_cmpln_src_tp_id = t.lgcy_cncl_cmpln_src_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "LGCY_CNCL_CMPLN_SRC_DIM_ID",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_CNCL_CMPLN_SRC_TP_DIM",
+    "src_col": "LGCY_CNCL_CMPLN_SRC_TP_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_cncl_cmpln_src_tp_dim ld ON ld.lgcy_cncl_cmpln_src_tp_id = t.lgcy_cncl_cmpln_src_tp_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "LGCY_CNCL_CMPLN_SRC_TP_NM",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_CNCL_CMPLN_SRC_TP_DIM",
+    "src_col": "LGCY_CNCL_CMPLN_SRC_TP_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_cncl_cmpln_src_tp_dim ld ON ld.lgcy_cncl_cmpln_src_tp_id = t.lgcy_cncl_cmpln_src_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "LGCY_CNCL_CMPLN_SRC_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "LGCY_CNCL_CMPLN_SRC_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "LGCY_MKT_TP_CD",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_MKT_TP_DIM",
+    "src_col": "LGCY_MKT_TP_CD",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_mkt_tp_dim lmtd ON lmtd.lgcy_mkt_tp_id = t.lgcy_mkt_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "LGCY_MKT_TP_DIM_ID",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_MKT_TP_DIM",
+    "src_col": "LGCY_MKT_TP_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_mkt_tp_dim lmtd ON lmtd.lgcy_mkt_tp_id = t.lgcy_mkt_tp_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "LGCY_MKT_TP_NM",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_MKT_TP_DIM",
+    "src_col": "LGCY_MKT_TP_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_mkt_tp_dim lmtd ON lmtd.lgcy_mkt_tp_id = t.lgcy_mkt_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "LGCY_MKT_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "LGCY_MKT_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "LGCY_TRD_CPCTY_TP_CD",
+    "src_schema": "TRANSACTIONS_OWNER\nCCAL_REPL_OWNER",
+    "src_table": "LGCY_TRD_CPCTY_TP_DIM\nCL_VAL",
+    "src_col": "LGCY_TRD_CPCTY_TP_CD\nCL_VAL_CODE",
+    "transform": "If t.src_stm_id <> 3 (not INSTBO1):\nccal_repl_owner.txn t\nleft join transactions_owner.lgcy_trd_cpcty_tp_dim ltctd ON t.lgcy_trd_cpcty_tp_id = ltctd.lgcy_trd_cpcty_tp_id\n\nIf t.src_stm_id = 3 (INSTBO1):\nccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cl on cl.cl_val_id = t.lgcy_trd_cpcty_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "LGCY_TRD_CPCTY_TP_DIM_ID",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "LGCY_TRD_CPCTY_TP_DIM",
+    "src_col": "LGCY_TRD_CPCTY_TP_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.lgcy_trd_cpcty_tp_dim ltctd ON t.lgcy_trd_cpcty_tp_id = ltctd.lgcy_trd_cpcty_tp_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "LGCY_TRD_CPCTY_TP_NM",
+    "src_schema": "TRANSACTIONS_OWNER\nCCAL_REPL_OWNER",
+    "src_table": "LGCY_TRD_CPCTY_TP_DIM\nCL_VAL",
+    "src_col": "LGCY_TRD_CPCTY_TP_NM\nCL_VAL_NM",
+    "transform": "If t.src_stm_id <> 3 (not INSTBO1):\nccal_repl_owner.txn t\nleft join transactions_owner.lgcy_trd_cpcty_tp_dim ltctd ON t.lgcy_trd_cpcty_tp_id = ltctd.lgcy_trd_cpcty_tp_id\n\nIf t.src_stm_id = 3 (INSTBO1):\nccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cl on cl.cl_val_id = t.lgcy_trd_cpcty_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "LGCY_TRD_CPCTY_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "LGCY_TRD_CPCTY_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "OFST_AR_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "OFST_AR_ID",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "OPT_CLSS_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "OPTS_CLSS_CODE",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(10)"
+  },
+  {
+    "target_col": "OMS_EXEC_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.oms_exec_tp_id\nand cv.cl_scm_id = '96'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OMS_EXEC_TP_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "DSC",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.oms_exec_tp_id\nand cv.cl_scm_id = '96'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1000)"
+  },
+  {
+    "target_col": "OMS_EXEC_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "OMS_EXEC_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "OMS_EXEC_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.oms_exec_tp_id\nand cv.cl_scm_id = '96'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "OMS_ORDR_KEY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "OMS_ORDR_KEY",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "ORIG_BKG_DT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ORIG_BKG_DT",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "ORIG_TRD_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ORIG_TRD_NUM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(15)"
+  },
+  {
+    "target_col": "ORIG_TD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ORIG_TD",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "REL_TXN_SRC_STM_DIM_ID",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "SRC_STM_DIM",
+    "src_col": "SRC_STM_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.txn_rltnp tr ON t.txn_id = tr.src_txn_id\nand tr.actv_f = 'Y'\nleft join ccal_repl_owner.txn t2 ON tr.trgt_txn_id = t2.txn_id\nleft join ccal_repl_owner.src_stm_dim stm ON t2.src_stm_id = stm.src_stm_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "REL_TXN_SRC_STM_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_STM_ID (from T2)",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.txn_rltnp tr ON t.txn_id = tr.src_txn_id\nand tr.actv_f = 'Y'\nleft join ccal_repl_owner.txn t2 ON tr.trgt_txn_id = t2.txn_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "REL_TXN_SRC_STM_CD",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "SRC_STM_DIM",
+    "src_col": "SRC_STM_CD",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.txn_rltnp tr ON t.txn_id = tr.src_txn_id\nand tr.actv_f = 'Y'\nleft join ccal_repl_owner.txn t2 ON tr.trgt_txn_id = t2.txn_id\nleft join ccal_repl_owner.src_stm_dim stm ON t2.src_stm_id = stm.src_stm_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "REL_TXN_RLTNP_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN_RLTNP",
+    "src_col": "TXN_RLTNP_TP_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.txn_rltnp tr ON t.txn_id = tr.src_txn_id\nand tr.actv_f = 'Y'",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "REL_TXN_RLTNP_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.txn_rltnp tr ON t.txn_id = tr.src_txn_id and tr.actv_f = 'Y'\nleft join ccal_repl_owner.cl_val cv ON cl_val_id = tr.TXN_RLTNP_TP_ID\nand cv.cl_scm_id = '4'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "REL_TXN_RLTNP_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.txn_rltnp tr ON t.txn_id = tr.src_txn_id and tr.actv_f = 'Y'\nleft join ccal_repl_owner.cl_val cv ON cl_val_id = tr.TXN_RLTNP_TP_ID\nand cv.cl_scm_id = '4'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "SALE_CHRG_RATE_MULTI_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SALE_CHRG_RATE",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\n\nFor a Transaction, If 2 APACSH records exists\n     If (one record is 'APACSH04' & other is 'APACSH11') \n          then skip 'APACSH04' record and load 'APACSH11' but use the values to\n          populate sales charge attributes from 'APACSH04' for 5 attributes (Sales Charge Rate Multiplier Number, Sales Charge Rate, Sales Charge Rate Type Code, Sales Charge Rate Type Id, Sales Charge Rate Type Name)\n     else exception entire transaction\n\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.cl_val cv ON AP.APA_TP_ID = cv.CL_VAL_ID AND\nCASE    WHEN AP.SALE_CHRG_RATE_TP_ID = 2507 \n            THEN AP.SALE_CHRG_RATE",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "SALE_CHRG_RATE_PCT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SALE_CHRG_RATE",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\n\nFor a Transaction, If 2 APACSH records exists\n     If (one record is 'APACSH04' & other is 'APACSH11') \n          then skip 'APACSH04' record and load 'APACSH11' but use the values to\n          populate sales charge attributes from 'APACSH04' for 5 attributes (Sales Charge Rate Multiplier Number, Sales Charge Rate, Sales Charge Rate Type Code, Sales Charge Rate Type Id, Sales Charge Rate Type Name)\n     else exception entire transaction\n\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.cl_val cv ON AP.APA_TP_ID = cv.CL_VAL_ID AND\nCASE   WHEN AP.SALE_CHRG_RATE_TP_ID = 2506 \n            THEN AP.SALE_CHRG_RATE",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "SALE_CHRG_RATE_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\n\nFor a Transaction, If 2 APACSH records exists\n     If (one record is 'APACSH04' & other is 'APACSH11') \n          then skip 'APACSH04' record and load 'APACSH11' but use the values to\n          populate sales charge attributes from 'APACSH04' for 5 attributes (Sales Charge Rate Multiplier Number, Sales Charge Rate, Sales Charge Rate Type Code, Sales Charge Rate Type Id, Sales Charge Rate Type Name)\n     else exception entire transaction\n\nccal_repl_owner.apa ap \nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = ap.sale_chrg_rate_tp_id\nand cv.cl_scm_id = '73'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SALE_CHRG_RATE_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SALE_CHRG_RATE_TP_ID",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\n\nFor a Transaction, If 2 APACSH records exists\n     If (one record is 'APACSH04' & other is 'APACSH11') \n          then skip 'APACSH04' record and load 'APACSH11' but use the values to\n          populate sales charge attributes from 'APACSH04' for 5 attributes (Sales Charge Rate Multiplier Number, Sales Charge Rate, Sales Charge Rate Type Code, Sales Charge Rate Type Id, Sales Charge Rate Type Name)\n     else exception entire transaction",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SALE_CHRG_RATE_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\n\nFor a Transaction, If 2 APACSH records exists\n     If (one record is 'APACSH04' & other is 'APACSH11') \n          then skip 'APACSH04' record and load 'APACSH11' but use the values to\n          populate sales charge attributes from 'APACSH04' for 5 attributes (Sales Charge Rate Multiplier Number, Sales Charge Rate, Sales Charge Rate Type Code, Sales Charge Rate Type Id, Sales Charge Rate Type Name)\n     else exception entire transaction\n\nccal_repl_owner.apa ap \nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = ap.sale_chrg_rate_tp_id\nand cv.cl_scm_id = '73'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "SCR_AVY_CGY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "AVY_CGY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(25)"
+  },
+  {
+    "target_col": "SCR_SIMP_DSPL_AVY_CGY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "DSPL_AVY_CGY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(25)"
+  },
+  {
+    "target_col": "SEC_AVY_CL_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "AVY_CL_ID",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SCR_AVY_TP",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "AVY_TP",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "SCR_SIMP_DSPL_AVY_TP",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "AVY_CL",
+    "src_col": "DSPL_AVY_TP",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "SEC_ALT_DSC_TRAILER_2",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ALT_DSC",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(256)"
+  },
+  {
+    "target_col": "SEC_APA_EXT_QUALFR",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "APA_EXT_QUALFR",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.\n\nNote: In SSDS_DAL_OWNER.ACTIVITY_FACT_V remove security_asset_package_external_qualifier field, because values on this field is always null, so there is no need to expose this field in view.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "SEC_APA_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "APA_ID",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SCR_APA_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SCR_APA_TP_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "DSC",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1000)"
+  },
+  {
+    "target_col": "SEC_APA_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "APA_TP_ID",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SCR_APA_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "SEC_CIRD_PD_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "ccal_cird_pd_map",
+    "src_col": "CIRD_PD_ID",
+    "transform": "Product Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC\n\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.ccal_cird_pd_map ccpm on ccpm.ccal_pd_id = ap.pd_id\nand ccpm.actv_f = 'Y'",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SEC_DB_CR_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.apa ap\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = ap.db_cr_id dci\nand cv.cl_scm_id = '15'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SEC_DB_CR_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.apa ap\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = ap.db_cr_id dci\nand cv.cl_scm_id = '15'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "SEC_DSC_TRAILER_1",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "APA_DSC",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(256)"
+  },
+  {
+    "target_col": "SEC_ORIG_QTY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "SEC_SRC_CUSIP",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SRC_PD_ID",
+    "transform": "Use APASEC and Product Information logic from 'ETL Notes' tab.\nProduct Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SEC_PD_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "PD_ID",
+    "transform": "Use APASEC and Product Information logic from 'ETL Notes' tab.\nProduct Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SEC_PD_DIM_ID",
+    "src_schema": "CIRD_OWNER",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "IMT_PD_DIM_ID",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic.\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nLEFT join cird_owner.imt_pd_dim ipd ON ipd.CCAL_PD_ID = ap.PD_ID\nand ipd.eff_dt <= t.td\nand ipd.end_dt > t.td",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SEC_PRC_IN_TXN_CCY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SCR_PRC_IN_TXN_CCY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,8)"
+  },
+  {
+    "target_col": "SEC_SRC_PRC_IN_SBC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SCR_PRC_IN_SBC",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,8)"
+  },
+  {
+    "target_col": "SEC_SRC_SEQ_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SRC_SEQ_NUM",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SEC_SBC_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "STM_BASE_CCY_AMT",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "SEC_TXN_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "TXN_AMT",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "SD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SD",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "SD_DIM_ID",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "DATE_DIM",
+    "src_col": "DT_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join common_owner.dt_dim dd ON t.sd = dd.cal_dt",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SRC_CRT_USRNM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_CRT_USRNM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "SRC_EFF_DT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SRC_EFF_DT",
+    "transform": "Use 'Source effective Date' logic from ETL Notes.\n\nIf there is only iAPASEC or only iAPACSH, grab source effective date from the iAPASEC/iAPACSH\nIf there is atleast 1 APASEC or APACSH, grab source effective date from that APASEC/APACSH\n\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "SRC_ENTR_CNL_TP_CD",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "SRC_ENTR_CNL_TP_DIM",
+    "src_col": "SRC_ENTR_CNL_TP_CD",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.SRC_ENTR_CNL_TP_DIM sectd ON t.src_entr_cnl_tp_id = sectd.src_entr_cnl_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SRC_ENTR_CNL_TP_DIM_ID",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "SRC_ENTR_CNL_TP_DIM",
+    "src_col": "SRC_ENTR_CNL_TP_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.SRC_ENTR_CNL_TP_DIM sectd ON t.src_entr_cnl_tp_id = sectd.src_entr_cnl_tp_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SRC_ENTR_CNL_TP_NM",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "SRC_ENTR_CNL_TP_DIM",
+    "src_col": "SRC_ENTR_CNL_TP_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.SRC_ENTR_CNL_TP_DIM sectd ON t.src_entr_cnl_tp_id = sectd.src_entr_cnl_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "SRC_ENTR_CNL_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_ENTR_CNL_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SRC_ENTR_DTM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_ENTR_DTM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "TIMESTAMP(6)"
+  },
+  {
+    "target_col": "SRC_PCS_TP_DIM_ID",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "SRC_PCS_TP_DIM",
+    "src_col": "SRC_PCS_TP_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.src_pcs_tp_dim sptd ON t.src_pcs_tp_id = sptd.src_pcs_tp_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SRC_PCS_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_PCS_TP_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.src_pcs_tp_dim sptd ON t.src_pcs_tp_id = sptd.src_pcs_tp_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SRC_PCS_TP_CD",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "SRC_PCS_TP_DIM",
+    "src_col": "SRC_PCS_TP_CD",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.src_pcs_tp_dim sptd ON t.src_pcs_tp_id = sptd.src_pcs_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SRC_PCS_TP_NM",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "SRC_PCS_TP_DIM",
+    "src_col": "SRC_PCS_TP_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.src_pcs_tp_dim sptd ON t.src_pcs_tp_id = sptd.src_pcs_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "SRC_STM_CD",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "SRC_STM_DIM",
+    "src_col": "SRC_STM_CD",
+    "transform": "ccal_repl_owner.txn t\nleft join common_owner.src_stm_dim ssd ON ssd.src_stm_id = t.src_stm_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "TXN_SRC_STM_DIM_ID",
+    "src_schema": "COMMON_OWNER",
+    "src_table": "SRC_STM_DIM",
+    "src_col": "SRC_STM_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join common_owner.src_stm_dim ssd ON ssd.src_stm_id = t.src_stm_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SRC_TXN_CODE",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "SRC_TXN_CODE",
+    "transform": ".",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SBC_CCY_CALC_DT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "STM_BASE_CCY_CLC_DTM",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "SBC_CCY_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "STM_BASE_ISO_CCY_CODE",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(3)"
+  },
+  {
+    "target_col": "SBC_CCY_DIM_ID",
+    "src_schema": "CIRD_OWNER",
+    "src_table": "CCY_DIM",
+    "src_col": "CCY_DIM_ID",
+    "transform": "ccal_repl_owner.apa ap\nleft join cird_owner.ccy_dim cd ON ap.stm_base_iso_ccy_code = cd.ccy_cd",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SBC_EXG_RATE",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "STM_BASE_CCY_EXG_RATE",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "REL_TXN_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN_RLTNP",
+    "src_col": "TRGT_TXN_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.txn_rltnp tr ON t.txn_id = tr.src_txn_id\nand tr.actv_f = 'Y'",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TD",
+    "transform": "",
+    "nullable": "NO",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "TRD_NUM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TRD_NUM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "TRD_SLCT_TP_DIM_ID",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "TRD_SLCT_TP_DIM",
+    "src_col": "TRD_SLCT_TP_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.trd_slct_tp_dim tstd ON t.trd_slct_tp_id = tstd.trd_slct_tp_id",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TRD_SLCT_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TRD_SLCT_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TRD_SLCT_TP_CD",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "TRD_SLCT_TP_DIM",
+    "src_col": "TRD_SLCT_TP_CD",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.trd_slct_tp_dim tstd ON t.trd_slct_tp_id = tstd.trd_slct_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "TRD_SLCT_TP_NM",
+    "src_schema": "TRANSACTIONS_OWNER",
+    "src_table": "TRD_SLCT_TP_DIM",
+    "src_col": "TRD_SLCT_TP_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join transactions_owner.trd_slct_tp_dim tstd ON t.trd_slct_tp_id = tstd.trd_slct_tp_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "TXN_CL_F",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TXN_CL_F",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(2)"
+  },
+  {
+    "target_col": "TXN_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TXN_ID",
+    "transform": "",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TXN_SRC_KEY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TXN_SRC_KEY",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "TXN_SUB_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.txn_sbtp_id\nand cv.cl_scm_id = '3'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "TXN_SUB_TP_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "DSC",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.txn_sbtp_id\nand cv.cl_scm_id = '3'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1000)"
+  },
+  {
+    "target_col": "TXN_SBTP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TXN_SBTP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TXN_SUB_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.txn_sbtp_id\nand cv.cl_scm_id = '3'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "TXN_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.txn_tp_id\nand cv.cl_scm_id = '2'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "TXN_TP_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "DSC",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.txn_tp_id\nand cv.cl_scm_id = '2'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1000)"
+  },
+  {
+    "target_col": "TXN_TP_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TXN_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TXN_TP_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "ccal_repl_owner.txn t\nleft join ccal_repl_owner.cl_val cv ON cv.cl_val_id = t.txn_tp_id\nand cv.cl_scm_id = '2'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "ORIG_SRC_STM_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ORIG_SRC_STM_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "ORIG_SRC_STM_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ORIG_SRC_STM_CODE",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(10)"
+  },
+  {
+    "target_col": "BKR_AR_DIM_ID",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "AR_DIM_ID",
+    "transform": "Populate with AR_DIM_ID based on the lookup for BKR_AR_ID",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "OFST_AR_DIM_ID",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "AR_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nLEFT join ccsi_repl_owner.ar_dim ard ON ard.AR_ID = ap.OFST_AR_ID\nand ard.eff_dt <= t.td\nand ard.end_dt > t.td",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "AR_DIM_ID",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "AR_DIM",
+    "src_col": "AR_DIM_ID",
+    "transform": "ccal_repl_owner.txn t\nLEFT join ccsi_owner.ar_dim ard ON ard.AR_ID = t.AR_ID\nand ard.eff_dt <= t.td\nand ard.end_dt > t.td",
+    "nullable": "NO",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "LAST_UDT_USR_NM",
+    "src_schema": "",
+    "src_table": "",
+    "src_col": "",
+    "transform": "Audit column. DEFAULT sysdate",
+    "nullable": "NO",
+    "dtype": "VARCHAR2(256)"
+  },
+  {
+    "target_col": "LAST_UDT_DTM",
+    "src_schema": "",
+    "src_table": "",
+    "src_col": "",
+    "transform": "Audit column. DEFAULT USER",
+    "nullable": "NO",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "SESS_NO",
+    "src_schema": "",
+    "src_table": "",
+    "src_col": "",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SCR_OPT_SYMB",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "OPT_SYMB",
+    "transform": "Use APASEC and Product Information logic from 'ETL Notes' tab.\nProduct Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "DRVD_TRD_CPCTY_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "DRVD_TRD_CPCTY_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "DRVD_TRD_CPCTY_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "DRVD_TRD_CPCTY_TP_ID",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "ADL_TRD_INSR",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ADL_TRD_INSR",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(5)"
+  },
+  {
+    "target_col": "TRD_FCTR_RATE",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "TRD_FCTR_RATE",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(22,8)"
+  },
+  {
+    "target_col": "MRKUP_RATE",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "MRKUP_RATE",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(22,6)"
+  },
+  {
+    "target_col": "STD_CMSN_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "STD_CMSN_AMT",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.",
+    "nullable": "YES",
+    "dtype": "NUMBER(22,6)"
+  },
+  {
+    "target_col": "ACT_CMSN_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "STM_BASE_CCY_AMT",
+    "transform": "If TXN.SRC_STM_ID in (25, 94) --STSR or STSR2\nand TXN.TXN_TP_ID not in (14, 1856) -- not Fund Trades\nand FIP.FIP_TP_ID in (123, 160) --FIPCOM01, FIPCOM91\nThen move STM_BASE_CCY_AMT",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "TRD_PCS_FEE_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "STM_BASE_CCY_AMT",
+    "transform": "If TXN.SRC_STM_ID in (25, 94) --STSR or STSR2\nand FIP.FIP_TP_ID = 125 (FIPFEE01, Processing (handling) Fee)\nThen move STM_BASE_CCY_AMT",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "SEC_FEE_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "STM_BASE_CCY_AMT",
+    "transform": "If TXN.SRC_STM_ID in (25, 94) --STSR or STSR2\nand FIP.FIP_TP_ID = 126 (FIPTAX03, SEC Fee)\nThen move STM_BASE_CCY_AMT",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "ACR_INT_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "STM_BASE_CCY_AMT",
+    "transform": "If TXN.SRC_STM_ID in (25, 94) --STSR or STSR2\nand FIP.FIP_TP_ID = 124 (FIPINT01, Accrued Interest)\nThen move STM_BASE_CCY_AMT",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "CNCSN_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "STM_BASE_CCY_AMT",
+    "transform": "If TXN.SRC_STM_ID in (25, 94) --STSR or STSR2\nand TXN.TXN_TP_ID in (14, 1856) -- Fund Trades\nand FIP.FIP_TP_ID in (123, 160) --FIPCOM01, FIPCOM91\nThen move STM_BASE_CCY_AMT",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "CDSC_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "STM_BASE_CCY_AMT\nOTHR_FEE",
+    "transform": "If TXN.SRC_STM_ID in (25, 94) --STSR or STSR2\nand TXN.TXN_TP_ID in (14, 1856) -- Fund Trades\nand TXN.BUY_SELL_IND = 'Sell'\nand FIP.FIP_TP_ID = 132 (FIPFEE02, Miscellaneous Fee(s))\nThen\nfor TXN.SRC_STM_ID = 94 move STM_BASE_CCY_AMT\nfor TXN.SRC_STM_ID = 25 move OTHR_FEE",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "OTHR_FEE_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "FIP",
+    "src_col": "STM_BASE_CCY_AMT\nOTHR_FEE",
+    "transform": "If TXN.SRC_STM_ID in (25, 94) --STSR or STSR2\nand FIP.FIP_TP_ID = 132 (FIPFEE02, Miscellaneous Fee(s))\nThen\nfor TXN.SRC_STM_ID = 94 move STM_BASE_CCY_AMT\nfor TXN.SRC_STM_ID = 25 move OTHR_FEE",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "TRD_CNCLD_F",
+    "src_schema": "",
+    "src_table": "",
+    "src_col": "",
+    "transform": "If there is a record in CCAL_REPL_OWNER.TXN_RLTNP table with TXN.TXN_ID = TXN_RLTNP.TRGT_TXN_ID\nand TXN_RLTNP_TP_ID = 69 (Cancel)\nand TXN_RLTNP.TRGT_TXN_ID <> TXN_RLTNP.SRC_TXN_ID\nthen set to 'Y' for both TRGT_TXN_ID and SRC_TXN_ID.\n\nThe check should be performed each time when a new record is written into CCAL_REPL_OWNER.TXN_RLTNP with TXN_RLTNP_TP_ID = 69 and update the flag for both TRGT_TXN_ID and SRC_TXN_ID, if TXN_RLTNP.TRGT_TXN_ID <> TXN_RLTNP.SRC_TXN_ID.\n\nNote: TXN_RLTNP.TRGT_TXN_ID <> TXN_RLTNP.SRC_TXN_ID is needed because it is possible that cancellation trade points to itself when the original trade that is being cancelled is not found. In this case Cancelled Flag should not be set to 'Y'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "SYMB",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SYMB",
+    "transform": "Use APASEC and Product Information logic from 'ETL Notes' tab.\nProduct Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "ISIN",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ISIN",
+    "transform": "Use APASEC and Product Information logic from 'ETL Notes' tab.\nProduct Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "TXN_SRC_TAX_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN_SRC_TAX_CODE_LKUP",
+    "src_col": "SRC_TAX_CODE",
+    "transform": "Left join to CCAL_REPL_OWNER.TXN_SRC_TAX_CODE_LKUP LKP table on TXN.SRC_TAX_CODE_ID = LKP.SRC_TAX_CODE_ID\nand LKP.ACTV_F = 'Y'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "TXN_SRC_TAX_CD_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN_SRC_TAX_CODE_LKUP",
+    "src_col": "SRC_TAX_CODE_DSC",
+    "transform": "Left join to CCAL_REPL_OWNER.TXN_SRC_TAX_CODE_LKUP LKP table on TXN.SRC_TAX_CODE_ID = LKP.SRC_TAX_CODE_ID\nand LKP.ACTV_F = 'Y'",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "TM_PRC_DISCRETION_F",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "",
+    "transform": "",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "CASH_NNA_CGY_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN_AVY_CL",
+    "src_col": "NNA_CGY_ID",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "CASH_NNA_CGY_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "NNA_CGY",
+    "src_col": "NNA_CGY_NM",
+    "transform": "Use APACSH logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.net_new _ast_cgy nna ON nna.net_new_ast_cgy_id = tac.net_new_ast_cgy_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "SCR_NNA_CGY_ID",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN_AVY_CL",
+    "src_col": "NNA_CGY_ID",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.avy_cl acl ON acl.avy_cl_id = tac.avy_cl_id",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "SCR_NNA_CGY_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "NNA_CGY",
+    "src_col": "NNA_CGY_NM",
+    "transform": "Use APASEC logic from 'ETL Notes' tab and below logic:\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\nleft join ccal_repl_owner.txn_avy_cl tac ON tac.txn_id = t.txn_id and tac.actv_f = 'Y' and ap.apa_id = tac.apa_id\nleft join ccal_repl_owner.net_new _ast_cgy nna ON nna.net_new_ast_cgy_id = tac.net_new_ast_cgy_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "YLD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "YIELD",
+    "transform": "value to be picked from APASEC",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "YTW",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "YIELD_TO_WORST",
+    "transform": "value to be picked from APASEC",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "YTW_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "YIELD_TO_WORST_CD",
+    "transform": "value to be picked from APASEC",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "BKR_AC_NUM",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "orig_src_stm_ar_id",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "SIS_DLTD_EV_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "ccal_repl_owner.cl_val cv\nleft join ccal_repl_owner.cl_val cv ON\ncv.cl_val_id = t.SRC_BUY_SELL_MULTI_ID\nand cv.CL_SCM_ID = '99' (this is excessive; using cl_val_id no need to use CL_SCM. Added for consistency with existing Name attribute)",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "DB_CARD_TXN_DT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "ORIG_TD",
+    "transform": "For TXN.SRC_STM_ID = 60 (ACTDETTD), use ORIG_TD.\nSuppress from Original Trade Date for ACTDETTD source",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "DB_CARD_ORIG_CCY_CD",
+    "src_schema": "Reference_Repl_Owner",
+    "src_table": "CCY",
+    "src_col": "CCY_CODE",
+    "transform": "Only applicable to SRC_STM_ID = 60 (ACTDETTD)\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\njoin REFERENCE_repl_OWNER.CCY orig on apa.orig_ccy_id = orig.CCY_ISO_NUM_CODE\n\nTBC if CDS values are to be left padded with 0 to 3",
+    "nullable": "NO",
+    "dtype": "VARCHAR2(3)"
+  },
+  {
+    "target_col": "DB_CARD_ORIG_CCY",
+    "src_schema": "Reference_Repl_Owner",
+    "src_table": "CCY",
+    "src_col": "CCY_NM",
+    "transform": "Only applicable to SRC_STM_ID = 60 (ACTDETTD)\nccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\njoin REFERENCE_repl_OWNER.CCY orig on apa.orig_ccy_id = orig.CCY_ISO_NUM_CODE",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(250)"
+  },
+  {
+    "target_col": "SDIRA_TXN_TP_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "For TXN.SRC_STM_ID = 60 (ACTDETTD), use TRADE_NUMBER.\nParse to extract SDIRA Transaction Type.\nFor example, from \"02726\" value it will be \"027\", while 26 stands for 2026 year. Lookup CL_VAL_CODE (does not exist today)\nSuppress from Trade Date for ACTDETTD source",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "SDIRA_TXN_TP",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "For TXN.SRC_STM_ID = 60 (ACTDETTD), use TRADE_NUMBER.\nParse to extract SDIRA Transaction Type.\nFor example, from \"02726\" value it will be \"027\", while 26 stands for 2026 year. Lookup CL_VAL_CODE (does not exist today)",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(200)"
+  },
+  {
+    "target_col": "SDIRA_TXN_YR",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "TXN",
+    "src_col": "TRD_NUM",
+    "transform": "For TXN.SRC_STM_ID = 60 (ACTDETTD), use TRADE_NUMBER.\nParse to extract SDIRA Transaction Year (last two digits) and add century part.\nFor example, from \"02726\" value it will be \"027\" for SDIRA Transaction Type, while 26 stands for 2026 year.",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(15)"
+  },
+  {
+    "target_col": "TXN_CCY",
+    "src_schema": "Reference_Repl_Owner",
+    "src_table": "CCY",
+    "src_col": "CCY_NM",
+    "transform": "ccal_repl_owner.txn t\njoin ccal_repl_owner.apa ap ON ap.exec_id = t.txn_id\njoin REFERENCE_repl_OWNER.CCY txn on apa.txn_iso_ccy_code = txn.CCY_CODE",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(250)"
+  },
+  {
+    "target_col": "BKR_IRA_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "IRA_F",
+    "transform": "( nvl(ar_dim .ira_f, 'N') )\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "BKR_ERISA_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ERISSA_F",
+    "transform": "( nvl(ar_dim .ERISSA_F, 'N') )\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "BKR_ORIG_SRC_STM_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ORIG_SRC_STM_CD",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "BKR_ABC_CLSS_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ABC_CLSS_CD",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "BKR_ABC_CLSS",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ABC_CLSS_NM",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(500)"
+  },
+  {
+    "target_col": "AC_CGY_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ar_cgy_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "BKR_AC_CGY_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ar_cgy_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "AC_CGY",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ar_cgy",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "BKR_AC_CGY",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ar_cgy",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "BKR_BSN_LINE_AFFLT",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "bsn_line_afflt",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "BKR_BSN_LINE_AFFLT_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "bsn_line_afflt_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "TST_AC_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "tst_ar_f",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "BKR_TST_AC_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "tst_ar_f",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "TAX_RPT_CLNT_ID",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "tax_rpt_party_id",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "BKR_TAX_RPT_CLNT_ID",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "tax_rpt_party_id",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,0)"
+  },
+  {
+    "target_col": "TAX_AC_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "tax_ac_f",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "BKR_TAX_AC_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "tax_ac_f",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "BKR_RJ_TAX_RPT_RSPL_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "rj_tax_rpt_rspl_f",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "RJ_BSN_UNIT_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "rj_bsn_unit_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "BKR_RJ_BSN_UNIT_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "rj_bsn_unit_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "RJ_BSN_UNIT",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "rj_bsn_unit",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(500)"
+  },
+  {
+    "target_col": "BKR_RJ_BSN_UNIT",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "rj_bsn_unit",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(500)"
+  },
+  {
+    "target_col": "AC_OWNSHP_TP_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ownshp_tp_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "BKR_AC_OWNSHP_TP_CD",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ownshp_tp_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "AC_OWNSHP_TP",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ownshp_tp",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\njoin ccsi_owner.ar_dim ar_dim on t.ar_id = ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "BKR_AC_OWNSHP_TP",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "ownshp_tp",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "BKR_FIRM_AC_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "firm_ac_f",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "BKR_FEE_BASE_AC_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "fee_base_f",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "BKR_RJ_TRUST_F",
+    "src_schema": "CCSI_OWNER",
+    "src_table": "ar_dim",
+    "src_col": "bsn_line_afflt_cd",
+    "transform": "ar_dim.bsn_line_afflt_cd in ('RJTNA','RJTCNH') then 'Y' else 'N' end as rj_trust_flag\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_PRIM_FA_NUM",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "fa_number_v",
+    "src_col": "fa_number",
+    "transform": "fetch fa_number_v2.fa_number\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJOIN ssds_dal_owner.fa_number_v fa_number_v2 on fa_number_v2.responsible_party_employee_id = fa_number_v1.responsible_party_employee_id\nand fa_number_v2.fa_number_type_code in ('pri','PRI')\nAND  t.td >= fa_number_v2.effective_date\nAND  t.td < fa_number_v2.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(6)"
+  },
+  {
+    "target_col": "OWN_FA_CSS_PSN_ID",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "PERSON_RV",
+    "src_col": "CSS_PERSON_ID",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJOIN ssds_dal_owner.SSDS_DAL_OWNER.PERSON_RV brk_own_psn on brk_own_psn.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_psn.effective_date\nAND t.td < brk_own_psn.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(30)"
+  },
+  {
+    "target_col": "OWN_FA_CRN_ADV_F",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "PERSON_BROKERAGE_SUBDIMENSION_V",
+    "src_col": "CURRENT_ADVISOR_FLAG",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJOIN ssds_dal_owner.PERSON_BROKERAGE_SUBDIMENSION_V brk_own_psn_brk_subdim on brk_own_psn_brk.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_psn.effective_date\nAND t.td < brk_own_psn.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_FA_DEPT_BR_CD",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "PERSON_RV",
+    "src_col": "DEPARTMENT_BRANCH_CODE",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJOIN ssds_dal_owner.SSDS_DAL_OWNER.PERSON_RV brk_own_psn on brk_own_psn.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_psn.effective_date\nAND t.td < brk_own_psn.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(10)"
+  },
+  {
+    "target_col": "OWN_FA_DSCR_F",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "PERSON_AMS_DISCRETIONARY_STATUS_V",
+    "src_col": "DISCRETIONARY_INDICATOR",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date;\nJOIN SSDS_DAL_OWNER.PERSON_AMS_DISCRETIONARY_STATUS_V brk_own_resp_ams_disc on brk_own_resp_ams_disc.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_resp_ams_disc.effective_date\nAND t.td < brk_own_resp_ams_disc.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_FA_DSCR_ST",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "PERSON_AMS_DISCRETIONARY_STATUS_V",
+    "src_col": "DISCRETIONARY_STATUS",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date;\nJOIN SSDS_DAL_OWNER.PERSON_AMS_DISCRETIONARY_STATUS_V brk_own_resp_ams_disc on brk_own_resp_ams_disc.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_resp_ams_disc.effective_date\nAND t.td < brk_own_resp_ams_disc.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "OWN_FA_DSCR_ST_CD",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "PERSON_AMS_DISCRETIONARY_STATUS_V",
+    "src_col": "DISCRETIONARY_STATUS_CODE",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date;\nJOIN SSDS_DAL_OWNER.PERSON_AMS_DISCRETIONARY_STATUS_V brk_own_resp_ams_disc on brk_own_resp_ams_disc.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_resp_ams_disc.effective_date\nAND t.td < brk_own_resp_ams_disc.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "OWN_FA_FINRA_CRD_CLSS_CD",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "PERSON_RV",
+    "src_col": "FINRA_CRD_CLASS_CODE",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJOIN ssds_dal_owner.SSDS_DAL_OWNER.PERSON_RV brk_own_psn on brk_own_psn.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_psn.effective_date\nAND t.td < brk_own_psn.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(12)"
+  },
+  {
+    "target_col": "OWN_FA_HR_ST_CD",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "PERSON_RV",
+    "src_col": "HR_STATUS_CODE",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJOIN ssds_dal_owner.SSDS_DAL_OWNER.PERSON_RV brk_own_psn on brk_own_psn.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_psn.effective_date\nAND t.td < brk_own_psn.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_FA_PRODUCER_F",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "PERSON_RV",
+    "src_col": "PRODUCER_FLAG",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJOIN ssds_dal_owner.SSDS_DAL_OWNER.PERSON_RV brk_own_psn on brk_own_psn.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_psn.effective_date\nAND t.td < brk_own_psn.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_FA_QUALF_ADV_F",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "PERSON_BROKERAGE_SUBDIMENSION_V",
+    "src_col": "QUALIFIED_ADVISOR_FLAG",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJOIN ssds_dal_owner.PERSON_BROKERAGE_SUBDIMENSION_V brk_own_psn_brk_subdim on brk_own_psn_brk.EMPLOYEE_ID = fa_number_v1.responsible_party_employee_id\nAND t.td >= brk_own_psn.effective_date\nAND t.td < brk_own_psn.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_BR_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_branch_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_BSN_ST",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_business_status",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_DIV_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_division_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_DIV_DSC",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_division_description",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_DIV_NODE",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_division_node",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_MAIN_BR_STE",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_main_branch_state",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(2)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_OSJ",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_osj",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(50)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_HIER_BSN_MODL_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_business_model_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_HIER_BSN_MODL_DSC",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_business_model_description",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_SALE_HIER_LOB_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_sales_lob_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_SALE_HIER_LOB_DSC",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_sales_lob_description",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_HIER_RPT_UNIT_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_reporting_unit_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_HIER_RPT_UNIT_DSC",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_reporting_unit_description",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_SALE_DIV_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_sales_division_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_SALE_HIER_RGON_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_sales_region_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_SALE_HIER_RGON_DSC",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_sales_region_description",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_HIER_TERR_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_territory_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_HIER_TERR_DSC",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_territory_description",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RSK_HIER_BSN_UNIT_CD",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "ENTERPRISE_ENTITY_RISK_DIM",
+    "src_col": "entity_risk_business_unit_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND brk_own_fa_ent.entity_recycled_boolean  = 0\nAND brk_own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RISK_DIMENSION_V own_risk_ent on own_fa_ent.entity_enterprise_id = own_risk_ent.entity_enterprise_id\nAND t.td >= own_risk_ent.effective_date\nAND t.td < own_risk_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RSK_HIER_BSN_UNIT_DSC",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RISK_DIM",
+    "src_col": "entity_risk_business_unit_description",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND brk_own_fa_ent.entity_recycled_boolean  = 0\nAND brk_own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RISK_DIMENSION_V own_risk_ent on own_fa_ent.entity_enterprise_id = own_risk_ent.entity_enterprise_id\nAND t.td >= own_risk_ent.effective_date\nAND t.td < own_risk_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RJAS_ID_F",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_rjas_id_boolean",
+    "transform": "case when own_fa_ent.entity_rjas_id_boolean=1 then 'y' else 'n' end                            as Owner_FA_entity_rjas_id_flag,\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_SUBDIV_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_subdivision_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_SUBDIV_DSC",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_subdivision_description",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_SUBS",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_subsidiary",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_SBTP",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_subtype",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_SBTP_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_subtype_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_TP",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_type",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_TP_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_type_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_LOB_AB_F",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "lob_alex_brown_boolean",
+    "transform": "case when own_fa_ent.lob_alex_brown_boolean =1 then 'y' else 'n' end as Owner_FA_entity_lob_alex_brown_flag,\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_LOB_AMS_F",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "lob_ams_boolean",
+    "transform": "case when own_fa_ent.lob_ams_boolean=1 then 'y' else 'n' end as Owner_FA_entity_lob_ams_flag,\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_LOB_BSN_MODL",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "lob_business_model",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_BSN_OPN_DT",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_business_open_date",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "DATE"
+  },
+  {
+    "target_col": "OWN_FA_ENT_LONG_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_code_long",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_SHRT_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_code_short",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(20)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_CSS_ID",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_DIM_V",
+    "src_col": "entity_css_id",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "OWN_FA_ENT_RTL_SALE_CPX_CD",
+    "src_schema": "ssds_dal_owner",
+    "src_table": "ENTERPRISE_ENTITY_RETAIL_DIMENSION_V",
+    "src_col": "entity_retail_sales_complex_code",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccsi_owner.ar_grp_subdim ar_grp_subdim ON ar_grp_subdim.ar_id = t.ar_id\nAND  t.td >= ar_grp_subdim.eff_dt\nAND  t.td < ar_grp_subdim.end_dt\njoin ccsi_owner.ar_dim bkr_ar_dim on ar_grp_subdim.linked_bkr_ar_id = bkr_ar_dim.ar_id\nAND  t.td >= ar_dim.eff_dt\nAND  t.td < ar_dim.end_dt\nJOIN ssds_dal_owner.fa_number_v fa_number_v1 ON UPPER(TRIM((bkr_ar_dim.own_bsn_ent_cd) = fa_number_v1.fa_number\nAND  t.td >= fa_number_v1.effective_date\nAND  t.td < fa_number_v1.end_date\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_DIM_V own_fa_ent on own_fa_ent.entity_code_long = fa_number_v1.fa_number_entity_code\nAND t.td >= own_fa_ent.effective_date\nAND t.td < own_fa_ent.end_date\nAND own_fa_ent.entity_recycled_boolean  = 0\nAND own_fa_ent.entity_financial_ria_boolean  = 0\nJoin ssds_dal_owner.ENTERPRISE_ENTITY_RETAIL_DIMENSION_V own_rtl_ent on own_rtl_ent.entity_enterprise_id = own_fa_ent.entity_enterprise_id\nAND t.td >= own_rtl_ent.effective_date\nAND t.td < own_rtl_ent.end_date",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "EQTY_IDY",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "eqty_sect_lvl_4",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "EQTY_IDY_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "eqty_sect_lvl_4_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "EQTY_IDY_GRP",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "eqty_sect_lvl_3",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "EQTY_IDY_GRP_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "eqty_sect_lvl_3_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "EQTY_SECT",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "eqty_sect_lvl_2",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "EQTY_SECT_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "eqty_sect_lvl_2_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "EQTY_SUP_SECT",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "eqty_sect_lvl_1",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "EQTY_SUP_SECT_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "eqty_sect_lvl_1_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "MODL_STRTG_DTL_AST_CLSS",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "firm_modl_lvl_2",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "MODL_STRTG_DTL_AST_CLSS_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "firm_modl_lvl_2_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "MODL_STRTG_SMY_AST_CLSS",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "firm_modl_lvl_1",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "MODL_STRTG_SMY_AST_CLSS_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "firm_modl_lvl_1_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "PD_CMPOS_DSC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "PD_CMPOS_DSC",
+    "transform": "Use Product Information logic from ETL Notes Tab\nProduct Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC\nccal_repl_owner.apa ap\njoin ccal_repl_owner.txn t ON  ap.exec_id = t.txn_id",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(4000)"
+  },
+  {
+    "target_col": "PD_SHRT_NM",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "pd_nm",
+    "transform": "Use Product Information logic from ETL Notes Tab\nProduct Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(500)"
+  },
+  {
+    "target_col": "PD_DSC",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "pd_dsc",
+    "transform": "Use Product Information logic from ETL Notes Tab\nProduct Information: (Security source CUSIP, Security Product Id, Security CIRD Product Id, Security Option Symbol, Symbol, ISIN, Product Composite Description, Product Short Name, Product Description)\nIf there is atleast 1 APASEC, consider above fields from that APASEC\nIf there is an iAPASEC but no APASEC, consider above fields from iAPASEC\n\nJOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(4000)"
+  },
+  {
+    "target_col": "RPT_CL_LVL_1",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "rpt_cl_lvl_1",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "RPT_CL_LVL_2",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "rpt_cl_lvl_2",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "RPT_STRTG_DTL_AST_CLSS",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "firm_rpt_lvl_2",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "RPT_STRTG_DTL_AST_CLSS_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "firm_rpt_lvl_2_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "RPT_STRTG_SMY_AST_CLSS",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "firm_rpt_lvl_1",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "RPT_STRTG_SMY_AST_CLSS_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "firm_rpt_lvl_1_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "FND_FAM",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "fnd_fam",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(500)"
+  },
+  {
+    "target_col": "SHR_CLSS_TP_CD",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "shr_clss_tp_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(30)"
+  },
+  {
+    "target_col": "SHR_CLSS_TP",
+    "src_schema": "cird_owner",
+    "src_table": "imt_pd_dim",
+    "src_col": "shr_clss_tp_nm",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(255)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_1",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_1",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_1_CD",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_1_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_2",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_2",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_2_CD",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_2_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_3",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_3",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_3_CD",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_3_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_4",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_4",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_4_CD",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_4_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_5",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_5",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(100)"
+  },
+  {
+    "target_col": "IMT_CL_LVL_5_CD",
+    "src_schema": "cird_owner",
+    "src_table": "IMT_PD_DIM",
+    "src_col": "imt_cl_lvl_5_cd",
+    "transform": "JOIN ccal_repl_owner.txn t with ccal_repl_owner.Apa ap on ap.exec_id = t.txn_id\nJOIN ccal_repl_owner.ccal_cird_pd_map ccal_cird_pd_map on ON ap.pd_id = ccal_cird_pd_map.ccal_pd_id\nND ccal_cird_pd_map.actv_f = 'Y'\nJOIN cird_owner.imt_pd_dim  imt_pd_dim1 on ap.pd_id = imt_pd_dim1.cird_pd_id (-- cird_pd-based dimension (only used when src_stm_id = 93))\nAND t.td >= imt_pd_dim1.eff_dt\nAND t.td < imt_pd_dim1.end_dt\nJOIN cird_owner.imt_pd_dim  imt_pd_dim ON  ap.pd_id = imt_pd_dim.ccal_pd_id (ccal_pd-based dimension)\nAND t.td >= imt_pd_dim.eff_dt\nAND t.td < imt_pd_dim.end_dt\nJOIN cird_owner.imt_pd_dim imt_pd_dim_cird ON ccal_cird_pd_map.cird_pd_id = imt_pd_dim_cird.cird_pd_id (Dimension via mapped cird_pd)\nAND t.td >= imt_pd_dim_cird.eff_dt\nAND t.td < imt_pd_dim_cird.end_dt;",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "OWN_FA_NUM_TP_CD",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "FA_NUMBER_V",
+    "src_col": "FA_NUMBER_TYPE_CODE",
+    "transform": "Fetch FA_NUMBER_V.FA_NUMBER_TYPE_CODE As OWN_FA_NUM_TP_CD\n\nLEFT Join with CCAL_REPL_OWNER.TXN TXN With CCSI_OWNER.AR_GRP_SUBDIM AR_GRP_SUBDIM ON TXN.AR_ID = AR_GRP_SUBDIM.AR_ID\nAnd TXN.TD >= AR_GRP_SUBDIM.EFF_DT\nAnd TXN.TD < AR_GRP_SUBDIM.END_DT\nLeft Join SSDS_DAL_OWNER.FA_NUMBER_V FA_NUMBER_V ON AR_GRP_SUBDIM.FA_NUM = FA_NUMBER_V.FA_NUMBER\nAnd TXN.TD >= FA_NUMBER_V.EFFECTIVE_DATE\nAnd TXN.TD < FA_NUMBER_V.END_DATE",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(3)"
+  },
+  {
+    "target_col": "OWN_FA_NUM_TP",
+    "src_schema": "SSDS_DAL_OWNER",
+    "src_table": "CODE_SET_VALUE_V",
+    "src_col": "CODE_VALUE_DESCRIPTION",
+    "transform": "Fetch CODE_SET_VALUE_V.CODE_VALUE_DESCRIPTION As OWN_FA_NUM_TP\n \nLEFT Join with CCAL_REPL_OWNER.TXN TXN With CCSI_OWNER.AR_GRP_SUBDIM AR_GRP_SUBDIM ON TXN.AR_ID = AR_GRP_SUBDIM.AR_ID\nAnd TXN.TD >= AR_GRP_SUBDIM.EFF_DT\nAnd TXN.TD < AR_GRP_SUBDIM.END_DT\nLeft Join SSDS_DAL_OWNER.FA_NUMBER_V FA_NUMBER_V ON AR_GRP_SUBDIM.FA_NUM = FA_NUMBER_V.FA_NUMBER\nAnd TXN.TD >= FA_NUMBER_V.EFFECTIVE_DATE\nAnd TXN.TD < FA_NUMBER_V.END_DATE\nLeft Join SSDS_DAL_OWNER.CODE_SET_VALUE_V CODE_SET_VALUE_V ON CODE_SET_VALUE_V.CODE_VALUE_ID = FA_NUMBER_V.FA_NUMBER_TYPE_CODE_ID\nAnd TXN.TD >= CODE_SET_VALUE_V.EFFECTIVE_DATE\nAnd TXN.TD < CODE_SET_VALUE_V.END_DATE",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(256)"
+  },
+  {
+    "target_col": "BOND_ACRTN_DCN_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\nApplicable only for APACSH82",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "BOND_AMRZ_PREM_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\nApplicable only for APACSH83",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "RJ_TRUST_BOOK_VAL_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\nApplicable only for APACSH84",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "RJ_TRUST_RLZD_TAX_GAIN_OR_LOSS_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APACSH logic from 'ETL Notes' tab.\nApplicable only for APACSH85",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "BFR_REPYMT_FACE_VAL_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.\nApplicable only for APASEC81",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "BFR_INCM_PYMT_FACE_VAL_AMT",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.\nApplicable only for APASEC83",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "BASE_POS_QTY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.\nApplicable only for APASEC91",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "NO_SIS_SCR_MVMT_TXN_QTY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.\nApplicable only for APASEC93",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "NO_SIS_SCR_MVMT_TXN_PRC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SCR_PRC_IN_TXN_CCY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.\nApplicable only for APASEC93",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,8)"
+  },
+  {
+    "target_col": "REIVS_SHR_QTY",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "ORIG_QTY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.\nApplicable only for APASEC94",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,6)"
+  },
+  {
+    "target_col": "REIVS_PRC",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "APA",
+    "src_col": "SCR_PRC_IN_TXN_CCY",
+    "transform": "Use APASEC logic from 'ETL Notes' tab.\nApplicable only for APASEC94",
+    "nullable": "YES",
+    "dtype": "NUMBER(38,8)"
+  },
+  {
+    "target_col": "STEP_IN_OUT_IND_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "Use CL_VAL_ID =   check in CL_VAL table where CL_SCM_ID = 114 and use CL_VAL_CODE",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "STEP_IN_OUT_IND_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "Use CL_VAL_ID =   check in CL_VAL table where CL_SCM_ID = 114 and use CL_VAL_NM",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  },
+  {
+    "target_col": "SHRT_SALE_EXMPT_CD",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_CODE",
+    "transform": "Use CL_VAL_ID =   check in CL_VAL table where CL_SCM_ID = 114 and use CL_VAL_CODE",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(1)"
+  },
+  {
+    "target_col": "SHRT_SALE_EXMPT_NM",
+    "src_schema": "CCAL_REPL_OWNER",
+    "src_table": "CL_VAL",
+    "src_col": "CL_VAL_NM",
+    "transform": "Use CL_VAL_ID =   , check in CL_VAL table where CL_SCM_ID = 115 and use CL_VAL_NM",
+    "nullable": "YES",
+    "dtype": "VARCHAR2(40)"
+  }
+]
