@@ -30,26 +30,6 @@ ROWNUM_LIMIT = 100
 
 # ── NOT NULL columns with safe fallback expressions ───────────────────────────
 NOT_NULL_EXPR = {
-    "EXG_DIM_ID":                  "NULL",
-    "AR_DIM_ID":                   "TXN.AR_ID",
-    "OFST_AR_DIM_ID":              "NULL",
-    "ACG_TP_DIM_ID":               "NULL",
-    "CASH_POS_TP_DIM_ID":          "NULL",
-    "SBC_CCY_DIM_ID":              "NULL",
-    "SEC_PD_DIM_ID":               "NULL",
-    "CASH_PD_DIM_ID":              "NULL",
-    "LGCY_CNCL_CMPLN_RSN_DIM_ID":  "TXN.LGCY_CNCL_CMPLN_RSN_TP_ID",
-    "LGCY_CNCL_CMPLN_SRC_DIM_ID":  "TXN.LGCY_CNCL_CMPLN_SRC_TP_ID",
-    "LGCY_MKT_TP_DIM_ID":          "TXN.LGCY_MKT_TP_ID",
-    "LGCY_TRD_CPCTY_TP_DIM_ID":    "TXN.LGCY_TRD_CPCTY_TP_ID",
-    "SRC_PCS_TP_DIM_ID":           "TXN.SRC_PCS_TP_ID",
-    "SRC_ENTR_CNL_TP_DIM_ID":      "NULL",
-    "TRD_SLCT_TP_DIM_ID":          "NULL",
-    "TXN_SRC_STM_DIM_ID":          "NULL",
-    "REL_TXN_SRC_STM_DIM_ID":      "NULL",
-    "BKR_AR_DIM_ID":               "NULL",
-    "TD_DIM_ID":                   "NULL",
-    "SD_DIM_ID":                   "NULL",
     "TXN_ID":                      "TXN.TXN_ID",
     "TD":                          "NVL(TXN.TD, SYSDATE)",
     "CRT_DTM":                     "NVL(TXN.CRT_DTM, SYSDATE)",
@@ -187,7 +167,16 @@ EXPR_OVERRIDES = {
 
     # CCY_DIM_ID: strip NVL-with-0 fallback, keep coalesce
     "CCY_DIM_ID": "coalesce(APA_CASH.CCY_DIM_ID, APA_SECURITY.CCY_DIM_ID)",
+
+    # Explicitly avoid hardcoded NULL for coverage-sensitive attributes.
+    "BKR_AR_DIM_ID": "BKR_AR_DIM.AR_DIM_ID",
+    "TXN_CCY": "coalesce(APA_CASH.TXN_ISO_CCY_CODE, APA_SECURITY.TXN_ISO_CCY_CODE)",
 }
+
+# User policy: hardcoded NULL is not allowed in NOT_NULL_EXPR.
+for _col, _expr in NOT_NULL_EXPR.items():
+    if _expr.strip().upper() == "NULL":
+        raise ValueError(f"NOT_NULL_EXPR cannot contain hardcoded NULL: {_col}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -778,6 +767,47 @@ null_count = counts.get(NULL_FALLBACK, 0)
 total = len(canonical_map)
 print(f"\n  Total: {total}, NULL fallback: {null_count} ({null_count/total*100:.1f}%)")
 print(f"  Target: <10% NULL (<37 cols). Current: {null_count/total*100:.1f}%")
+
+# Residual-missing report for attributes still unresolved to literal NULL.
+REMEDIATION_GUIDE = {
+    "EXG_DIM_ID": ("Mapped via step3 expression from EXG_DIM", "If unresolved, join CIRD_OWNER.EXG_DIM and map EXG_DIM_ID by EXG_CD + effective date"),
+    "OFST_AR_DIM_ID": ("Mapped via step3 expression from APA offset AR dim keys", "If unresolved, map from offset AR key in source mapping sheet and add AR_DIM lookup"),
+    "ACG_TP_DIM_ID": ("Mapped via step3 coalesce of APA ACG type dim ids", "If unresolved, map ACG type id in manual mapping and add CL_VAL lookup rule"),
+    "CASH_POS_TP_DIM_ID": ("Mapped via step3 cash position type dim id", "If unresolved, map CASH_POS_TP_ID to target dim id in mapping workbook"),
+    "SBC_CCY_DIM_ID": ("Mapped via step3 coalesce of APA currency dim ids", "If unresolved, map from ISO currency code to CCY_DIM in manual mapping"),
+    "SEC_PD_DIM_ID": ("Mapped via step3 security period dim id", "If unresolved, map SEC_PD_ID through PERIOD_DIM lookup in mapping rules"),
+    "CASH_PD_DIM_ID": ("Mapped via step3 cash period dim id", "If unresolved, map CASH_PD_ID through PERIOD_DIM lookup in mapping rules"),
+    "SRC_ENTR_CNL_TP_DIM_ID": ("Mapped via step3 source entry channel dim expression", "If unresolved, map SRC_ENTR_CNL_TP_ID to dim id in manual map"),
+    "TRD_SLCT_TP_DIM_ID": ("Mapped via step3 trade select dim expression", "If unresolved, map TRD_SLCT_TP_ID to dim id in manual map"),
+    "TXN_SRC_STM_DIM_ID": ("Mapped via step3 source system dim expression", "If unresolved, map SRC_STM_ID to SRC_STM_DIM_ID in mapping workbook"),
+    "REL_TXN_SRC_STM_DIM_ID": ("Mapped via step3 related source system dim expression", "If unresolved, map related SRC_STM_ID chain manually in mapping rules"),
+    "BKR_AR_DIM_ID": ("Mapped using BKR_AR_DIM.AR_DIM_ID", "If unresolved, add broker AR lookup path in mapping workbook and validate LINKED_BKR_AR_ID coverage"),
+    "TD_DIM_ID": ("Mapped via step3 TD_DATE_DIM.DT_DIM_ID expression", "If unresolved, map TD to DATE_DIM.DT_DIM_ID in mapping workbook"),
+    "SD_DIM_ID": ("Mapped via step3 SD_DATE_DIM.DT_DIM_ID expression", "If unresolved, map SD to DATE_DIM.DT_DIM_ID in mapping workbook"),
+    "TXN_CCY": ("Mapped using APA TXN_ISO_CCY_CODE coalesce", "If unresolved, map transaction currency directly from source currency code in mapping workbook"),
+}
+
+residual_nulls = []
+for e in canonical_map:
+    if str(e.get("expr", "")).strip().upper() == "NULL":
+        col = e["col"]
+        prog_fix, manual_fix = REMEDIATION_GUIDE.get(
+            col,
+            (
+                "No programmatic expression is currently available in builder context.",
+                "Define explicit source-to-target mapping for this attribute in the DRD/ODI mapping workbook.",
+            ),
+        )
+        residual_nulls.append({
+            "column": col,
+            "reason": "Expression resolves to literal NULL after rule evaluation",
+            "programmatic_fix": prog_fix,
+            "manual_mapping_fix": manual_fix,
+        })
+
+report_json = Path("reports/odi_missing_attributes_report.json")
+report_json.write_text(json.dumps(residual_nulls, indent=2), encoding="utf-8")
+print(f"\nResidual missing report written: {report_json} ({len(residual_nulls)} rows)")
 
 # Write canonical map for debugging
 Path("data/odi_canonical_map.json").write_text(

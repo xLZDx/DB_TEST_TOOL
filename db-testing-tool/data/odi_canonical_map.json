@@ -1,98 +1,98 @@
 [
   {
     "col": "EXG_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "NVL(EXG_DIM.EXG_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "AR_DIM_ID",
-    "expr": "TXN.AR_ID",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(AR_DIM.AR_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OFST_AR_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(coalesce(APA_CASH.OFST_AR_DIM_ID,APA_SECURITY.OFST_AR_DIM_ID),0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "ACG_TP_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(coalesce(APA_CASH.ACG_TP_DIM_ID,APA_SECURITY.ACG_TP_DIM_ID),0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "CASH_POS_TP_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(APA_CASH.CASH_POS_TP_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "SBC_CCY_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(coalesce(APA_CASH.SBC_CCY_DIM_ID,APA_SECURITY.SBC_CCY_DIM_ID),0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "SEC_PD_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "NVL(APA_SECURITY.PD_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "CASH_PD_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "NVL(APA_CASH.PD_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "LGCY_CNCL_CMPLN_RSN_DIM_ID",
-    "expr": "TXN.LGCY_CNCL_CMPLN_RSN_TP_ID",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "NVL(LGCY_CNCL_CMPLN_RSN_TP_DIM.LGCY_CNCL_CMPLN_RSN_TP_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "LGCY_CNCL_CMPLN_SRC_DIM_ID",
-    "expr": "TXN.LGCY_CNCL_CMPLN_SRC_TP_ID",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "NVL(LGCY_CNCL_CMPLN_SRC_TP_DIM.LGCY_CNCL_CMPLN_SRC_TP_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "LGCY_MKT_TP_DIM_ID",
-    "expr": "TXN.LGCY_MKT_TP_ID",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(LGCY_MKT_TP_DIM.LGCY_MKT_TP_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "LGCY_TRD_CPCTY_TP_DIM_ID",
-    "expr": "TXN.LGCY_TRD_CPCTY_TP_ID",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "CASE WHEN TXN.SRC_STM_ID != 3 \nTHEN\n  NVL(LGCY_TRD_CPCTY_TP_DIM.LGCY_TRD_CPCTY_TP_DIM_ID, 0)\nWHEN TXN.SRC_STM_ID = 3  \nTHEN\n  0\nEND",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "SRC_PCS_TP_DIM_ID",
-    "expr": "TXN.SRC_PCS_TP_ID",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(SRC_PCS_TP_DIM.SRC_PCS_TP_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "SRC_ENTR_CNL_TP_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(SRC_ENTR_CNL_TP_DIM.SRC_ENTR_CNL_TP_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "TRD_SLCT_TP_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(TRD_SLCT_TP_DIM.TRD_SLCT_TP_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "TXN_SRC_STM_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "nvl(SRC_STM_DIM.SRC_STM_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "REL_TXN_SRC_STM_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "NVL(TXN_RLTNP_SRC_STM_DIM.SRC_STM_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "BKR_AR_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "BKR_AR_DIM.AR_DIM_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "TD_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "NVL(TD_DATE_DIM.DT_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "TD",
@@ -101,8 +101,8 @@
   },
   {
     "col": "SD_DIM_ID",
-    "expr": "NULL",
-    "match_status": "NOT_NULL_HARDCODED"
+    "expr": "NVL(SD_DATE_DIM.DT_DIM_ID,0)",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "SD",
@@ -1226,7 +1226,7 @@
   },
   {
     "col": "TXN_CCY",
-    "expr": "null",
+    "expr": "coalesce(APA_CASH.TXN_ISO_CCY_CODE, APA_SECURITY.TXN_ISO_CCY_CODE)",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
