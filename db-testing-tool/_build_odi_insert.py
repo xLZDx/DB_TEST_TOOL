@@ -788,7 +788,17 @@ REMEDIATION_GUIDE = {
 }
 
 residual_nulls = []
+effective_null_aliases = {
+    "AVY_CL_ID",
+    "CCY_DIM_ID",
+    "CIRD_PD_ID",
+    "NNA_CGY_ID",
+    "OFST_ORIG_SRC_STM_AR_ID",
+    "AGRT_ORIG_FEES",
+    "AGRT_STMT_FEES",
+}
 for e in canonical_map:
+    expr = str(e.get("expr", ""))
     if str(e.get("expr", "")).strip().upper() == "NULL":
         col = e["col"]
         prog_fix, manual_fix = REMEDIATION_GUIDE.get(
@@ -801,6 +811,30 @@ for e in canonical_map:
         residual_nulls.append({
             "column": col,
             "reason": "Expression resolves to literal NULL after rule evaluation",
+            "programmatic_fix": prog_fix,
+            "manual_mapping_fix": manual_fix,
+        })
+        continue
+
+    # Flag columns that still source from APA aliases that are hardcoded as CAST(NULL AS ...)
+    # in the APA subqueries. These are effectively uncovered and need explicit sourcing.
+    matched_alias = None
+    for alias in effective_null_aliases:
+        if re.search(rf"\bAPA_(CASH|SECURITY)\.{alias}\b", expr, re.IGNORECASE):
+            matched_alias = alias
+            break
+    if matched_alias:
+        col = e["col"]
+        prog_fix, manual_fix = REMEDIATION_GUIDE.get(
+            col,
+            (
+                "Replace APA placeholder alias with a real source expression or lookup join.",
+                "Define explicit source-to-target mapping for this attribute in the DRD/ODI mapping workbook.",
+            ),
+        )
+        residual_nulls.append({
+            "column": col,
+            "reason": f"Expression depends on APA placeholder alias {matched_alias} that is CAST(NULL AS ...) in builder subquery",
             "programmatic_fix": prog_fix,
             "manual_mapping_fix": manual_fix,
         })
