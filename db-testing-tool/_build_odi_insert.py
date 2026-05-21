@@ -165,8 +165,24 @@ EXPR_OVERRIDES = {
     "AGRT_ORIG_FEES": "NVL(APA_CASH.AGRT_ORIG_FEES,0) + NVL(APA_SECURITY.AGRT_ORIG_FEES,0)",
     "AGRT_STMT_FEES": "NVL(APA_SECURITY.AGRT_STMT_FEES,0) + NVL(APA_CASH.AGRT_STMT_FEES,0)",
 
-    # CCY_DIM_ID: strip NVL-with-0 fallback, keep coalesce
-    "CCY_DIM_ID": "coalesce(APA_CASH.CCY_DIM_ID, APA_SECURITY.CCY_DIM_ID)",
+    # DRD-aligned mappings for fields that were previously sourced from placeholder aliases.
+    "CASH_PD_DIM_ID": "NVL(IMT_PD_DIM_CASH.IMT_PD_DIM_ID,0)",
+    "SEC_PD_DIM_ID": "NVL(IMT_PD_DIM_SEC.IMT_PD_DIM_ID,0)",
+    "SBC_CCY_DIM_ID": "NVL(coalesce(CCY_DIM_SBC_CASH.CCY_DIM_ID, CCY_DIM_SBC_SEC.CCY_DIM_ID),0)",
+    "OFST_AR_DIM_ID": "NVL(OFST_AR_DIM.AR_DIM_ID,0)",
+    "ACG_TP_DIM_ID": "NVL(coalesce(APA_CASH.ACG_TP_ID, APA_SECURITY.ACG_TP_ID),0)",
+    "CASH_POS_TP_DIM_ID": "NVL(APA_CASH.CASH_POS_TP_ID,0)",
+    "CASH_CIRD_PD_ID": "CCAL_CIRD_PD_MAP_CASH.CIRD_PD_ID",
+    "SEC_CIRD_PD_ID": "CCAL_CIRD_PD_MAP_SEC.CIRD_PD_ID",
+    "CCY_DIM_ID": "coalesce(CCY_DIM_CASH.CCY_DIM_ID, CCY_DIM_SEC.CCY_DIM_ID)",
+    "CSH_AVY_CL_ID": "TXN_AVY_CL_CASH.AVY_CL_ID",
+    "SEC_AVY_CL_ID": "TXN_AVY_CL_SEC.AVY_CL_ID",
+    "CASH_NNA_CGY_ID": "TXN_AVY_CL_CASH.NNA_CGY_ID",
+    "SCR_NNA_CGY_ID": "TXN_AVY_CL_SEC.NNA_CGY_ID",
+    "OFST_ORIG_SRC_STM_AR_ID": "OFST_AR_DIM.ORIG_SRC_STM_AR_ID",
+    "OFST_AR_ORIG_SRC_STM_CD": "OFST_AR_DIM.ORIG_SRC_STM_CD",
+    "OFST_AR_SETL_TP_CD": "OFST_AR_DIM.SETL_TP_CD",
+    "OFST_AR_SETL_TP_DSC": "OFST_AR_DIM.SETL_TP",
 
     # Explicitly avoid hardcoded NULL for coverage-sensitive attributes.
     "BKR_AR_DIM_ID": "BKR_AR_DIM.AR_DIM_ID",
@@ -602,6 +618,64 @@ ANSI_JOINS = [
      " AND AR_AC_SUBDIM.DEP_AC_SETUP_ID = APA_CASH.AC_ID"
      " AND TXN.TD >= AR_AC_SUBDIM.EFF_DT AND TXN.TD < AR_AC_SUBDIM.END_DT"),
 
+    # OFST_AR_DIM: DRD mapping for offset originating source arrangement attributes.
+    ("OFST_AR_DIM",
+     "LEFT JOIN CCSI_OWNER.AR_DIM OFST_AR_DIM"
+     " ON OFST_AR_DIM.AR_ID = coalesce(APA_CASH.OFST_AR_ID, APA_SECURITY.OFST_AR_ID)"
+     " AND TXN.TD >= OFST_AR_DIM.EFF_DT AND TXN.TD < OFST_AR_DIM.END_DT"),
+
+    # IMT_PD_DIM: DRD mapping for cash/security product dim IDs from APA.PD_ID with TD SCD window.
+    ("IMT_PD_DIM_CASH",
+     "LEFT JOIN CIRD_OWNER.IMT_PD_DIM IMT_PD_DIM_CASH"
+     " ON IMT_PD_DIM_CASH.CCAL_PD_ID = APA_CASH.CASH_PD_ID"
+     " AND IMT_PD_DIM_CASH.EFF_DT <= TXN.TD AND IMT_PD_DIM_CASH.END_DT > TXN.TD"),
+    ("IMT_PD_DIM_SEC",
+     "LEFT JOIN CIRD_OWNER.IMT_PD_DIM IMT_PD_DIM_SEC"
+     " ON IMT_PD_DIM_SEC.CCAL_PD_ID = APA_SECURITY.SEC_PD_ID"
+     " AND IMT_PD_DIM_SEC.EFF_DT <= TXN.TD AND IMT_PD_DIM_SEC.END_DT > TXN.TD"),
+
+    # CCAL_CIRD_PD_MAP: DRD mapping for CIRD product IDs.
+    ("CCAL_CIRD_PD_MAP_CASH",
+     "LEFT JOIN CCAL_REPL_OWNER.CCAL_CIRD_PD_MAP CCAL_CIRD_PD_MAP_CASH"
+     " ON CCAL_CIRD_PD_MAP_CASH.CCAL_PD_ID = APA_CASH.CASH_PD_ID"
+     " AND CCAL_CIRD_PD_MAP_CASH.ACTV_F = 'Y'"),
+    ("CCAL_CIRD_PD_MAP_SEC",
+     "LEFT JOIN CCAL_REPL_OWNER.CCAL_CIRD_PD_MAP CCAL_CIRD_PD_MAP_SEC"
+     " ON CCAL_CIRD_PD_MAP_SEC.CCAL_PD_ID = APA_SECURITY.SEC_PD_ID"
+     " AND CCAL_CIRD_PD_MAP_SEC.ACTV_F = 'Y'"),
+
+    # CCY_DIM: DRD mapping for currency dimension ID from APA txn ISO currency.
+    ("CCY_DIM_CASH",
+     "LEFT JOIN CIRD_OWNER.CCY_DIM CCY_DIM_CASH"
+     " ON CCY_DIM_CASH.CCY_CD = APA_CASH.TXN_ISO_CCY_CODE"),
+    ("CCY_DIM_SEC",
+     "LEFT JOIN CIRD_OWNER.CCY_DIM CCY_DIM_SEC"
+     " ON CCY_DIM_SEC.CCY_CD = APA_SECURITY.TXN_ISO_CCY_CODE"),
+    ("CCY_DIM_SBC_CASH",
+     "LEFT JOIN CIRD_OWNER.CCY_DIM CCY_DIM_SBC_CASH"
+     " ON CCY_DIM_SBC_CASH.CCY_CD = APA_CASH.STM_BASE_ISO_CCY_CODE"),
+    ("CCY_DIM_SBC_SEC",
+     "LEFT JOIN CIRD_OWNER.CCY_DIM CCY_DIM_SBC_SEC"
+     " ON CCY_DIM_SBC_SEC.CCY_CD = APA_SECURITY.STM_BASE_ISO_CCY_CODE"),
+
+    # TXN_AVY_CL + AVY_CL: DRD mapping for AVY classification and NNA category fields.
+    ("TXN_AVY_CL_CASH",
+     "LEFT JOIN CCAL_REPL_OWNER.TXN_AVY_CL TXN_AVY_CL_CASH"
+     " ON TXN_AVY_CL_CASH.TXN_ID = TXN.TXN_ID"
+     " AND TXN_AVY_CL_CASH.APA_ID = APA_CASH.APA_ID"
+     " AND TXN_AVY_CL_CASH.ACTV_F = 'Y'"),
+    ("TXN_AVY_CL_SEC",
+     "LEFT JOIN CCAL_REPL_OWNER.TXN_AVY_CL TXN_AVY_CL_SEC"
+     " ON TXN_AVY_CL_SEC.TXN_ID = TXN.TXN_ID"
+     " AND TXN_AVY_CL_SEC.APA_ID = APA_SECURITY.APA_ID"
+     " AND TXN_AVY_CL_SEC.ACTV_F = 'Y'"),
+    ("AVY_CL_CASH",
+     "LEFT JOIN CCAL_REPL_OWNER.AVY_CL AVY_CL_CASH"
+     " ON AVY_CL_CASH.AVY_CL_ID = TXN_AVY_CL_CASH.AVY_CL_ID"),
+    ("AVY_CL_SEC",
+     "LEFT JOIN CCAL_REPL_OWNER.AVY_CL AVY_CL_SEC"
+     " ON AVY_CL_SEC.AVY_CL_ID = TXN_AVY_CL_SEC.AVY_CL_ID"),
+
     # TXN_SRC_TAX_CODE_LKUP
     ("TXN_SRC_TAX_CODE_LKUP",
      "LEFT JOIN CCAL_REPL_OWNER.TXN_SRC_TAX_CODE_LKUP TXN_SRC_TAX_CODE_LKUP"
@@ -788,16 +862,21 @@ REMEDIATION_GUIDE = {
 }
 
 residual_nulls = []
+skip_report_columns = {
+    # DRD rows are struck-through (de-scoped), so they must not appear as unresolved.
+    "AGRT_ORIG_FEES",
+    "AGRT_STMT_FEES",
+}
 effective_null_aliases = {
     "AVY_CL_ID",
     "CCY_DIM_ID",
     "CIRD_PD_ID",
     "NNA_CGY_ID",
     "OFST_ORIG_SRC_STM_AR_ID",
-    "AGRT_ORIG_FEES",
-    "AGRT_STMT_FEES",
 }
 for e in canonical_map:
+    if e["col"] in skip_report_columns:
+        continue
     expr = str(e.get("expr", ""))
     if str(e.get("expr", "")).strip().upper() == "NULL":
         col = e["col"]
