@@ -840,11 +840,12 @@ _workbook_cache: Dict[int, Any] = {}  # hash(file_bytes) → openpyxl.Workbook
 
 
 def _get_workbook(file_bytes: bytes) -> Any:
-    """Return a read-only workbook, caching by content hash to avoid re-parsing."""
+    """Return a workbook, caching by content hash to avoid re-parsing."""
     key = hash(file_bytes)
     wb = _workbook_cache.get(key)
     if wb is None:
-        wb = openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True, read_only=True)
+        # Keep workbook in normal mode so font/style metadata (strike-through) is available.
+        wb = openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True)
         _workbook_cache[key] = wb
         # Keep cache bounded (LRU-ish: evict oldest if >5)
         if len(_workbook_cache) > 5:
@@ -871,6 +872,13 @@ def _read_excel(file_bytes: bytes, sheet_name: Optional[str] = None) -> List[Lis
 
     rows = []
     for row in ws.iter_rows():
+        # Ignore rows where any populated cell is strike-through in the DRD sheet.
+        # Business rule: struck rows are de-scoped attributes and must not be parsed.
+        if any(
+            (cell.value is not None and str(cell.value).strip() and getattr(getattr(cell, "font", None), "strike", False))
+            for cell in row
+        ):
+            continue
         rows.append([cell.value for cell in row])
     return rows
 

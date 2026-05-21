@@ -810,6 +810,8 @@ for e in canonical_map:
         )
         residual_nulls.append({
             "column": col,
+            "current_expression": expr,
+            "comparison": "Literal NULL expression",
             "reason": "Expression resolves to literal NULL after rule evaluation",
             "programmatic_fix": prog_fix,
             "manual_mapping_fix": manual_fix,
@@ -834,14 +836,43 @@ for e in canonical_map:
         )
         residual_nulls.append({
             "column": col,
+            "current_expression": expr,
+            "comparison": f"Uses placeholder alias {matched_alias}",
             "reason": f"Expression depends on APA placeholder alias {matched_alias} that is CAST(NULL AS ...) in builder subquery",
             "programmatic_fix": prog_fix,
             "manual_mapping_fix": manual_fix,
         })
 
-report_json = Path("reports/odi_missing_attributes_report.json")
-report_json.write_text(json.dumps(residual_nulls, indent=2), encoding="utf-8")
-print(f"\nResidual missing report written: {report_json} ({len(residual_nulls)} rows)")
+def _md_escape(value: str) -> str:
+    return str(value or "").replace("|", "\\|").replace("\n", " ").strip()
+
+
+report_md = Path("reports/odi_missing_attributes_report.md")
+md_lines = [
+    "# ODI Missing Attributes Report",
+    "",
+    f"Total unresolved attributes: {len(residual_nulls)}",
+    "",
+    "| Attribute | Current Expression | Comparison | Why Missing | Programmatic Fix | Manual Mapping Fix |",
+    "| --- | --- | --- | --- | --- | --- |",
+]
+
+for item in sorted(residual_nulls, key=lambda x: x["column"]):
+    md_lines.append(
+        "| "
+        + _md_escape(item.get("column", "")) + " | "
+        + _md_escape(item.get("current_expression", "")) + " | "
+        + _md_escape(item.get("comparison", "")) + " | "
+        + _md_escape(item.get("reason", "")) + " | "
+        + _md_escape(item.get("programmatic_fix", "")) + " | "
+        + _md_escape(item.get("manual_mapping_fix", "")) + " |"
+    )
+
+if not residual_nulls:
+    md_lines.append("| None | - | - | - | - | - |")
+
+report_md.write_text("\n".join(md_lines) + "\n", encoding="utf-8")
+print(f"\nResidual missing report written: {report_md} ({len(residual_nulls)} rows)")
 
 # Write canonical map for debugging
 Path("data/odi_canonical_map.json").write_text(
