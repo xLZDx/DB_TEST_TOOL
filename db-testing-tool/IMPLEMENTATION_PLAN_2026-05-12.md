@@ -11,6 +11,20 @@ Artifact note: no prior `IMPLEMENTATION_PLAN_2026-05-12.md` was present under `d
 | Implementation | Not approved | No implementation changes approved yet | User | Blocked until plan approval |
 | Close-out | Not started | Requires implementation review, tests, and last-50-line log checks | User | Explicit implementation approval |
 
+### Mandatory Implementation Gate
+
+- Implementation is forbidden without explicit operator approval text: `GO` or `ГО`.
+- Any other phrase (for example `do it`, `continue`, `approved`, silence) is not implementation approval.
+- Required sequence:
+	1. Detailed plan.
+	2. Agent review.
+	3. Plan update with agent feedback.
+	4. Operator review.
+	5. If operator comments exist, repeat agent-review loop.
+	6. Final report/plan for implementation.
+	7. Explicit `GO` or `ГО`.
+	8. Implementation.
+
 ## Overview
 
 The executable baseline is broken before functional behavior can be trusted. `pytest -q` currently collects `app/services/test_executor.py` and `app/services/test_generator.py` as tests, fails to import the `app` package, and then fails again on missing modules imported from `app/models/__init__.py`, `app/routers/ai.py`, `app/services/ai_service.py`, and the connector implementations. The repository tree confirms the import graph is stale: `app/models/__init__.py:3-12` imports eight model modules that are not present under `app/models/`, `app/services` does not contain `copilot_auth_service.py`, and `app/connectors` does not contain `base.py`.

@@ -50,3 +50,25 @@ To add a new agent for a specific task:
 3. Set name, role, and system prompt
 4. Select provider (GHC recommended for SQL tasks)
 5. Optionally restrict available tools
+
+## Mandatory Approval Workflow (GO/ГО)
+
+This project uses a strict implementation gate.
+
+Rules:
+1. No implementation without explicit operator approval word: `GO` or `ГО`.
+2. `do it`, `continue`, `approved`, silence, or similar phrases are not implementation approval.
+
+Required loop:
+1. Think and draft detailed plan.
+2. Send plan for agent review.
+3. Incorporate agent feedback.
+4. Send plan to operator review.
+5. If operator comments exist, update plan and repeat agent review.
+6. Present final report/plan for implementation.
+7. Wait for explicit `GO` or `ГО`.
+8. Implement only after `GO`/`ГО`.
+
+Mandatory pre-edit check:
+- `Did operator provide GO/ГО for this exact final plan?`
+- If answer is no, stop and request explicit approval.

@@ -50,3 +50,19 @@ cd C:\GIT_Repo\db-testing-tool
 python -m pytest tests/ -v
 ```
 Start server: `python -m uvicorn app.main:app --host 127.0.0.1 --port 8550 --reload`
+
+## Mandatory GO or ГО Approval Gate
+- Hard stop: do not implement code/config/file changes without explicit operator text `GO` or `ГО`.
+- Any other phrase is not implementation approval (examples: `do it`, `continue`, `looks good`, silence).
+- Required workflow for every task:
+	1. Create a detailed plan.
+	2. Send plan to agent review.
+	3. Incorporate agent feedback.
+	4. Present updated plan to operator review.
+	5. If operator comments exist, loop back to agent review and repeat until no comments remain.
+	6. Present final implementation report/plan.
+	7. Wait for explicit `GO` or `ГО`.
+	8. Implement only after that approval.
+- Pre-edit self-check (mandatory): `Did operator provide GO/ГО for this exact final plan?`
+	- If no: stop and request explicit approval.
+- Commit rule: every implementation commit must reference approval, e.g. `Operator approval: GO`.
