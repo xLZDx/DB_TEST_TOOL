@@ -1,97 +1,97 @@
 [
   {
     "col": "EXG_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "AR_DIM_ID",
-    "expr": "NVL(TXN.AR_ID, -1)",
+    "expr": "TXN.AR_ID",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "OFST_AR_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "ACG_TP_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "CASH_POS_TP_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "SBC_CCY_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "SEC_PD_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "CASH_PD_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "LGCY_CNCL_CMPLN_RSN_DIM_ID",
-    "expr": "NVL(TXN.LGCY_CNCL_CMPLN_RSN_TP_ID, -1)",
+    "expr": "TXN.LGCY_CNCL_CMPLN_RSN_TP_ID",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "LGCY_CNCL_CMPLN_SRC_DIM_ID",
-    "expr": "NVL(TXN.LGCY_CNCL_CMPLN_SRC_TP_ID, -1)",
+    "expr": "TXN.LGCY_CNCL_CMPLN_SRC_TP_ID",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "LGCY_MKT_TP_DIM_ID",
-    "expr": "NVL(TXN.LGCY_MKT_TP_ID, -1)",
+    "expr": "TXN.LGCY_MKT_TP_ID",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "LGCY_TRD_CPCTY_TP_DIM_ID",
-    "expr": "NVL(TXN.LGCY_TRD_CPCTY_TP_ID, -1)",
+    "expr": "TXN.LGCY_TRD_CPCTY_TP_ID",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "SRC_PCS_TP_DIM_ID",
-    "expr": "NVL(TXN.SRC_PCS_TP_ID, -1)",
+    "expr": "TXN.SRC_PCS_TP_ID",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "SRC_ENTR_CNL_TP_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "TRD_SLCT_TP_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "TXN_SRC_STM_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "REL_TXN_SRC_STM_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "BKR_AR_DIM_ID",
-    "expr": "NVL(TXN.AR_ID, -1)",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
     "col": "TD_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
@@ -101,7 +101,7 @@
   },
   {
     "col": "SD_DIM_ID",
-    "expr": "-1",
+    "expr": "NULL",
     "match_status": "NOT_NULL_HARDCODED"
   },
   {
@@ -516,7 +516,7 @@
   },
   {
     "col": "CCY_DIM_ID",
-    "expr": "NVL(coalesce(APA_CASH.CCY_DIM_ID,APA_SECURITY.CCY_DIM_ID),0)",
+    "expr": "coalesce(APA_CASH.CCY_DIM_ID, APA_SECURITY.CCY_DIM_ID)",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
@@ -1381,53 +1381,53 @@
   },
   {
     "col": "OWN_FA_CSS_PSN_ID",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "FA_NUMBER_V.RESPONSIBLE_PARTY_CSS_PERSON_ID",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_CRN_ADV_F",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "CASE WHEN OWN_FA_ENT.ENTITY_IRIA_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_DEPT_BR_CD",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "OWN_FA_ENT.ENTITY_BRANCH_CODE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_DSCR_F",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "CASE WHEN OWN_FA_ENT.ENTITY_FINRA_STATUS_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_DSCR_ST",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "OWN_FA_ENT.ENTITY_BUSINESS_STATUS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_DSCR_ST_CD",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "OWN_FA_ENT.ENTITY_BUSINESS_STATUS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_FINRA_CRD_CLSS_CD",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "FA_NUMBER_V.FA_SUB_TYPE",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_HR_ST_CD",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "FA_NUMBER_V.FA_NUMBER_STATUS",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_PRODUCER_F",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "CASE WHEN OWN_FA_ENT.LOB_PRODUCERS_CHOICE_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_QUALF_ADV_F",
-    "expr": "NULL",
-    "match_status": "NULL_FALLBACK"
+    "expr": "CASE WHEN OWN_FA_ENT.ENTITY_IAR_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_BR_CD",

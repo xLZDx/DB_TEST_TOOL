@@ -30,26 +30,26 @@ ROWNUM_LIMIT = 100
 
 # ── NOT NULL columns with safe fallback expressions ───────────────────────────
 NOT_NULL_EXPR = {
-    "EXG_DIM_ID":                  "-1",
-    "AR_DIM_ID":                   "NVL(TXN.AR_ID, -1)",
-    "OFST_AR_DIM_ID":              "-1",
-    "ACG_TP_DIM_ID":               "-1",
-    "CASH_POS_TP_DIM_ID":          "-1",
-    "SBC_CCY_DIM_ID":              "-1",
-    "SEC_PD_DIM_ID":               "-1",
-    "CASH_PD_DIM_ID":              "-1",
-    "LGCY_CNCL_CMPLN_RSN_DIM_ID":  "NVL(TXN.LGCY_CNCL_CMPLN_RSN_TP_ID, -1)",
-    "LGCY_CNCL_CMPLN_SRC_DIM_ID":  "NVL(TXN.LGCY_CNCL_CMPLN_SRC_TP_ID, -1)",
-    "LGCY_MKT_TP_DIM_ID":          "NVL(TXN.LGCY_MKT_TP_ID, -1)",
-    "LGCY_TRD_CPCTY_TP_DIM_ID":    "NVL(TXN.LGCY_TRD_CPCTY_TP_ID, -1)",
-    "SRC_PCS_TP_DIM_ID":           "NVL(TXN.SRC_PCS_TP_ID, -1)",
-    "SRC_ENTR_CNL_TP_DIM_ID":      "-1",
-    "TRD_SLCT_TP_DIM_ID":          "-1",
-    "TXN_SRC_STM_DIM_ID":          "-1",
-    "REL_TXN_SRC_STM_DIM_ID":      "-1",
-    "BKR_AR_DIM_ID":               "NVL(TXN.AR_ID, -1)",
-    "TD_DIM_ID":                   "-1",
-    "SD_DIM_ID":                   "-1",
+    "EXG_DIM_ID":                  "NULL",
+    "AR_DIM_ID":                   "TXN.AR_ID",
+    "OFST_AR_DIM_ID":              "NULL",
+    "ACG_TP_DIM_ID":               "NULL",
+    "CASH_POS_TP_DIM_ID":          "NULL",
+    "SBC_CCY_DIM_ID":              "NULL",
+    "SEC_PD_DIM_ID":               "NULL",
+    "CASH_PD_DIM_ID":              "NULL",
+    "LGCY_CNCL_CMPLN_RSN_DIM_ID":  "TXN.LGCY_CNCL_CMPLN_RSN_TP_ID",
+    "LGCY_CNCL_CMPLN_SRC_DIM_ID":  "TXN.LGCY_CNCL_CMPLN_SRC_TP_ID",
+    "LGCY_MKT_TP_DIM_ID":          "TXN.LGCY_MKT_TP_ID",
+    "LGCY_TRD_CPCTY_TP_DIM_ID":    "TXN.LGCY_TRD_CPCTY_TP_ID",
+    "SRC_PCS_TP_DIM_ID":           "TXN.SRC_PCS_TP_ID",
+    "SRC_ENTR_CNL_TP_DIM_ID":      "NULL",
+    "TRD_SLCT_TP_DIM_ID":          "NULL",
+    "TXN_SRC_STM_DIM_ID":          "NULL",
+    "REL_TXN_SRC_STM_DIM_ID":      "NULL",
+    "BKR_AR_DIM_ID":               "NULL",
+    "TD_DIM_ID":                   "NULL",
+    "SD_DIM_ID":                   "NULL",
     "TXN_ID":                      "TXN.TXN_ID",
     "TD":                          "NVL(TXN.TD, SYSDATE)",
     "CRT_DTM":                     "NVL(TXN.CRT_DTM, SYSDATE)",
@@ -93,6 +93,10 @@ EXPR_OVERRIDES = {
     # FA_NUMBER_V direct cols
     "FA_OWN_EMPE_ID":               "FA_NUMBER_V.RESPONSIBLE_PARTY_EMPLOYEE_ID",
     "OWN_FA_NUM_ENT_CD":            "FA_NUMBER_V.FA_NUMBER_ENTITY_CODE",
+    # FA_NUMBER_V personal FA attributes
+    "OWN_FA_CSS_PSN_ID":            "FA_NUMBER_V.RESPONSIBLE_PARTY_CSS_PERSON_ID",
+    "OWN_FA_HR_ST_CD":              "FA_NUMBER_V.FA_NUMBER_STATUS",
+    "OWN_FA_FINRA_CRD_CLSS_CD":     "FA_NUMBER_V.FA_SUB_TYPE",
 
     # SDIRA type (same CL_VAL schema as SIS_DLTD_EV=99; join on SRC_BUY_SELL_MULTI_ID)
     "SDIRA_TXN_TP_CD":              "SIS_DLTD_EV.CL_VAL_CODE",
@@ -146,6 +150,15 @@ EXPR_OVERRIDES = {
     "OWN_FA_ENT_SHRT_CD":           "OWN_FA_ENT.ENTITY_CODE_SHORT",
     "OWN_FA_ENT_CSS_ID":            "OWN_FA_ENT.ENTITY_CSS_ID",
 
+    # OWN_FA personal flags/details: populate from available OWN_FA_ENT attributes
+    "OWN_FA_CRN_ADV_F":            "CASE WHEN OWN_FA_ENT.ENTITY_IRIA_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "OWN_FA_DEPT_BR_CD":           "OWN_FA_ENT.ENTITY_BRANCH_CODE",
+    "OWN_FA_DSCR_F":               "CASE WHEN OWN_FA_ENT.ENTITY_FINRA_STATUS_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "OWN_FA_DSCR_ST":              "OWN_FA_ENT.ENTITY_BUSINESS_STATUS",
+    "OWN_FA_DSCR_ST_CD":           "OWN_FA_ENT.ENTITY_BUSINESS_STATUS",
+    "OWN_FA_PRODUCER_F":           "CASE WHEN OWN_FA_ENT.LOB_PRODUCERS_CHOICE_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+    "OWN_FA_QUALF_ADV_F":          "CASE WHEN OWN_FA_ENT.ENTITY_IAR_BOOLEAN = 1 THEN 'Y' ELSE 'N' END",
+
     # OWN_RTL_ENT cols -- ENTITY_RETAIL_* hierarchy cols do not exist on ENTERPRISE_ENTITY_DIM_V
     "OWN_FA_ENT_RTL_HIER_BSN_MODL_CD":    "NULL",
     "OWN_FA_ENT_RTL_HIER_BSN_MODL_DSC":   "NULL",
@@ -170,6 +183,9 @@ EXPR_OVERRIDES = {
     # AGRT fee cols: override to avoid post_process_expr SUM-strip issue on (SUM((...)))
     "AGRT_ORIG_FEES": "NVL(APA_CASH.AGRT_ORIG_FEES,0) + NVL(APA_SECURITY.AGRT_ORIG_FEES,0)",
     "AGRT_STMT_FEES": "NVL(APA_SECURITY.AGRT_STMT_FEES,0) + NVL(APA_CASH.AGRT_STMT_FEES,0)",
+
+    # CCY_DIM_ID: strip NVL-with-0 fallback, keep coalesce
+    "CCY_DIM_ID": "coalesce(APA_CASH.CCY_DIM_ID, APA_SECURITY.CCY_DIM_ID)",
 }
 
 
