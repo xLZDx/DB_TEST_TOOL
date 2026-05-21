@@ -1466,67 +1466,67 @@
   },
   {
     "col": "OWN_FA_ENT_RTL_HIER_BSN_MODL_CD",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.LOB_BUSINESS_MODEL",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_HIER_BSN_MODL_DSC",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.LOB_BUSINESS_MODEL",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_SALE_HIER_LOB_CD",
-    "expr": "NULL",
+    "expr": "CASE WHEN OWN_FA_ENT.ENTITY_RETAIL_BOOLEAN = 1 THEN 'RETAIL' ELSE 'NONRETAIL' END",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_SALE_HIER_LOB_DSC",
-    "expr": "NULL",
+    "expr": "CASE WHEN OWN_FA_ENT.ENTITY_RETAIL_BOOLEAN = 1 THEN 'Retail' ELSE 'Non-Retail' END",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_HIER_RPT_UNIT_CD",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.ENTITY_DIVISION_CODE",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_HIER_RPT_UNIT_DSC",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.ENTITY_DIVISION_DESCRIPTION",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_SALE_DIV_CD",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.ENTITY_DIVISION_CODE",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_SALE_HIER_RGON_CD",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.ENTITY_SUBDIVISION_CODE",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_SALE_HIER_RGON_DSC",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.ENTITY_SUBDIVISION_DESCRIPTION",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_HIER_TERR_CD",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.ENTITY_BRANCH_CODE",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RTL_HIER_TERR_DSC",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.ENTITY_OSJ",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RSK_HIER_BSN_UNIT_CD",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.LOB_RISK_OFFICER_EMPLOYEE_ID",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
     "col": "OWN_FA_ENT_RSK_HIER_BSN_UNIT_DSC",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.LOB_RISK_DIVISION_OFFICER_EMPLOYEE_ID",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
@@ -1606,7 +1606,7 @@
   },
   {
     "col": "OWN_FA_ENT_RTL_SALE_CPX_CD",
-    "expr": "NULL",
+    "expr": "OWN_FA_ENT.ENTITY_RETAIL_LEVEL_TYPE",
     "match_status": "EXACT_EXPRESSION_MATCH"
   },
   {
