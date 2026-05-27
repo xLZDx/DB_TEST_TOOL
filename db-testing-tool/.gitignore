@@ -1,0 +1,11 @@
+
+venv/
+__pycache__/
+*.db
+.pytest_cache/
+certs/
+redshift-jdbc42-2.1.0.32/
+*.har
+Aira/
+Unsorted/
+training_packs/
